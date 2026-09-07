@@ -537,7 +537,7 @@ export const App: React.FC = () => {
               keySignature={currentKey}
               isFeedback={isFeedback}
               lastResult={lastResult}
-              darkMode={appState.settings.theme !== 'light'}
+              darkMode={true}
               onContinue={spawnNextProblem}
               onOpenKeyModal={() => setIsKeyModalOpen(true)}
             />

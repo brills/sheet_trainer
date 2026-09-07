@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppState } from '../types';
-import { X, Moon, Sun, Monitor, Keyboard, RotateCcw, Compass } from 'lucide-react';
+import { X, Keyboard, RotateCcw, Compass } from 'lucide-react';
 import { DEFAULT_APP_STATE } from '../storage/localStore';
 
 interface SettingsModalProps {
@@ -19,16 +19,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onOpenKeyModal
 }) => {
   if (!isOpen) return null;
-
-  const onSetTheme = (theme: 'dark' | 'light' | 'system') => {
-    onUpdateState({
-      ...state,
-      settings: {
-        ...state.settings,
-        theme
-      }
-    });
-  };
 
   const onToggleKeyLegend = () => {
     onUpdateState({
@@ -65,37 +55,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
 
-        {/* 1. Theme Selector */}
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-semibold text-slate-300">Theme</span>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { id: 'dark', label: 'Dark', icon: Moon },
-              { id: 'light', label: 'Light', icon: Sun },
-              { id: 'system', label: 'System', icon: Monitor },
-            ].map(t => {
-              const Icon = t.icon;
-              const active = state.settings.theme === t.id;
-              return (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => onSetTheme(t.id as any)}
-                  className={`
-                    flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold border transition-all
-                    ${active ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-750'}
-                  `}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{t.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 2. Desktop Keymap HUD Toggle */}
-        <div className="flex items-center justify-between py-2 border-t border-slate-800">
+        {/* 1. Desktop Keymap HUD Toggle */}
+        <div className="flex items-center justify-between py-2">
           <div className="flex items-center gap-2">
             <Keyboard className="w-4 h-4 text-emerald-400" />
             <div className="flex flex-col">
@@ -119,8 +80,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
 
-        {/* 3. Mastery & Progression Info */}
-        <div className="flex flex-col gap-1.5 border-t border-slate-800 pt-2 text-xs">
+        {/* 2. Mastery & Progression Info */}
+        <div className="flex flex-col gap-1.5 border-t border-slate-800 pt-3 text-xs">
           <div className="flex items-center justify-between">
             <span className="font-semibold text-slate-200">Progression & Mastery Gate</span>
             <span className="text-[10px] text-emerald-400 font-mono">20 trials · ≤ 2.0s · ≥ 85%</span>
@@ -130,7 +91,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </p>
         </div>
 
-        {/* 4. Key Signatures & Circle of Fifths */}
+        {/* 3. Key Signatures & Circle of Fifths */}
         {onOpenKeyModal && (
           <div className="flex items-center justify-between py-2 border-t border-slate-800">
             <div className="flex items-center gap-2">
@@ -154,7 +115,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
         )}
 
-        {/* 3. Danger Zone / Reset */}
+        {/* 4. Danger Zone / Reset */}
         <div className="border-t border-slate-800 pt-3">
           <button
             type="button"

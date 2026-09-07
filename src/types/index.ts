@@ -106,7 +106,7 @@ export interface TrackProgress {
 }
 
 export interface AppSettings {
-  theme: 'dark' | 'light' | 'system';
+  theme?: 'dark' | 'light' | 'system';
   showKeymapLegend: boolean;
   chords: TrackSettings;
   arpeggios: TrackSettings;
