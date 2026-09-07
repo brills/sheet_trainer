@@ -5,7 +5,10 @@ import {
   Clef, 
   PatternStats,
   TrackProgress,
-  KeySignatureDefinition
+  KeySignatureDefinition,
+  ChordQuality,
+  Inversion,
+  ArpeggioContour
 } from '../../types';
 import { 
   generateRandomChordForTier, 
@@ -40,6 +43,7 @@ export function selectNextChord(
   progress: TrackProgress,
   keySignature?: KeySignatureDefinition
 ): ChordDefinition {
+  const config = CHORD_TIERS[tier] || CHORD_TIERS[1.1];
   const matrix = progress.weaknessMatrix;
 
   // If a key signature is active, 80% chance to sample diatonic chords in this key
@@ -52,9 +56,16 @@ export function selectNextChord(
     }
   }
 
-  // 40% chance of the remaining trials to target a known weakness in this tier
+  // 40% chance of the remaining trials to target a known weakness strictly within this tier's qualities and inversions
   const tierWeaknesses = Object.entries(matrix).filter(([k, stats]) => {
-    return k.startsWith(clef) && stats.totalSeen > 0 && (stats.correctCount / stats.totalSeen < 0.85);
+    if (!k.startsWith(clef) || stats.totalSeen === 0 || (stats.correctCount / stats.totalSeen >= 0.85)) {
+      return false;
+    }
+    const parts = k.split(':'); // [clef, quality, inversion]
+    if (parts.length < 3) return false;
+    const quality = parts[1] as ChordQuality;
+    const inversion = parts[2] as Inversion;
+    return config.qualities.includes(quality) && config.inversions.includes(inversion);
   });
 
   if (tierWeaknesses.length > 0 && Math.random() < 0.4) {
@@ -63,8 +74,8 @@ export function selectNextChord(
     const [weakKey] = tierWeaknesses[0];
     const parts = weakKey.split(':'); // [clef, quality, inversion]
     if (parts.length >= 3) {
-      const quality = parts[1] as any;
-      const inversion = parts[2] as any;
+      const quality = parts[1] as ChordQuality;
+      const inversion = parts[2] as Inversion;
       const validRoots = getValidRootsForQuality(quality, tier, clef);
       const picked = validRoots[Math.floor(Math.random() * validRoots.length)];
       const chord = buildChord(picked.root, picked.accidental, quality, inversion, clef, tier);
@@ -97,8 +108,16 @@ export function selectNextArpeggio(
     }
   }
 
+  // 40% chance of the remaining trials to target a known weakness strictly within this tier's qualities and contours
   const tierWeaknesses = Object.entries(matrix).filter(([k, stats]) => {
-    return k.startsWith(clef) && stats.totalSeen > 0 && (stats.correctCount / stats.totalSeen < 0.85);
+    if (!k.startsWith(clef) || stats.totalSeen === 0 || (stats.correctCount / stats.totalSeen >= 0.85)) {
+      return false;
+    }
+    const parts = k.split(':'); // [clef, quality, contour]
+    if (parts.length < 3) return false;
+    const quality = parts[1] as ChordQuality;
+    const contour = parts[2] as ArpeggioContour;
+    return config.qualities.includes(quality) && config.contours.includes(contour);
   });
 
   if (tierWeaknesses.length > 0 && Math.random() < 0.4) {
@@ -106,8 +125,8 @@ export function selectNextArpeggio(
     const [weakKey] = tierWeaknesses[0];
     const parts = weakKey.split(':'); // [clef, quality, contour]
     if (parts.length >= 3) {
-      const quality = parts[1] as any;
-      const contour = parts[2] as any;
+      const quality = parts[1] as ChordQuality;
+      const contour = parts[2] as ArpeggioContour;
       const startingDegree = config.startingDegrees[Math.floor(Math.random() * config.startingDegrees.length)];
       const validRoots = getValidArpeggioRootsForQuality(quality, tier, clef);
       const picked = validRoots[Math.floor(Math.random() * validRoots.length)];

@@ -115,6 +115,30 @@ const distractors = generateChordMultipleChoiceOptions(cMajRoot);
 assert(distractors.length === 4, 'Multiple choice generates exactly 4 options');
 assert(distractors.filter(d => d.isCorrect).length === 1, 'Exactly 1 option is marked correct');
 
+// Test that Tier 1.3 strictly generates 2nd inversions even if weakness matrix contains root-pos errors
+import { selectNextChord } from '../src/core/engines/adaptiveEngine';
+const mockProgress = {
+  currentTier: 1.3,
+  highestStreak: 0,
+  currentStreak: 0,
+  totalTrialsCompleted: 10,
+  masteredTiers: [],
+  unlockedKeyStages: [0],
+  masteredKeys: [],
+  weaknessMatrix: {
+    'treble:minor:root': { totalSeen: 10, correctCount: 1, avgLatencyMs: 2500, lastAttemptTimestamp: Date.now() }
+  }
+};
+let onlySecondInversions = true;
+for (let i = 0; i < 50; i++) {
+  const chord = selectNextChord(1.3, 'treble', mockProgress);
+  if (chord.inversion !== '2nd') {
+    onlySecondInversions = false;
+    break;
+  }
+}
+assert(onlySecondInversions, 'Tier 1.3 (2nd Inversion) strictly generates 2nd inversion chords, ignoring root position weaknesses');
+
 // 6. Key Signatures & Circle of Fifths Tests
 console.log('\n--- 6. Key Signatures & Circle of Fifths ---');
 import { KEY_SIGNATURES, KEY_STAGES, getRequiredAccidentalForNote, getDiatonicChordsForKey } from '../src/core/theory/keys';
