@@ -1,9 +1,12 @@
 import { NOTE_LETTERS, noteToMidi, transposePitch, formatNoteName } from '../src/core/theory/notes';
-import { buildChord, CHORD_TIERS, CHORD_FORMULAS } from '../src/core/theory/chords';
-import { buildArpeggio, ARPEGGIO_TIERS } from '../src/core/theory/arpeggios';
+import { buildChord, CHORD_TIERS, CHORD_FORMULAS, getValidOctavesForChord } from '../src/core/theory/chords';
+import { buildArpeggio, ARPEGGIO_TIERS, getValidOctavesForArpeggio } from '../src/core/theory/arpeggios';
 import { ChordInputStateMachine } from '../src/core/engines/stateMachine';
 import { calculatePatternWeight, checkTierPromotion } from '../src/core/engines/adaptiveEngine';
 import { generateChordMultipleChoiceOptions } from '../src/core/engines/distractorEngine';
+import { KEY_SIGNATURES, KEY_STAGES, getRequiredAccidentalForNote, getDiatonicChordsForKey } from '../src/core/theory/keys';
+import { checkKeyStagePromotion } from '../src/core/engines/adaptiveEngine';
+import { PrecisionTimingEngine } from '../src/core/engines/timingEngine';
 
 console.log('🧪 Starting Sheet Trainer Verification Suite...\n');
 
@@ -32,24 +35,41 @@ assert(majorThird.letter === 'E' && majorThird.accidental === 'natural' && major
 const minorThird = transposePitch(c4, 3, 2);
 assert(minorThird.letter === 'E' && minorThird.accidental === 'flat' && minorThird.octave === 4, 'C4 + minor 3rd is Eb4');
 
-// 2. Chord Inversion Tests
-console.log('\n--- 2. Chord Inversions ---');
-const cMajRoot = buildChord('C', 'natural', 'major', 'root', 'treble', 1.1);
+// 2. Chord Inversion Tests & Multi-Octave Range
+console.log('\n--- 2. Chord Inversions & Multi-Octave Range ---');
+const cMajRoot = buildChord('C', 'natural', 'major', 'root', 'treble', 1.1, 4);
 assert(cMajRoot.notes.length === 3, 'C Major triad has 3 notes');
 assert(cMajRoot.notes[0].letter === 'C' && cMajRoot.notes[1].letter === 'E' && cMajRoot.notes[2].letter === 'G', 'C Maj Root is C-E-G');
 
-const cMaj1st = buildChord('C', 'natural', 'major', '1st', 'treble', 1.2);
+const cMaj1st = buildChord('C', 'natural', 'major', '1st', 'treble', 1.2, 4);
 assert(cMaj1st.notes[0].letter === 'E' && cMaj1st.notes[1].letter === 'G' && cMaj1st.notes[2].letter === 'C', 'C Maj 1st Inv is E-G-C (top 4th gap)');
 assert(cMaj1st.notes[2].octave > cMaj1st.notes[0].octave, '1st Inv root C is on top');
 
-const cMaj2nd = buildChord('C', 'natural', 'major', '2nd', 'treble', 1.3);
+const cMaj2nd = buildChord('C', 'natural', 'major', '2nd', 'treble', 1.3, 4);
 assert(cMaj2nd.notes[0].letter === 'G' && cMaj2nd.notes[1].letter === 'C' && cMaj2nd.notes[2].letter === 'E', 'C Maj 2nd Inv is G-C-E (bottom 4th gap)');
 
-const c7th3rd = buildChord('C', 'natural', 'dom7', '3rd', 'treble', 3.2);
+const c7th3rd = buildChord('C', 'natural', 'dom7', '3rd', 'treble', 3.2, 4);
 assert(c7th3rd.notes[0].letter === 'B' && c7th3rd.notes[0].accidental === 'flat', 'C7 3rd Inv has Bb in bass');
 
+// Multi-Octave Support for Am in Treble Clef
+const amValidOctaves = getValidOctavesForChord('A', 'natural', 'minor', 'root', 'treble');
+assert(amValidOctaves.includes(3) && amValidOctaves.includes(4), 'Am in treble clef accommodates both octave 3 (A3-C4-E4) and octave 4 (A4-C5-E5)');
+
+const amOctave3 = buildChord('A', 'natural', 'minor', 'root', 'treble', 1.1, 3);
+assert(amOctave3.notes[0].octave === 3 && amOctave3.notes[1].octave === 4 && amOctave3.notes[2].octave === 4, 'Am in Octave 3 builds A3 - C4 - E4');
+
+const amOctave4 = buildChord('A', 'natural', 'minor', 'root', 'treble', 1.1, 4);
+assert(amOctave4.notes[0].octave === 4 && amOctave4.notes[1].octave === 5 && amOctave4.notes[2].octave === 5, 'Am in Octave 4 builds A4 - C5 - E5');
+
+// Multi-Octave Support for C Maj in Treble & Bass Clefs
+const cMajTrebleOctaves = getValidOctavesForChord('C', 'natural', 'major', 'root', 'treble');
+assert(cMajTrebleOctaves.includes(4) && cMajTrebleOctaves.includes(5), 'C Maj in treble clef accommodates both octave 4 and octave 5');
+
+const cMajBassOctaves = getValidOctavesForChord('C', 'natural', 'major', 'root', 'bass');
+assert(cMajBassOctaves.includes(2) && cMajBassOctaves.includes(3), 'C Maj in bass clef accommodates both octave 2 and octave 3');
+
 // Gb Maj vs G min vs Gb min tests
-const gbMaj = buildChord('G', 'flat', 'major', 'root', 'treble', 1.1);
+const gbMaj = buildChord('G', 'flat', 'major', 'root', 'treble', 1.1, 4);
 assert(
   gbMaj.notes[0].letter === 'G' && gbMaj.notes[0].accidental === 'flat' &&
   gbMaj.notes[1].letter === 'B' && gbMaj.notes[1].accidental === 'flat' &&
@@ -57,7 +77,7 @@ assert(
   'Gb Major triad is Gb - Bb - Db'
 );
 
-const gMin = buildChord('G', 'natural', 'minor', 'root', 'treble', 1.1);
+const gMin = buildChord('G', 'natural', 'minor', 'root', 'treble', 1.1, 4);
 assert(
   gMin.notes[0].letter === 'G' && gMin.notes[0].accidental === 'natural' &&
   gMin.notes[1].letter === 'B' && gMin.notes[1].accidental === 'flat' &&
@@ -65,7 +85,7 @@ assert(
   'G minor triad is G - Bb - D'
 );
 
-const gbMin = buildChord('G', 'flat', 'minor', 'root', 'treble', 1.1);
+const gbMin = buildChord('G', 'flat', 'minor', 'root', 'treble', 1.1, 4);
 assert(
   gbMin.notes[0].letter === 'G' && gbMin.notes[0].accidental === 'flat' &&
   gbMin.notes[1].letter === 'B' && gbMin.notes[1].accidental === 'double_flat' &&
@@ -73,11 +93,14 @@ assert(
   'Gb minor triad has B double-flat (Gb - Bbb - Db)'
 );
 
-// 3. Arpeggio Tests
-console.log('\n--- 3. Arpeggio Contours ---');
-const gAsc = buildArpeggio('G', 'natural', 'major', 'ascending', 'root', 'treble', 1.1);
+// 3. Arpeggio Tests & Multi-Octave Range
+console.log('\n--- 3. Arpeggio Contours & Range ---');
+const gAsc = buildArpeggio('G', 'natural', 'major', 'ascending', 'root', 'treble', 1.1, 4);
 assert(gAsc.notes.length === 4, 'Ascending arpeggio generates 4 notes');
 assert(gAsc.notes[0].letter === 'G' && gAsc.notes[3].letter === 'G' && gAsc.notes[3].octave > gAsc.notes[0].octave, 'Ascending completes full octave');
+
+const arpValidOctaves = getValidOctavesForArpeggio('C', 'natural', 'major', 'ascending', 'root', 'treble');
+assert(arpValidOctaves.length > 0 && arpValidOctaves.includes(4), 'Arpeggios have valid multi-octave bounds');
 
 // 4. Input State Machine Tests
 console.log('\n--- 4. Input State Machine ---');
@@ -139,29 +162,38 @@ for (let i = 0; i < 50; i++) {
 }
 assert(onlySecondInversions, 'Tier 1.3 (2nd Inversion) strictly generates 2nd inversion chords, ignoring root position weaknesses');
 
-// 6. Key Signatures & Circle of Fifths Tests
-console.log('\n--- 6. Key Signatures & Circle of Fifths ---');
-import { KEY_SIGNATURES, KEY_STAGES, getRequiredAccidentalForNote, getDiatonicChordsForKey } from '../src/core/theory/keys';
-import { checkKeyStagePromotion } from '../src/core/engines/adaptiveEngine';
+// 6. 15 Paired Key Signatures & Circle of Fifths Tests
+console.log('\n--- 6. 15 Paired Key Signatures & Circle of Fifths ---');
 
-assert(Object.keys(KEY_SIGNATURES).length >= 15, 'All major and minor key signatures defined');
+const totalStageKeys = KEY_STAGES.reduce((sum, s) => sum + s.keys.length, 0);
+assert(totalStageKeys === 15, `KEY_STAGES contains exactly 15 paired key signatures (got ${totalStageKeys})`);
 assert(KEY_STAGES.length === 5, 'Circle of Fifths organized into 5 progressive stages');
 
-// Test Accidental Delta in Key of G Major (F# in signature)
+// Check that all 15 key signatures are defined and have paired names
+const allKeys = KEY_STAGES.flatMap(s => s.keys);
+assert(allKeys.every(k => KEY_SIGNATURES[k] && KEY_SIGNATURES[k].name.includes('/')), 'All 15 key signatures have paired Major / Relative Minor names');
+
+// Check backward compatibility aliases
+assert(KEY_SIGNATURES['Am'] !== undefined && KEY_SIGNATURES['Am'].id === 'C', 'Minor alias "Am" correctly resolves to "C / Am"');
+assert(KEY_SIGNATURES['Em'] !== undefined && KEY_SIGNATURES['Em'].id === 'G', 'Minor alias "Em" correctly resolves to "G / Em"');
+assert(KEY_SIGNATURES['Dm'] !== undefined && KEY_SIGNATURES['Dm'].id === 'F', 'Minor alias "Dm" correctly resolves to "F / Dm"');
+
+// Test Accidental Delta in Key of G / Em (F# in signature)
 const keyG = KEY_SIGNATURES['G'];
 const fSharpNote = { letter: 'F' as const, accidental: 'sharp' as const, octave: 4 };
 const fNaturalNote = { letter: 'F' as const, accidental: 'natural' as const, octave: 4 };
 const cSharpNote = { letter: 'C' as const, accidental: 'sharp' as const, octave: 4 };
 
-assert(getRequiredAccidentalForNote(fSharpNote, keyG) === null, 'In G Major: F# is implicit in key signature (no glyph)');
-assert(getRequiredAccidentalForNote(fNaturalNote, keyG) === 'natural', 'In G Major: F natural requires explicit natural glyph');
-assert(getRequiredAccidentalForNote(cSharpNote, keyG) === 'sharp', 'In G Major: C# requires explicit sharp glyph');
+assert(getRequiredAccidentalForNote(fSharpNote, keyG) === null, 'In G / Em: F# is implicit in key signature (no glyph)');
+assert(getRequiredAccidentalForNote(fNaturalNote, keyG) === 'natural', 'In G / Em: F natural requires explicit natural glyph');
+assert(getRequiredAccidentalForNote(cSharpNote, keyG) === 'sharp', 'In G / Em: C# requires explicit sharp glyph');
 
-// Test Diatonic Chords in G Major
+// Test Diatonic Chords in G / Em
 const gDiatonic = getDiatonicChordsForKey(keyG, 1.1, 'treble');
-assert(gDiatonic.length > 0, 'Diatonic chords generated for G Major');
-assert(gDiatonic.some(c => c.root === 'G' && c.quality === 'major'), 'G Major triad is diatonic in G Major');
-assert(gDiatonic.some(c => c.root === 'D' && c.quality === 'major'), 'D Major triad (V) is diatonic in G Major');
+assert(gDiatonic.length > 0, 'Diatonic chords generated for G / Em');
+assert(gDiatonic.some(c => c.root === 'G' && c.quality === 'major'), 'G Major triad is diatonic in G / Em');
+assert(gDiatonic.some(c => c.root === 'D' && c.quality === 'major'), 'D Major triad (V) is diatonic in G / Em');
+assert(gDiatonic.some(c => c.root === 'E' && c.quality === 'minor'), 'E Minor triad (vi / i) is diatonic in G / Em');
 
 // Test Key Stage Promotion
 const stagePromoShort = checkKeyStagePromotion(0, Array(19).fill({ isCorrect: true, latencyMs: 1600 }));
@@ -175,7 +207,6 @@ assert(!stagePromoSlow.shouldPromote, 'Key stage promotion fails if avg latency 
 
 // 7. Untimed Precision Latency Engine Tests
 console.log('\n--- 7. Timing & Latency Engine ---');
-import { PrecisionTimingEngine } from '../src/core/engines/timingEngine';
 
 const timer = new PrecisionTimingEngine();
 timer.startQuestion();

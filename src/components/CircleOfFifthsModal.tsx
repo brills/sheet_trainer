@@ -178,7 +178,13 @@ export const CircleOfFifthsModal: React.FC<CircleOfFifthsModalProps> = ({
                         </div>
 
                         <div className="mt-2 flex items-center justify-between text-[11px]">
-                          <span className="text-slate-500 capitalize">{keyDef.mode}</span>
+                          <span className="text-slate-500">
+                            {keyDef.sharpsCount === 0 && keyDef.flatsCount === 0 
+                              ? 'Natural' 
+                              : (keyDef.sharpsCount > 0 
+                                  ? `${keyDef.sharpsCount} ${keyDef.sharpsCount === 1 ? 'Sharp' : 'Sharps'}` 
+                                  : `${keyDef.flatsCount} ${keyDef.flatsCount === 1 ? 'Flat' : 'Flats'}`)}
+                          </span>
                           {isMastered && (
                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                           )}

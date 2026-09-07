@@ -14,7 +14,9 @@ import {
   transposePitch, 
   getDefaultRootOctave, 
   formatNoteName, 
-  NOTE_LETTERS 
+  NOTE_LETTERS,
+  noteToMidi,
+  CLEF_BOUNDS
 } from './notes';
 
 export interface ArpeggioTierConfig {
@@ -102,18 +104,16 @@ export const ARPEGGIO_TIERS: Record<number, ArpeggioTierConfig> = {
   }
 };
 
-export function buildArpeggio(
+export function constructArpeggioNotes(
   root: NoteLetter,
   rootAccidental: Accidental,
   quality: ChordQuality,
   contour: ArpeggioContour,
   startingDegree: 'root' | '3rd' | '5th',
-  clef: Clef,
-  tier: number
-): ArpeggioDefinition {
+  rootOctave: number
+): NotePitch[] {
   const formula = CHORD_FORMULAS[quality];
-  const baseOctave = getDefaultRootOctave(clef, root);
-  const rootNote: NotePitch = { letter: root, accidental: rootAccidental, octave: baseOctave };
+  const rootNote: NotePitch = { letter: root, accidental: rootAccidental, octave: rootOctave };
 
   // Generate chord tones in root position
   const chordTones: NotePitch[] = formula.intervals.map((semitones, idx) => {
@@ -160,7 +160,7 @@ export function buildArpeggio(
       break;
 
     case 'arch':
-      // Arch: 1 -> 3 -> 5 -> 3 -> 1 (or 4 notes: 1 -> 3 -> 5 -> 3)
+      // Arch: 1 -> 3 -> 5 -> 3
       finalNotes = [
         baseTones[0],
         baseTones[1],
@@ -190,13 +190,56 @@ export function buildArpeggio(
       break;
   }
 
-  // Adjust octave range for clef
-  const lowestOctave = Math.min(...finalNotes.map(n => n.octave));
-  if (clef === 'treble' && lowestOctave > 5) {
-    finalNotes = finalNotes.map(n => ({ ...n, octave: n.octave - 1 }));
-  } else if (clef === 'bass' && lowestOctave > 3) {
-    finalNotes = finalNotes.map(n => ({ ...n, octave: n.octave - 1 }));
+  return finalNotes;
+}
+
+export function getValidOctavesForArpeggio(
+  root: NoteLetter,
+  rootAccidental: Accidental,
+  quality: ChordQuality,
+  contour: ArpeggioContour,
+  startingDegree: 'root' | '3rd' | '5th',
+  clef: Clef
+): number[] {
+  const candidateOctaves = clef === 'bass' ? [2, 3] : (clef === 'treble' ? [3, 4, 5] : [2, 3, 4, 5]);
+  const bounds = CLEF_BOUNDS[clef] || CLEF_BOUNDS.treble;
+  const validOctaves: number[] = [];
+
+  for (const oct of candidateOctaves) {
+    const notes = constructArpeggioNotes(root, rootAccidental, quality, contour, startingDegree, oct);
+    const inBounds = notes.every(n => {
+      const midi = noteToMidi(n);
+      return midi >= bounds.minMidi && midi <= bounds.maxMidi;
+    });
+    if (inBounds) {
+      validOctaves.push(oct);
+    }
   }
+
+  if (validOctaves.length === 0) {
+    validOctaves.push(getDefaultRootOctave(clef, root));
+  }
+
+  return validOctaves;
+}
+
+export function buildArpeggio(
+  root: NoteLetter,
+  rootAccidental: Accidental,
+  quality: ChordQuality,
+  contour: ArpeggioContour,
+  startingDegree: 'root' | '3rd' | '5th',
+  clef: Clef,
+  tier: number,
+  octave?: number
+): ArpeggioDefinition {
+  const formula = CHORD_FORMULAS[quality];
+  const validOctaves = getValidOctavesForArpeggio(root, rootAccidental, quality, contour, startingDegree, clef);
+  const chosenOctave = octave !== undefined
+    ? octave
+    : validOctaves[Math.floor(Math.random() * validOctaves.length)];
+
+  const finalNotes = constructArpeggioNotes(root, rootAccidental, quality, contour, startingDegree, chosenOctave);
 
   const rootName = formatNoteName(root, rootAccidental);
   const contourLabel = contour.charAt(0).toUpperCase() + contour.slice(1);

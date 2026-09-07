@@ -11,7 +11,9 @@ import {
   transposePitch, 
   getDefaultRootOctave, 
   formatNoteName, 
-  NOTE_LETTERS 
+  NOTE_LETTERS,
+  noteToMidi,
+  CLEF_BOUNDS
 } from './notes';
 
 export interface ChordFormula {
@@ -180,17 +182,15 @@ export const CHORD_FORMULAS: Record<ChordQuality, ChordFormula> = {
   }
 };
 
-export function buildChord(
+export function constructChordNotes(
   root: NoteLetter,
   rootAccidental: Accidental,
   quality: ChordQuality,
   inversion: Inversion,
-  clef: Clef,
-  tier: number
-): ChordDefinition {
+  rootOctave: number
+): NotePitch[] {
   const formula = CHORD_FORMULAS[quality];
-  const baseOctave = getDefaultRootOctave(clef, root);
-  const rootNote: NotePitch = { letter: root, accidental: rootAccidental, octave: baseOctave };
+  const rootNote: NotePitch = { letter: root, accidental: rootAccidental, octave: rootOctave };
 
   // Generate root position notes
   const rootPosNotes: NotePitch[] = formula.intervals.map((semitones, idx) => {
@@ -198,43 +198,76 @@ export function buildChord(
   });
 
   // Apply inversion
-  let invertedNotes: NotePitch[] = [];
   const count = rootPosNotes.length;
-
   if (inversion === 'root') {
-    invertedNotes = [...rootPosNotes];
+    return [...rootPosNotes];
   } else if (inversion === '1st') {
-    // Note 0 goes up 1 octave, rest stay
-    invertedNotes = [
+    return [
       ...rootPosNotes.slice(1),
       { ...rootPosNotes[0], octave: rootPosNotes[0].octave + 1 }
     ];
   } else if (inversion === '2nd') {
-    // Note 0 & 1 go up 1 octave
-    invertedNotes = [
+    return [
       ...rootPosNotes.slice(2),
       { ...rootPosNotes[0], octave: rootPosNotes[0].octave + 1 },
       { ...rootPosNotes[1], octave: rootPosNotes[1].octave + 1 }
     ];
   } else if (inversion === '3rd' && count >= 4) {
-    // Note 0, 1, 2 go up 1 octave
-    invertedNotes = [
+    return [
       ...rootPosNotes.slice(3),
       { ...rootPosNotes[0], octave: rootPosNotes[0].octave + 1 },
       { ...rootPosNotes[1], octave: rootPosNotes[1].octave + 1 },
       { ...rootPosNotes[2], octave: rootPosNotes[2].octave + 1 }
     ];
-  } else {
-    invertedNotes = [...rootPosNotes];
+  }
+  return [...rootPosNotes];
+}
+
+export function getValidOctavesForChord(
+  root: NoteLetter,
+  rootAccidental: Accidental,
+  quality: ChordQuality,
+  inversion: Inversion,
+  clef: Clef
+): number[] {
+  const candidateOctaves = clef === 'bass' ? [2, 3] : (clef === 'treble' ? [3, 4, 5] : [2, 3, 4, 5]);
+  const bounds = CLEF_BOUNDS[clef] || CLEF_BOUNDS.treble;
+  const validOctaves: number[] = [];
+
+  for (const oct of candidateOctaves) {
+    const notes = constructChordNotes(root, rootAccidental, quality, inversion, oct);
+    const inBounds = notes.every(n => {
+      const midi = noteToMidi(n);
+      return midi >= bounds.minMidi && midi <= bounds.maxMidi;
+    });
+    if (inBounds) {
+      validOctaves.push(oct);
+    }
   }
 
-  // Adjust overall chord octave if notes drift too high or low on the staff
-  const lowestOctave = Math.min(...invertedNotes.map(n => n.octave));
-  if (clef === 'treble' && lowestOctave > 5) {
-    invertedNotes = invertedNotes.map(n => ({ ...n, octave: n.octave - 1 }));
-  } else if (clef === 'bass' && lowestOctave > 3) {
-    invertedNotes = invertedNotes.map(n => ({ ...n, octave: n.octave - 1 }));
+  if (validOctaves.length === 0) {
+    validOctaves.push(getDefaultRootOctave(clef, root));
   }
+
+  return validOctaves;
+}
+
+export function buildChord(
+  root: NoteLetter,
+  rootAccidental: Accidental,
+  quality: ChordQuality,
+  inversion: Inversion,
+  clef: Clef,
+  tier: number,
+  octave?: number
+): ChordDefinition {
+  const formula = CHORD_FORMULAS[quality];
+  const validOctaves = getValidOctavesForChord(root, rootAccidental, quality, inversion, clef);
+  const chosenOctave = octave !== undefined
+    ? octave
+    : validOctaves[Math.floor(Math.random() * validOctaves.length)];
+
+  const invertedNotes = constructChordNotes(root, rootAccidental, quality, inversion, chosenOctave);
 
   const rootName = formatNoteName(root, rootAccidental);
   const invStr = inversion === 'root' ? 'Root Pos' : `${inversion} Inv`;

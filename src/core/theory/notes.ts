@@ -53,6 +53,21 @@ export function formatNoteName(letter: NoteLetter, acc: Accidental, includeOctav
   return includeOctave && octave !== undefined ? `${name}${octave}` : name;
 }
 
+export const CLEF_BOUNDS: Record<Clef, { minMidi: number; maxMidi: number }> = {
+  treble: {
+    minMidi: 55, // G3 (3 ledger lines below treble stave)
+    maxMidi: 86  // D6 (2 ledger lines above treble stave)
+  },
+  bass: {
+    minMidi: 36, // C2 (2 ledger lines below bass stave)
+    maxMidi: 67  // G4 (2 ledger lines above bass stave)
+  },
+  grand: {
+    minMidi: 36, // C2
+    maxMidi: 86  // D6
+  }
+};
+
 export function getDefaultRootOctave(clef: Clef, letter: NoteLetter): number {
   if (clef === 'bass') {
     return ['A', 'B'].includes(letter) ? 2 : 3;

@@ -25,52 +25,42 @@ export const KEY_STAGES: KeyStageInfo[] = [
   {
     stage: 0,
     title: 'Stage 0: Foundation',
-    description: 'Natural Keys (0 Sharps / Flats)',
-    keys: ['C', 'Am']
+    description: 'Natural Keys (0 Accidentals)',
+    keys: ['C']
   },
   {
     stage: 1,
     title: 'Stage 1: Step One',
-    description: '1 Sharp or 1 Flat (G Maj, F Maj, E Min, D Min)',
-    keys: ['G', 'F', 'Em', 'Dm']
+    description: '1 Sharp or 1 Flat (G / Em, F / Dm)',
+    keys: ['G', 'F']
   },
   {
     stage: 2,
     title: 'Stage 2: Intermediate',
-    description: '2 Sharps or 2 Flats (D Maj, B♭ Maj, B Min, G Min)',
-    keys: ['D', 'Bb', 'Bm', 'Gm']
+    description: '2 Sharps or 2 Flats (D / Bm, B♭ / Gm)',
+    keys: ['D', 'Bb']
   },
   {
     stage: 3,
     title: 'Stage 3: Advanced',
-    description: '3–4 Sharps & Flats (A, E♭, E, A♭ Maj & relatives)',
-    keys: ['A', 'Eb', 'E', 'Ab', 'F#m', 'Cm', 'C#m', 'Fm']
+    description: '3–4 Sharps & Flats (A / F♯m, E♭ / Cm, E / C♯m, A♭ / Fm)',
+    keys: ['A', 'Eb', 'E', 'Ab']
   },
   {
     stage: 4,
     title: 'Stage 4: Circle Mastery',
     description: '5–7 Sharps & Flats (B, D♭, F♯, G♭, C♯, C♭ & relatives)',
-    keys: ['B', 'Db', 'F#', 'Gb', 'C#', 'Cb', 'G#m', 'Bbm', 'D#m', 'Ebm', 'A#m', 'Abm']
+    keys: ['B', 'Db', 'F#', 'Gb', 'C#', 'Cb']
   }
 ];
 
-export const KEY_SIGNATURES: Record<string, KeySignatureDefinition> = {
+const PRIMARY_KEY_SIGNATURES: Record<string, KeySignatureDefinition> = {
   // --- Stage 0: 0 Accidentals ---
   C: {
     id: 'C',
-    name: 'C Major',
+    name: 'C / Am',
     vexKey: 'C',
     mode: 'major',
-    sharpsCount: 0,
-    flatsCount: 0,
-    stage: 0,
-    accidentals: {}
-  },
-  Am: {
-    id: 'Am',
-    name: 'A Minor',
-    vexKey: 'Am',
-    mode: 'minor',
     sharpsCount: 0,
     flatsCount: 0,
     stage: 0,
@@ -80,7 +70,7 @@ export const KEY_SIGNATURES: Record<string, KeySignatureDefinition> = {
   // --- Stage 1: 1 Accidental ---
   G: {
     id: 'G',
-    name: 'G Major',
+    name: 'G / Em',
     vexKey: 'G',
     mode: 'major',
     sharpsCount: 1,
@@ -88,31 +78,11 @@ export const KEY_SIGNATURES: Record<string, KeySignatureDefinition> = {
     stage: 1,
     accidentals: { F: 'sharp' }
   },
-  Em: {
-    id: 'Em',
-    name: 'E Minor',
-    vexKey: 'Em',
-    mode: 'minor',
-    sharpsCount: 1,
-    flatsCount: 0,
-    stage: 1,
-    accidentals: { F: 'sharp' }
-  },
   F: {
     id: 'F',
-    name: 'F Major',
+    name: 'F / Dm',
     vexKey: 'F',
     mode: 'major',
-    sharpsCount: 0,
-    flatsCount: 1,
-    stage: 1,
-    accidentals: { B: 'flat' }
-  },
-  Dm: {
-    id: 'Dm',
-    name: 'D Minor',
-    vexKey: 'Dm',
-    mode: 'minor',
     sharpsCount: 0,
     flatsCount: 1,
     stage: 1,
@@ -122,7 +92,7 @@ export const KEY_SIGNATURES: Record<string, KeySignatureDefinition> = {
   // --- Stage 2: 2 Accidentals ---
   D: {
     id: 'D',
-    name: 'D Major',
+    name: 'D / Bm',
     vexKey: 'D',
     mode: 'major',
     sharpsCount: 2,
@@ -130,31 +100,11 @@ export const KEY_SIGNATURES: Record<string, KeySignatureDefinition> = {
     stage: 2,
     accidentals: { F: 'sharp', C: 'sharp' }
   },
-  Bm: {
-    id: 'Bm',
-    name: 'B Minor',
-    vexKey: 'Bm',
-    mode: 'minor',
-    sharpsCount: 2,
-    flatsCount: 0,
-    stage: 2,
-    accidentals: { F: 'sharp', C: 'sharp' }
-  },
   Bb: {
     id: 'Bb',
-    name: 'B♭ Major',
+    name: 'B♭ / Gm',
     vexKey: 'Bb',
     mode: 'major',
-    sharpsCount: 0,
-    flatsCount: 2,
-    stage: 2,
-    accidentals: { B: 'flat', E: 'flat' }
-  },
-  Gm: {
-    id: 'Gm',
-    name: 'G Minor',
-    vexKey: 'Gm',
-    mode: 'minor',
     sharpsCount: 0,
     flatsCount: 2,
     stage: 2,
@@ -164,7 +114,7 @@ export const KEY_SIGNATURES: Record<string, KeySignatureDefinition> = {
   // --- Stage 3: 3–4 Accidentals ---
   A: {
     id: 'A',
-    name: 'A Major',
+    name: 'A / F♯m',
     vexKey: 'A',
     mode: 'major',
     sharpsCount: 3,
@@ -172,19 +122,9 @@ export const KEY_SIGNATURES: Record<string, KeySignatureDefinition> = {
     stage: 3,
     accidentals: { F: 'sharp', C: 'sharp', G: 'sharp' }
   },
-  'F#m': {
-    id: 'F#m',
-    name: 'F♯ Minor',
-    vexKey: 'F#m',
-    mode: 'minor',
-    sharpsCount: 3,
-    flatsCount: 0,
-    stage: 3,
-    accidentals: { F: 'sharp', C: 'sharp', G: 'sharp' }
-  },
   Eb: {
     id: 'Eb',
-    name: 'E♭ Major',
+    name: 'E♭ / Cm',
     vexKey: 'Eb',
     mode: 'major',
     sharpsCount: 0,
@@ -192,19 +132,9 @@ export const KEY_SIGNATURES: Record<string, KeySignatureDefinition> = {
     stage: 3,
     accidentals: { B: 'flat', E: 'flat', A: 'flat' }
   },
-  Cm: {
-    id: 'Cm',
-    name: 'C Minor',
-    vexKey: 'Cm',
-    mode: 'minor',
-    sharpsCount: 0,
-    flatsCount: 3,
-    stage: 3,
-    accidentals: { B: 'flat', E: 'flat', A: 'flat' }
-  },
   E: {
     id: 'E',
-    name: 'E Major',
+    name: 'E / C♯m',
     vexKey: 'E',
     mode: 'major',
     sharpsCount: 4,
@@ -212,31 +142,11 @@ export const KEY_SIGNATURES: Record<string, KeySignatureDefinition> = {
     stage: 3,
     accidentals: { F: 'sharp', C: 'sharp', G: 'sharp', D: 'sharp' }
   },
-  'C#m': {
-    id: 'C#m',
-    name: 'C♯ Minor',
-    vexKey: 'C#m',
-    mode: 'minor',
-    sharpsCount: 4,
-    flatsCount: 0,
-    stage: 3,
-    accidentals: { F: 'sharp', C: 'sharp', G: 'sharp', D: 'sharp' }
-  },
   Ab: {
     id: 'Ab',
-    name: 'A♭ Major',
+    name: 'A♭ / Fm',
     vexKey: 'Ab',
     mode: 'major',
-    sharpsCount: 0,
-    flatsCount: 4,
-    stage: 3,
-    accidentals: { B: 'flat', E: 'flat', A: 'flat', D: 'flat' }
-  },
-  Fm: {
-    id: 'Fm',
-    name: 'F Minor',
-    vexKey: 'Fm',
-    mode: 'minor',
     sharpsCount: 0,
     flatsCount: 4,
     stage: 3,
@@ -246,7 +156,7 @@ export const KEY_SIGNATURES: Record<string, KeySignatureDefinition> = {
   // --- Stage 4: 5–7 Accidentals ---
   B: {
     id: 'B',
-    name: 'B Major',
+    name: 'B / G♯m',
     vexKey: 'B',
     mode: 'major',
     sharpsCount: 5,
@@ -254,19 +164,9 @@ export const KEY_SIGNATURES: Record<string, KeySignatureDefinition> = {
     stage: 4,
     accidentals: { F: 'sharp', C: 'sharp', G: 'sharp', D: 'sharp', A: 'sharp' }
   },
-  'G#m': {
-    id: 'G#m',
-    name: 'G♯ Minor',
-    vexKey: 'G#m',
-    mode: 'minor',
-    sharpsCount: 5,
-    flatsCount: 0,
-    stage: 4,
-    accidentals: { F: 'sharp', C: 'sharp', G: 'sharp', D: 'sharp', A: 'sharp' }
-  },
   Db: {
     id: 'Db',
-    name: 'D♭ Major',
+    name: 'D♭ / B♭m',
     vexKey: 'Db',
     mode: 'major',
     sharpsCount: 0,
@@ -274,19 +174,9 @@ export const KEY_SIGNATURES: Record<string, KeySignatureDefinition> = {
     stage: 4,
     accidentals: { B: 'flat', E: 'flat', A: 'flat', D: 'flat', G: 'flat' }
   },
-  Bbm: {
-    id: 'Bbm',
-    name: 'B♭ Minor',
-    vexKey: 'Bbm',
-    mode: 'minor',
-    sharpsCount: 0,
-    flatsCount: 5,
-    stage: 4,
-    accidentals: { B: 'flat', E: 'flat', A: 'flat', D: 'flat', G: 'flat' }
-  },
   'F#': {
     id: 'F#',
-    name: 'F♯ Major',
+    name: 'F♯ / D♯m',
     vexKey: 'F#',
     mode: 'major',
     sharpsCount: 6,
@@ -294,19 +184,9 @@ export const KEY_SIGNATURES: Record<string, KeySignatureDefinition> = {
     stage: 4,
     accidentals: { F: 'sharp', C: 'sharp', G: 'sharp', D: 'sharp', A: 'sharp', E: 'sharp' }
   },
-  'D#m': {
-    id: 'D#m',
-    name: 'D♯ Minor',
-    vexKey: 'D#m',
-    mode: 'minor',
-    sharpsCount: 6,
-    flatsCount: 0,
-    stage: 4,
-    accidentals: { F: 'sharp', C: 'sharp', G: 'sharp', D: 'sharp', A: 'sharp', E: 'sharp' }
-  },
   Gb: {
     id: 'Gb',
-    name: 'G♭ Major',
+    name: 'G♭ / E♭m',
     vexKey: 'Gb',
     mode: 'major',
     sharpsCount: 0,
@@ -314,19 +194,9 @@ export const KEY_SIGNATURES: Record<string, KeySignatureDefinition> = {
     stage: 4,
     accidentals: { B: 'flat', E: 'flat', A: 'flat', D: 'flat', G: 'flat', C: 'flat' }
   },
-  Ebm: {
-    id: 'Ebm',
-    name: 'E♭ Minor',
-    vexKey: 'Ebm',
-    mode: 'minor',
-    sharpsCount: 0,
-    flatsCount: 6,
-    stage: 4,
-    accidentals: { B: 'flat', E: 'flat', A: 'flat', D: 'flat', G: 'flat', C: 'flat' }
-  },
   'C#': {
     id: 'C#',
-    name: 'C♯ Major',
+    name: 'C♯ / A♯m',
     vexKey: 'C#',
     mode: 'major',
     sharpsCount: 7,
@@ -334,36 +204,36 @@ export const KEY_SIGNATURES: Record<string, KeySignatureDefinition> = {
     stage: 4,
     accidentals: { F: 'sharp', C: 'sharp', G: 'sharp', D: 'sharp', A: 'sharp', E: 'sharp', B: 'sharp' }
   },
-  'A#m': {
-    id: 'A#m',
-    name: 'A♯ Minor',
-    vexKey: 'A#m',
-    mode: 'minor',
-    sharpsCount: 7,
-    flatsCount: 0,
-    stage: 4,
-    accidentals: { F: 'sharp', C: 'sharp', G: 'sharp', D: 'sharp', A: 'sharp', E: 'sharp', B: 'sharp' }
-  },
   Cb: {
     id: 'Cb',
-    name: 'C♭ Major',
+    name: 'C♭ / A♭m',
     vexKey: 'Cb',
     mode: 'major',
     sharpsCount: 0,
     flatsCount: 7,
     stage: 4,
     accidentals: { B: 'flat', E: 'flat', A: 'flat', D: 'flat', G: 'flat', C: 'flat', F: 'flat' }
-  },
-  Abm: {
-    id: 'Abm',
-    name: 'A♭ Minor',
-    vexKey: 'Abm',
-    mode: 'minor',
-    sharpsCount: 0,
-    flatsCount: 7,
-    stage: 4,
-    accidentals: { B: 'flat', E: 'flat', A: 'flat', D: 'flat', G: 'flat', C: 'flat', F: 'flat' }
   }
+};
+
+// Aliases for relative minors and alternate ids to guarantee backward compatibility
+export const KEY_SIGNATURES: Record<string, KeySignatureDefinition> = {
+  ...PRIMARY_KEY_SIGNATURES,
+  Am: PRIMARY_KEY_SIGNATURES.C,
+  Em: PRIMARY_KEY_SIGNATURES.G,
+  Dm: PRIMARY_KEY_SIGNATURES.F,
+  Bm: PRIMARY_KEY_SIGNATURES.D,
+  Gm: PRIMARY_KEY_SIGNATURES.Bb,
+  'F#m': PRIMARY_KEY_SIGNATURES.A,
+  Cm: PRIMARY_KEY_SIGNATURES.Eb,
+  'C#m': PRIMARY_KEY_SIGNATURES.E,
+  Fm: PRIMARY_KEY_SIGNATURES.Ab,
+  'G#m': PRIMARY_KEY_SIGNATURES.B,
+  Bbm: PRIMARY_KEY_SIGNATURES.Db,
+  'D#m': PRIMARY_KEY_SIGNATURES['F#'],
+  Ebm: PRIMARY_KEY_SIGNATURES.Gb,
+  'A#m': PRIMARY_KEY_SIGNATURES['C#'],
+  Abm: PRIMARY_KEY_SIGNATURES.Cb
 };
 
 /**
