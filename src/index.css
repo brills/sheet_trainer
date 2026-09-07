@@ -24,3 +24,25 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.4);
 }
+
+/* Ensure VexFlow ledger lines, stave lines, and glyphs are high-contrast in dark mode */
+.dark svg path[stroke="#000000"],
+.dark svg path[stroke="#000"],
+.dark svg path[stroke="black"],
+.dark svg line[stroke="#000000"],
+.dark svg line[stroke="#000"],
+.dark svg line[stroke="black"],
+.dark svg rect[fill="#000000"],
+.dark svg rect[fill="#000"],
+.dark svg rect[fill="black"] {
+  stroke: #f8fafc !important;
+  fill: #f8fafc !important;
+}
+
+/* VexFlow ledger lines and staff lines */
+.dark svg path.vf-ledgerline,
+.dark svg path.vf-staveline,
+.dark svg path.vf-notehead {
+  stroke: #f8fafc !important;
+  fill: #f8fafc !important;
+}

@@ -156,11 +156,21 @@ export const App: React.FC = () => {
       message: isCorrect ? undefined : `Answer: ${correctAnswerStr}`
     });
 
-    // Advance to next after brief feedback
-    const delay = isCorrect ? 400 : 900;
-    setTimeout(() => {
+    // Advance to next after comfortable feedback (1.1s for correct, 2.5s for incorrect to allow studying)
+    const delay = isCorrect ? 1100 : 2500;
+    const timeoutId = window.setTimeout(() => {
       spawnNextProblem();
     }, delay);
+
+    // Allow user to hit Space or Enter to skip the wait immediately
+    const skipListener = (e: KeyboardEvent) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        window.clearTimeout(timeoutId);
+        window.removeEventListener('keydown', skipListener);
+        spawnNextProblem();
+      }
+    };
+    window.addEventListener('keydown', skipListener, { once: true });
   }, [activeTrack, appState, currentChord, currentArpeggio, recentTrials, trackProgress, trackSettings.clef, spawnNextProblem]);
 
   // Input Handlers

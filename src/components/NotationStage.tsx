@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { ChordDefinition, ArpeggioDefinition, TrackType } from '../types';
 import { renderChordToSvg, renderArpeggioToSvg } from '../core/theory/vexflowAdapter';
 import { FlashState } from '../core/engines/timingEngine';
+import { formatNoteName } from '../core/theory/notes';
 import { Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react';
 
 interface NotationStageProps {
@@ -45,6 +46,13 @@ export const NotationStage: React.FC<NotationStageProps> = ({
   const isFlashing = flashState === 'flashing';
   const isFeedback = flashState === 'feedback';
 
+  // Format notes list for display during feedback
+  const notesSummary = track === 'chords' && chord
+    ? chord.notes.map(n => formatNoteName(n.letter, n.accidental, true, n.octave)).join(' - ')
+    : arpeggio
+      ? arpeggio.notes.map(n => formatNoteName(n.letter, n.accidental, true, n.octave)).join(' → ')
+      : '';
+
   return (
     <div className="relative w-full max-w-md mx-auto flex flex-col items-center">
       {/* Off-screen double buffer (hidden from DOM flow) */}
@@ -56,59 +64,80 @@ export const NotationStage: React.FC<NotationStageProps> = ({
 
       {/* Main Notation Card */}
       <div className={`
-        relative w-full h-[220px] rounded-2xl border transition-all duration-200
-        flex items-center justify-center overflow-hidden
-        ${darkMode ? 'bg-slate-900/80 border-slate-800 backdrop-blur-md shadow-2xl shadow-black/40' : 'bg-white border-slate-200 shadow-xl'}
-        ${isFeedback && lastResult?.isCorrect ? 'border-emerald-500/80 ring-2 ring-emerald-500/20' : ''}
-        ${isFeedback && lastResult && !lastResult.isCorrect ? 'border-rose-500/80 ring-2 ring-rose-500/20' : ''}
+        relative w-full h-[230px] rounded-3xl border transition-all duration-300
+        flex flex-col items-center justify-center overflow-hidden
+        ${darkMode ? 'bg-slate-900/90 border-slate-800 backdrop-blur-md shadow-2xl shadow-black/50' : 'bg-white border-slate-200 shadow-xl'}
+        ${isFeedback && lastResult?.isCorrect ? 'border-emerald-500 ring-4 ring-emerald-500/20' : ''}
+        ${isFeedback && lastResult && !lastResult.isCorrect ? 'border-rose-500 ring-4 ring-rose-500/20' : ''}
       `}>
         {/* Active Notation Render Container */}
         <div 
           ref={visibleRef}
           className={`
-            transition-all duration-150 transform flex items-center justify-center
+            transition-all duration-200 transform flex items-center justify-center
             ${isMasked ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}
           `}
         />
 
         {/* Masked State Overlay */}
         {isMasked && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in">
-            <div className="p-3 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 mb-2 shadow-inner">
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
+            <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/60 text-slate-300 mb-2 shadow-inner">
               <EyeOff className="w-6 h-6 text-slate-400 animate-pulse" />
             </div>
-            <p className="text-sm font-medium text-slate-300">Image Masked</p>
-            <p className="text-xs text-slate-500 mt-0.5">Recall pattern from memory</p>
+            <p className="text-sm font-bold text-slate-200">Image Masked</p>
+            <p className="text-xs text-slate-400 mt-0.5">Recall pattern from iconic memory</p>
           </div>
         )}
 
-        {/* Feedback Overlay (Revealed on Submission) */}
+        {/* Feedback Top Pill Overlay */}
         {isFeedback && lastResult && (
           <div className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md shadow-lg transition-all animate-in fade-in zoom-in-95">
             {lastResult.isCorrect ? (
-              <span className="flex items-center gap-1 text-emerald-400 bg-emerald-950/80 border border-emerald-800/60 px-2.5 py-1 rounded-full">
-                <CheckCircle2 className="w-4 h-4" /> Correct
+              <span className="flex items-center gap-1.5 text-emerald-300 bg-emerald-950/90 border border-emerald-500/40 px-3 py-1 rounded-full font-bold shadow-md shadow-emerald-950/50">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Correct!
               </span>
             ) : (
-              <span className="flex items-center gap-1 text-rose-400 bg-rose-950/80 border border-rose-800/60 px-2.5 py-1 rounded-full">
-                <XCircle className="w-4 h-4" /> {lastResult.message || 'Incorrect'}
+              <span className="flex items-center gap-1.5 text-rose-300 bg-rose-950/90 border border-rose-500/40 px-3 py-1 rounded-full font-bold shadow-md shadow-rose-950/50">
+                <XCircle className="w-4 h-4 text-rose-400" /> Incorrect
               </span>
             )}
           </div>
         )}
 
-        {/* Flash Indicator Pill */}
-        <div className="absolute bottom-2 left-3 flex items-center gap-1.5 text-[11px] font-mono text-slate-500">
-          {isFlashing ? (
-            <span className="flex items-center gap-1 text-emerald-400 font-medium">
-              <Eye className="w-3.5 h-3.5 animate-pulse" /> Flash ({flashDurationMs}ms)
-            </span>
-          ) : isMasked ? (
-            <span className="text-slate-400">Captured (Iconic Memory)</span>
-          ) : (
-            <span>Ready</span>
-          )}
-        </div>
+        {/* Feedback Bottom Solution Banner */}
+        {isFeedback && (
+          <div className={`
+            absolute bottom-0 inset-x-0 py-2 px-3 border-t backdrop-blur-md flex flex-col items-center justify-center animate-in slide-in-from-bottom-2 duration-200
+            ${lastResult?.isCorrect 
+              ? 'bg-emerald-950/90 border-emerald-500/30 text-emerald-200' 
+              : 'bg-rose-950/90 border-rose-500/30 text-rose-200'}
+          `}>
+            <div className="flex items-center gap-2 font-mono text-xs font-bold">
+              <span>{track === 'chords' ? (chord?.displayName) : (arpeggio?.displayName)}</span>
+            </div>
+            {notesSummary && (
+              <span className="text-[11px] font-mono text-slate-300 mt-0.5">
+                Notes: {notesSummary}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Flash Indicator Pill (shown when not in feedback) */}
+        {!isFeedback && (
+          <div className="absolute bottom-2 left-3 flex items-center gap-1.5 text-[11px] font-mono text-slate-500">
+            {isFlashing ? (
+              <span className="flex items-center gap-1 text-emerald-400 font-medium">
+                <Eye className="w-3.5 h-3.5 animate-pulse" /> Flash ({flashDurationMs}ms)
+              </span>
+            ) : isMasked ? (
+              <span className="text-slate-400">Captured</span>
+            ) : (
+              <span>Ready</span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

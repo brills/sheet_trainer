@@ -25,8 +25,8 @@ export function renderChordToSvg(
   renderer.resize(width, height);
   const context = renderer.getContext();
 
-  // Style colors
-  const strokeColor = isDark ? '#e2e8f0' : '#1e293b'; // slate-200 / slate-800
+  // Style colors: high contrast slate-100 for dark mode, slate-900 for light mode
+  const strokeColor = isDark ? '#f8fafc' : '#0f172a'; // slate-50 vs slate-900
   context.setStrokeStyle(strokeColor);
   context.setFillStyle(strokeColor);
 
@@ -36,8 +36,14 @@ export function renderChordToSvg(
   const staveWidth = width - 40;
   const stave = new Stave(staveX, staveY, staveWidth);
 
-  // Set clef
+  // Set clef and styling for lines and ledger lines
   stave.addClef(chord.clef === 'bass' ? 'bass' : 'treble');
+  stave.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
+  
+  if (typeof (stave as any).setLedgerLineStyle === 'function') {
+    (stave as any).setLedgerLineStyle({ fillStyle: strokeColor, strokeStyle: strokeColor, lineWidth: 1.5 });
+  }
+
   stave.setContext(context).draw();
 
   // Map notes to VexFlow keys: e.g., ["c/4", "e/4", "g/4"]
@@ -54,12 +60,17 @@ export function renderChordToSvg(
   chord.notes.forEach((note, idx) => {
     const accChar = accidentalToVexFlow(note.accidental);
     if (accChar && accChar !== 'n') {
-      staveNote.addModifier(new VexAccidental(accChar), idx);
+      const acc = new VexAccidental(accChar);
+      acc.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
+      staveNote.addModifier(acc, idx);
     }
   });
 
-  // Format note styling
+  // Format note & ledger line styling
   staveNote.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
+  if (typeof staveNote.setLedgerLineStyle === 'function') {
+    staveNote.setLedgerLineStyle({ fillStyle: strokeColor, strokeStyle: strokeColor, lineWidth: 1.5 });
+  }
 
   // Voice & Formatter
   const voice = new Voice({ num_beats: 4, beat_value: 4 });
@@ -85,7 +96,7 @@ export function renderArpeggioToSvg(
   renderer.resize(width, height);
   const context = renderer.getContext();
 
-  const strokeColor = isDark ? '#e2e8f0' : '#1e293b';
+  const strokeColor = isDark ? '#f8fafc' : '#0f172a';
   context.setStrokeStyle(strokeColor);
   context.setFillStyle(strokeColor);
 
@@ -95,6 +106,12 @@ export function renderArpeggioToSvg(
   const stave = new Stave(staveX, staveY, staveWidth);
 
   stave.addClef(arpeggio.clef === 'bass' ? 'bass' : 'treble');
+  stave.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
+  
+  if (typeof (stave as any).setLedgerLineStyle === 'function') {
+    (stave as any).setLedgerLineStyle({ fillStyle: strokeColor, strokeStyle: strokeColor, lineWidth: 1.5 });
+  }
+
   stave.setContext(context).draw();
 
   const duration = '8';
@@ -109,10 +126,15 @@ export function renderArpeggioToSvg(
 
     const accChar = accidentalToVexFlow(note.accidental);
     if (accChar && accChar !== 'n') {
-      sn.addModifier(new VexAccidental(accChar), 0);
+      const acc = new VexAccidental(accChar);
+      acc.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
+      sn.addModifier(acc, 0);
     }
 
     sn.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
+    if (typeof sn.setLedgerLineStyle === 'function') {
+      sn.setLedgerLineStyle({ fillStyle: strokeColor, strokeStyle: strokeColor, lineWidth: 1.5 });
+    }
     return sn;
   });
 
