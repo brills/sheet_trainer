@@ -559,6 +559,7 @@ export const App: React.FC = () => {
                   onSubmit={handleDirectEntrySubmit}
                   disabled={isFeedback}
                   onKeyPressFeedback={setLastPressedKey}
+                  tier={trackProgress.currentTier}
                 />
               )}
 
@@ -577,6 +578,7 @@ export const App: React.FC = () => {
               <KeymapLegendHUD
                 lastPressedKey={lastPressedKey}
                 mode={trackSettings.inputMode}
+                tier={trackProgress.currentTier}
               />
             )}
           </>

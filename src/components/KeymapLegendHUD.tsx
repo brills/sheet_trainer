@@ -4,11 +4,13 @@ import { Keyboard } from 'lucide-react';
 interface KeymapLegendHUDProps {
   lastPressedKey?: string | null;
   mode?: 'direct_entry' | 'multiple_choice';
+  tier?: number;
 }
 
 export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
   lastPressedKey,
-  mode = 'direct_entry'
+  mode = 'direct_entry',
+  tier
 }) => {
   const [activeKey, setActiveKey] = useState<string | null>(null);
 
@@ -74,10 +76,18 @@ export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
           {/* Inversion */}
           <div className="flex items-center gap-1">
             <span className="text-slate-400 font-medium mr-0.5">Inv:</span>
-            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('0') || isKeyActive('r') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[0] Root</span>
-            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('1') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[1] 1st</span>
-            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('2') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[2] 2nd</span>
-            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('3') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[3] 3rd</span>
+            {tier && (tier === 1.1 || tier === 1.2 || tier === 1.3 || tier === 3.1 || tier === 4.1 || tier === 4.2) ? (
+              <span className="px-2 py-0.5 rounded border bg-slate-800/50 border-slate-700/40 text-emerald-400/80 text-[10px]">
+                Auto (Fixed in Tier)
+              </span>
+            ) : (
+              <>
+                <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('0') || isKeyActive('r') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[0] Root</span>
+                <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('1') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[1] 1st</span>
+                <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('2') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[2] 2nd</span>
+                <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('3') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[3] 3rd</span>
+              </>
+            )}
           </div>
         </>
       )}

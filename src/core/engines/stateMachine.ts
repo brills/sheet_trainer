@@ -45,9 +45,21 @@ export class ChordInputStateMachine {
 
   private activeSlot: SlotIndex = 0;
   private onCompleteCallback?: (result: ChordSlotState) => void;
+  private fixedInversion: Inversion | null = null;
 
-  constructor(onComplete?: (result: ChordSlotState) => void) {
+  constructor(onComplete?: (result: ChordSlotState) => void, fixedInversion?: Inversion | null) {
     this.onCompleteCallback = onComplete;
+    this.fixedInversion = fixedInversion || null;
+    if (this.fixedInversion) {
+      this.state.inversion = this.fixedInversion;
+    }
+  }
+
+  public setFixedInversion(inv: Inversion | null): void {
+    this.fixedInversion = inv;
+    if (this.fixedInversion) {
+      this.state.inversion = this.fixedInversion;
+    }
   }
 
   public getState(): ChordSlotState {
@@ -63,7 +75,7 @@ export class ChordInputStateMachine {
       root: null,
       accidental: null,
       quality: null,
-      inversion: null
+      inversion: this.fixedInversion
     };
     this.activeSlot = 0;
   }
@@ -74,7 +86,7 @@ export class ChordInputStateMachine {
     // Backspace / Delete handling
     if (key === 'Backspace' || key === 'Delete') {
       if (this.activeSlot > 0) {
-        if (this.activeSlot === 3 && this.state.inversion !== null) {
+        if (this.activeSlot === 3 && this.state.inversion !== null && !this.fixedInversion) {
           this.state.inversion = null;
         } else if (this.activeSlot === 2 && this.state.quality !== null) {
           this.state.quality = null;
@@ -129,12 +141,19 @@ export class ChordInputStateMachine {
         return { updated: true, completed: false };
       }
 
-      // Smart-skip: If user typed a quality key directly, auto-fill natural and advance
+      // Smart-skip: If user typed a quality key directly, auto-fill natural
       if (QUALITY_KEY_MAP[key] !== undefined) {
         this.state.accidental = 'natural';
         this.state.quality = QUALITY_KEY_MAP[key];
-        this.activeSlot = 3;
-        return { updated: true, completed: false };
+        
+        if (this.fixedInversion) {
+          this.state.inversion = this.fixedInversion;
+          this.onCompleteCallback?.(this.state);
+          return { updated: true, completed: true };
+        } else {
+          this.activeSlot = 3;
+          return { updated: true, completed: false };
+        }
       }
     }
 
@@ -142,8 +161,15 @@ export class ChordInputStateMachine {
     if (this.activeSlot === 2) {
       if (QUALITY_KEY_MAP[key] !== undefined) {
         this.state.quality = QUALITY_KEY_MAP[key];
-        this.activeSlot = 3;
-        return { updated: true, completed: false };
+
+        if (this.fixedInversion) {
+          this.state.inversion = this.fixedInversion;
+          this.onCompleteCallback?.(this.state);
+          return { updated: true, completed: true };
+        } else {
+          this.activeSlot = 3;
+          return { updated: true, completed: false };
+        }
       }
     }
 
@@ -168,7 +194,14 @@ export class ChordInputStateMachine {
       this.activeSlot = 2;
     } else if (slot === 2) {
       this.state.quality = value;
-      this.activeSlot = 3;
+      if (this.fixedInversion && this.state.root) {
+        if (!this.state.accidental) this.state.accidental = 'natural';
+        this.state.inversion = this.fixedInversion;
+        this.onCompleteCallback?.(this.state);
+        return true;
+      } else {
+        this.activeSlot = 3;
+      }
     } else if (slot === 3) {
       this.state.inversion = value;
       if (this.state.root && this.state.quality && this.state.inversion) {

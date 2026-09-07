@@ -2,8 +2,8 @@ import { NOTE_LETTERS, noteToMidi, transposePitch, formatNoteName } from '../src
 import { buildChord, CHORD_TIERS, CHORD_FORMULAS, getValidOctavesForChord } from '../src/core/theory/chords';
 import { buildArpeggio, ARPEGGIO_TIERS, getValidOctavesForArpeggio } from '../src/core/theory/arpeggios';
 import { ChordInputStateMachine } from '../src/core/engines/stateMachine';
-import { calculatePatternWeight, checkTierPromotion } from '../src/core/engines/adaptiveEngine';
-import { generateChordMultipleChoiceOptions } from '../src/core/engines/distractorEngine';
+import { calculatePatternWeight, checkTierPromotion, selectNextChord } from '../src/core/engines/adaptiveEngine';
+import { generateChordMultipleChoiceOptions, generateArpeggioMultipleChoiceOptions } from '../src/core/engines/distractorEngine';
 import { KEY_SIGNATURES, KEY_STAGES, getRequiredAccidentalForNote, getDiatonicChordsForKey } from '../src/core/theory/keys';
 import { checkKeyStagePromotion } from '../src/core/engines/adaptiveEngine';
 import { PrecisionTimingEngine } from '../src/core/engines/timingEngine';
@@ -102,25 +102,56 @@ assert(gAsc.notes[0].letter === 'G' && gAsc.notes[3].letter === 'G' && gAsc.note
 const arpValidOctaves = getValidOctavesForArpeggio('C', 'natural', 'major', 'ascending', 'root', 'treble');
 assert(arpValidOctaves.length > 0 && arpValidOctaves.includes(4), 'Arpeggios have valid multi-octave bounds');
 
-// 4. Input State Machine Tests
-console.log('\n--- 4. Input State Machine ---');
-let completedResult: any = null;
-const sm = new ChordInputStateMachine((res) => {
-  completedResult = res;
-});
+// 4. Input State Machine Tests & Fixed Inversion Auto-Skip
+console.log('\n--- 4. Input State Machine & Fixed Inversions ---');
 
-// Test typing C -> m -> 1 (Cm 1st inv with auto-skip natural)
-sm.handleKey('c');
-assert(sm.getActiveSlot() === 1 && sm.getState().root === 'C', 'Typed "c": Root set to C, advanced to Slot 1');
+// Test Tier 1.4 (Mixed inversions: requires inversion input)
+let mixedResult: any = null;
+const smMixed = new ChordInputStateMachine((res) => {
+  mixedResult = res;
+}, null);
 
-sm.handleKey('m'); // Auto-skips accidental slot to quality
-assert(sm.getActiveSlot() === 3 && sm.getState().accidental === 'natural' && sm.getState().quality === 'minor', 'Typed "m": Natural auto-filled, Quality set to minor, advanced to Slot 3');
+smMixed.handleKey('c');
+assert(smMixed.getActiveSlot() === 1 && smMixed.getState().root === 'C', 'Mixed Mode - Typed "c": Root set to C');
+smMixed.handleKey('m'); // Auto-skips accidental slot to quality
+assert(smMixed.getActiveSlot() === 3 && smMixed.getState().quality === 'minor', 'Mixed Mode - Typed "m": Quality set to minor, waiting for Inversion at Slot 3');
+smMixed.handleKey('1'); // Auto-submits on inversion entry
+assert(mixedResult !== null && mixedResult.inversion === '1st', 'Mixed Mode - Typed "1": Auto-submitted 1st inversion');
 
-sm.handleKey('1'); // Auto-submits
-assert(completedResult !== null && completedResult.inversion === '1st', 'Typed "1": Auto-submitted 1st inversion');
+// Test Tier 1.1 (Root Position Fixed): typing C -> m auto-submits Cm Root without needing inversion key!
+let rootResult: any = null;
+const smRoot = new ChordInputStateMachine((res) => {
+  rootResult = res;
+}, 'root');
 
-// 5. Adaptive Weighting & Distractor Tests
-console.log('\n--- 5. Adaptive Engine & Distractors ---');
+smRoot.handleKey('c');
+const rootKeyRes = smRoot.handleKey('m');
+assert(rootKeyRes.completed === true, 'Tier 1.1 (Root Pos) - Typed "c" then "m": Immediately completed without typing inversion');
+assert(rootResult !== null && rootResult.root === 'C' && rootResult.quality === 'minor' && rootResult.inversion === 'root', 'Tier 1.1 - Auto-filled Root Inversion correctly');
+
+// Test Tier 1.2 (1st Inversion Fixed): typing A -> m auto-submits Am 1st Inv
+let inv1stResult: any = null;
+const sm1st = new ChordInputStateMachine((res) => {
+  inv1stResult = res;
+}, '1st');
+
+sm1st.handleKey('a');
+const inv1stKeyRes = sm1st.handleKey('m');
+assert(inv1stKeyRes.completed === true && inv1stResult.inversion === '1st', 'Tier 1.2 (1st Inv) - Typed "a" then "m": Auto-submitted 1st Inversion');
+
+// Test Tier 1.3 (2nd Inversion Fixed): typing E -> s (sharp) -> m auto-submits E#m 2nd Inv
+let inv2ndResult: any = null;
+const sm2nd = new ChordInputStateMachine((res) => {
+  inv2ndResult = res;
+}, '2nd');
+
+sm2nd.handleKey('e');
+sm2nd.handleKey('s'); // Sharp
+const inv2ndKeyRes = sm2nd.handleKey('m'); // Minor
+assert(inv2ndKeyRes.completed === true && inv2ndResult.accidental === 'sharp' && inv2ndResult.inversion === '2nd', 'Tier 1.3 (2nd Inv) - Typed "e" -> "s" -> "m": Auto-submitted E#m 2nd Inversion');
+
+// 5. Adaptive Weighting & Tier-Restricted Multiple-Choice Distractor Tests
+console.log('\n--- 5. Adaptive Engine & Distractor Constraints ---');
 const weightUnseen = calculatePatternWeight({ totalSeen: 0, correctCount: 0, avgLatencyMs: 400, lastAttemptTimestamp: 0 });
 const weightWeak = calculatePatternWeight({ totalSeen: 10, correctCount: 4, avgLatencyMs: 900, lastAttemptTimestamp: 0 });
 assert(weightWeak > weightUnseen, 'Weak patterns (40% accuracy) have higher sampling weight than normal patterns');
@@ -134,12 +165,28 @@ assert(promoCheckPass.shouldPromote && promoCheckPass.nextTier === 1.2, 'Tier pr
 const promoCheckSlow = checkTierPromotion('chords', 1.1, Array(20).fill({ isCorrect: true, latencyMs: 2200 }));
 assert(!promoCheckSlow.shouldPromote, 'Tier promotion fails if avg latency exceeds 2.0s (2200ms)');
 
-const distractors = generateChordMultipleChoiceOptions(cMajRoot);
-assert(distractors.length === 4, 'Multiple choice generates exactly 4 options');
-assert(distractors.filter(d => d.isCorrect).length === 1, 'Exactly 1 option is marked correct');
+// Distractor Inversion Constraints:
+// Tier 1.1 (Root Position): all 4 options must be Root Position
+const t11Distractors = generateChordMultipleChoiceOptions(cMajRoot);
+assert(t11Distractors.length === 4, 'Multiple choice generates 4 options');
+assert(t11Distractors.every(d => d.sublabel === 'Root Inversion'), 'Tier 1.1 (Root Position): ALL 4 options strictly have "Root Inversion" (no impossible 1st/2nd/3rd distractors)');
+
+// Tier 1.2 (1st Inversion): all 4 options must be 1st Inversion
+const t12Chord = buildChord('A', 'natural', 'minor', '1st', 'treble', 1.2, 4);
+const t12Distractors = generateChordMultipleChoiceOptions(t12Chord);
+assert(t12Distractors.every(d => d.sublabel === '1st Inversion'), 'Tier 1.2 (1st Inversion): ALL 4 options strictly have "1st Inversion"');
+
+// Tier 1.3 (2nd Inversion): all 4 options must be 2nd Inversion
+const t13Chord = buildChord('E', 'natural', 'minor', '2nd', 'treble', 1.3, 4);
+const t13Distractors = generateChordMultipleChoiceOptions(t13Chord);
+assert(t13Distractors.every(d => d.sublabel === '2nd Inversion'), 'Tier 1.3 (2nd Inversion): ALL 4 options strictly have "2nd Inversion"');
+
+// Tier 3.2 (7th Inversions: ['1st', '2nd', '3rd']): no option should have Root Inversion
+const t32Chord = buildChord('G', 'natural', 'dom7', '2nd', 'treble', 3.2, 4);
+const t32Distractors = generateChordMultipleChoiceOptions(t32Chord);
+assert(t32Distractors.every(d => d.sublabel !== 'Root Inversion'), 'Tier 3.2 (7th Inversions 1st/2nd/3rd): Distractors NEVER contain Root Inversion');
 
 // Test that Tier 1.3 strictly generates 2nd inversions even if weakness matrix contains root-pos errors
-import { selectNextChord } from '../src/core/engines/adaptiveEngine';
 const mockProgress = {
   currentTier: 1.3,
   highestStreak: 0,

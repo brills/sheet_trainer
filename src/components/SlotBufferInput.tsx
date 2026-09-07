@@ -2,21 +2,27 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { NoteLetter, Accidental, ChordQuality, Inversion } from '../types';
 import { ChordInputStateMachine, ChordSlotState, SlotIndex } from '../core/engines/stateMachine';
 import { accidentalSymbol, NOTE_LETTERS } from '../core/theory/notes';
-import { CHORD_FORMULAS } from '../core/theory/chords';
+import { CHORD_FORMULAS, CHORD_TIERS } from '../core/theory/chords';
 import { Delete } from 'lucide-react';
 
 interface SlotBufferInputProps {
   onSubmit: (state: { root: NoteLetter; accidental: Accidental; quality: ChordQuality; inversion: Inversion }) => void;
   disabled?: boolean;
   onKeyPressFeedback?: (key: string) => void;
+  tier?: number;
 }
 
 export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
   onSubmit,
   disabled = false,
-  onKeyPressFeedback
+  onKeyPressFeedback,
+  tier
 }) => {
-  const [stateMachine] = useState(() => new ChordInputStateMachine());
+  const tierConfig = tier !== undefined ? CHORD_TIERS[tier] : undefined;
+  const isFixedInversion = tierConfig !== undefined && tierConfig.inversions.length === 1;
+  const fixedInversion = isFixedInversion ? tierConfig.inversions[0] : null;
+
+  const [stateMachine] = useState(() => new ChordInputStateMachine(undefined, fixedInversion));
   const [slotState, setSlotState] = useState<ChordSlotState>(stateMachine.getState());
   const [activeSlot, setActiveSlot] = useState<SlotIndex>(0);
 
@@ -37,9 +43,15 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
   }, [onSubmit]);
 
   useEffect(() => {
-    // Register completion listener
     (stateMachine as any).onCompleteCallback = handleComplete;
   }, [stateMachine, handleComplete]);
+
+  // Update fixed inversion when tier changes
+  useEffect(() => {
+    stateMachine.setFixedInversion(fixedInversion);
+    stateMachine.reset();
+    syncState();
+  }, [fixedInversion, stateMachine, syncState]);
 
   // Reset when disabled changes or a new problem starts
   useEffect(() => {
@@ -137,10 +149,17 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
         {/* Slot 4: Inversion */}
         <div className={`
           flex flex-col items-center justify-center h-16 rounded-xl border transition-all
-          ${activeSlot === 3 ? 'border-emerald-500 bg-emerald-950/30 ring-2 ring-emerald-500/30 shadow-lg shadow-emerald-500/10' : 'border-slate-800 bg-slate-950/60'}
+          ${isFixedInversion 
+            ? 'border-slate-800/80 bg-slate-950/40 text-slate-400'
+            : (activeSlot === 3 ? 'border-emerald-500 bg-emerald-950/30 ring-2 ring-emerald-500/30 shadow-lg shadow-emerald-500/10' : 'border-slate-800 bg-slate-950/60')}
         `}>
-          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 mb-0.5">4. Inv</span>
-          <span className="text-base font-bold font-mono text-emerald-400">
+          <div className="flex items-center gap-1 mb-0.5">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">4. Inv</span>
+            {isFixedInversion && (
+              <span className="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700">Tier</span>
+            )}
+          </div>
+          <span className={`text-base font-bold font-mono ${isFixedInversion ? 'text-emerald-400/80' : 'text-emerald-400'}`}>
             {slotState.inversion ? (slotState.inversion === 'root' ? 'Root' : slotState.inversion) : <span className="text-slate-700 font-normal">_</span>}
           </span>
         </div>
@@ -198,58 +217,58 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
           </button>
 
           {/* Inversions (4 buttons) */}
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={() => onSelectInversion('root')}
-            className="h-10 rounded-xl font-mono text-xs font-bold bg-slate-800/90 text-emerald-400 border border-slate-700 active:scale-95"
-          >
-            Root
-          </button>
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={() => onSelectInversion('1st')}
-            className="h-10 rounded-xl font-mono text-xs font-bold bg-slate-800/90 text-emerald-400 border border-slate-700 active:scale-95"
-          >
-            1st
-          </button>
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={() => onSelectInversion('2nd')}
-            className="h-10 rounded-xl font-mono text-xs font-bold bg-slate-800/90 text-emerald-400 border border-slate-700 active:scale-95"
-          >
-            2nd
-          </button>
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={() => onSelectInversion('3rd')}
-            className="h-10 rounded-xl font-mono text-xs font-bold bg-slate-800/90 text-emerald-400 border border-slate-700 active:scale-95"
-          >
-            3rd
-          </button>
+          {(['root', '1st', '2nd', '3rd'] as Inversion[]).map(inv => {
+            const isThisFixed = isFixedInversion && fixedInversion === inv;
+            const isAllowedInTier = !tierConfig || tierConfig.inversions.includes(inv);
+            const label = inv === 'root' ? 'Root' : inv;
+
+            return (
+              <button
+                key={inv}
+                type="button"
+                disabled={disabled || isFixedInversion || !isAllowedInTier}
+                onClick={() => onSelectInversion(inv)}
+                className={`
+                  h-10 rounded-xl font-mono text-xs font-bold border active:scale-95 transition-all
+                  ${isThisFixed
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                    : isAllowedInTier
+                      ? (slotState.inversion === inv
+                          ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold'
+                          : 'bg-slate-800/90 text-emerald-400 border-slate-700 hover:bg-slate-750')
+                      : 'bg-slate-900/40 text-slate-600 border-slate-800/40 opacity-40 cursor-not-allowed'}
+                `}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Row 3: Qualities */}
         <div className="grid grid-cols-6 gap-1.5">
-          {(['major', 'minor', 'diminished', 'augmented', 'dom7', 'maj7'] as ChordQuality[]).map(q => (
-            <button
-              key={q}
-              type="button"
-              disabled={disabled}
-              onClick={() => onSelectQuality(q)}
-              className={`
-                h-10 rounded-xl font-mono text-xs font-semibold border transition-all active:scale-95
-                ${slotState.quality === q
-                  ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold'
-                  : 'bg-slate-800/90 text-slate-200 border-slate-700 hover:bg-slate-750'}
-              `}
-            >
-              {CHORD_FORMULAS[q].shortName}
-            </button>
-          ))}
+          {(['major', 'minor', 'diminished', 'augmented', 'dom7', 'maj7'] as ChordQuality[]).map(q => {
+            const isAllowedInTier = !tierConfig || tierConfig.qualities.includes(q);
+
+            return (
+              <button
+                key={q}
+                type="button"
+                disabled={disabled}
+                onClick={() => onSelectQuality(q)}
+                className={`
+                  h-10 rounded-xl font-mono text-xs font-semibold border transition-all active:scale-95
+                  ${slotState.quality === q
+                    ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold'
+                    : isAllowedInTier
+                      ? 'bg-slate-800/90 text-slate-200 border-slate-700 hover:bg-slate-750'
+                      : 'bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-850'}
+                `}
+              >
+                {CHORD_FORMULAS[q].shortName}
+              </button>
+            );
+          })}
         </div>
 
         {/* Clear Button */}
