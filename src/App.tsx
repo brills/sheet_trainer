@@ -21,7 +21,7 @@ import { logTrial, getTrialsForTrack } from './storage/telemetryStore';
 import { PrecisionTimingEngine } from './core/engines/timingEngine';
 import { selectNextChord, selectNextArpeggio, checkTierPromotion, checkKeyStagePromotion } from './core/engines/adaptiveEngine';
 import { generateChordMultipleChoiceOptions, generateArpeggioMultipleChoiceOptions } from './core/engines/distractorEngine';
-import { buildChord, CHORD_FORMULAS } from './core/theory/chords';
+import { buildChord, CHORD_FORMULAS, formatInversionName } from './core/theory/chords';
 import { formatNoteName } from './core/theory/notes';
 import { KEY_SIGNATURES, KEY_STAGES } from './core/theory/keys';
 import { Navigation } from './components/Navigation';
@@ -358,13 +358,13 @@ export const App: React.FC = () => {
       {
         slot: 'inversion',
         label: 'Inv',
-        userVal: input.inversion === 'root' ? 'Root' : input.inversion,
-        correctVal: currentChord.inversion === 'root' ? 'Root' : currentChord.inversion,
+        userVal: formatInversionName(input.inversion, 'short'),
+        correctVal: formatInversionName(currentChord.inversion, 'short'),
         isMatch: isInvMatch
       }
     ];
 
-    const userStr = `${formatNoteName(input.root, input.accidental)}${CHORD_FORMULAS[input.quality].shortName} (${input.inversion === 'root' ? 'Root' : input.inversion})`;
+    const userStr = `${formatNoteName(input.root, input.accidental)}${CHORD_FORMULAS[input.quality].shortName} (${formatInversionName(input.inversion, 'short')})`;
 
     evaluateSubmission(isCorrect, userStr, currentChord.displayName, {
       userChord,

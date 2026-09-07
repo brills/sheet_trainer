@@ -1,5 +1,5 @@
 import { ChordDefinition, ArpeggioDefinition, MultipleChoiceOption } from '../../types';
-import { CHORD_TIERS, CHORD_FORMULAS } from '../theory/chords';
+import { CHORD_TIERS, CHORD_FORMULAS, formatInversionName } from '../theory/chords';
 import { ARPEGGIO_TIERS } from '../theory/arpeggios';
 import { NOTE_LETTERS, formatNoteName } from '../theory/notes';
 
@@ -16,13 +16,13 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
   const options: MultipleChoiceOption[] = [];
   const rootStr = formatNoteName(target.root, target.rootAccidental);
   const qualityStr = CHORD_FORMULAS[target.quality].shortName;
-  const invStr = target.inversion === 'root' ? 'Root' : target.inversion;
+  const invStr = formatInversionName(target.inversion, 'full');
 
   // 1. Correct Option
   options.push({
     id: target.id,
     label: `${rootStr}${qualityStr}`,
-    sublabel: `${invStr} Inversion`,
+    sublabel: invStr,
     isCorrect: true
   });
 
@@ -46,7 +46,7 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
       options.push({
         id: `trap_qual_${trapQuality}_${target.inversion}`,
         label: `${rootStr}${trapQualityStr}`,
-        sublabel: `${invStr} Inversion`,
+        sublabel: invStr,
         isCorrect: false
       });
     }
@@ -55,14 +55,14 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
   // Candidate 2: Inversion Trap (ONLY if tier has multiple inversions!)
   if (otherInversions.length > 0) {
     const trapInv = otherInversions[Math.floor(Math.random() * otherInversions.length)];
-    const trapInvStr = trapInv === 'root' ? 'Root' : trapInv;
+    const trapInvStr = formatInversionName(trapInv, 'full');
     const sig = `${rootStr}:${target.quality}:${trapInv}`;
     if (!seen.has(sig)) {
       seen.add(sig);
       options.push({
         id: `trap_inv_${trapInv}`,
         label: `${rootStr}${qualityStr}`,
-        sublabel: `${trapInvStr} Inversion`,
+        sublabel: trapInvStr,
         isCorrect: false
       });
     }
@@ -74,7 +74,7 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
     if (options.length >= 4) break;
     const trapRootStr = formatNoteName(trapRoot, target.rootAccidental);
     const trapInv = allowedInversions[Math.floor(Math.random() * allowedInversions.length)];
-    const trapInvStr = trapInv === 'root' ? 'Root' : trapInv;
+    const trapInvStr = formatInversionName(trapInv, 'full');
     const trapQual = allowedQualities[Math.floor(Math.random() * allowedQualities.length)];
     const trapQualStr = CHORD_FORMULAS[trapQual]?.shortName || 'Maj';
     const sig = `${trapRootStr}:${trapQual}:${trapInv}`;
@@ -83,7 +83,7 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
       options.push({
         id: `trap_root_${trapRoot}_${trapQual}_${trapInv}`,
         label: `${trapRootStr}${trapQualStr}`,
-        sublabel: `${trapInvStr} Inversion`,
+        sublabel: trapInvStr,
         isCorrect: false
       });
     }
@@ -97,11 +97,11 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
     const fallbackQual = allowedQualities[0];
     const fallbackQualStr = CHORD_FORMULAS[fallbackQual]?.shortName || 'Maj';
     const fallbackInv = target.inversion;
-    const fallbackInvStr = fallbackInv === 'root' ? 'Root' : fallbackInv;
+    const fallbackInvStr = formatInversionName(fallbackInv, 'full');
     options.push({
       id: `trap_fallback_${fallbackIndex}_${target.id}`,
       label: `${fallbackRootStr}${fallbackQualStr}`,
-      sublabel: `${fallbackInvStr} Inversion`,
+      sublabel: fallbackInvStr,
       isCorrect: false
     });
     fallbackIndex++;

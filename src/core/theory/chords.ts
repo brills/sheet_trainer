@@ -252,6 +252,13 @@ export function getValidOctavesForChord(
   return validOctaves;
 }
 
+export function formatInversionName(inversion: Inversion, style: 'short' | 'full' = 'short'): string {
+  if (style === 'full') {
+    return inversion === 'root' ? 'Root Position' : `${inversion} Inversion`;
+  }
+  return inversion === 'root' ? 'Root Pos' : `${inversion} Inv`;
+}
+
 export function buildChord(
   root: NoteLetter,
   rootAccidental: Accidental,
@@ -270,7 +277,7 @@ export function buildChord(
   const invertedNotes = constructChordNotes(root, rootAccidental, quality, inversion, chosenOctave);
 
   const rootName = formatNoteName(root, rootAccidental);
-  const invStr = inversion === 'root' ? 'Root Pos' : `${inversion} Inv`;
+  const invStr = formatInversionName(inversion, 'short');
   const displayName = `${rootName}${formula.shortName} (${invStr})`;
   const id = `${rootName}_${quality.toUpperCase()}_${inversion.toUpperCase()}_${clef.toUpperCase()}`;
 

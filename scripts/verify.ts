@@ -169,7 +169,7 @@ assert(!promoCheckSlow.shouldPromote, 'Tier promotion fails if avg latency excee
 // Tier 1.1 (Root Position): all 4 options must be Root Position
 const t11Distractors = generateChordMultipleChoiceOptions(cMajRoot);
 assert(t11Distractors.length === 4, 'Multiple choice generates 4 options');
-assert(t11Distractors.every(d => d.sublabel === 'Root Inversion'), 'Tier 1.1 (Root Position): ALL 4 options strictly have "Root Inversion" (no impossible 1st/2nd/3rd distractors)');
+assert(t11Distractors.every(d => d.sublabel === 'Root Position'), 'Tier 1.1 (Root Position): ALL 4 options strictly have "Root Position" (no impossible 1st/2nd/3rd distractors)');
 
 // Tier 1.2 (1st Inversion): all 4 options must be 1st Inversion
 const t12Chord = buildChord('A', 'natural', 'minor', '1st', 'treble', 1.2, 4);
@@ -181,10 +181,10 @@ const t13Chord = buildChord('E', 'natural', 'minor', '2nd', 'treble', 1.3, 4);
 const t13Distractors = generateChordMultipleChoiceOptions(t13Chord);
 assert(t13Distractors.every(d => d.sublabel === '2nd Inversion'), 'Tier 1.3 (2nd Inversion): ALL 4 options strictly have "2nd Inversion"');
 
-// Tier 3.2 (7th Inversions: ['1st', '2nd', '3rd']): no option should have Root Inversion
+// Tier 3.2 (7th Inversions: ['1st', '2nd', '3rd']): no option should have Root Position
 const t32Chord = buildChord('G', 'natural', 'dom7', '2nd', 'treble', 3.2, 4);
 const t32Distractors = generateChordMultipleChoiceOptions(t32Chord);
-assert(t32Distractors.every(d => d.sublabel !== 'Root Inversion'), 'Tier 3.2 (7th Inversions 1st/2nd/3rd): Distractors NEVER contain Root Inversion');
+assert(t32Distractors.every(d => d.sublabel !== 'Root Position'), 'Tier 3.2 (7th Inversions 1st/2nd/3rd): Distractors NEVER contain Root Position');
 
 // Test that Tier 1.3 strictly generates 2nd inversions even if weakness matrix contains root-pos errors
 const mockProgress = {
