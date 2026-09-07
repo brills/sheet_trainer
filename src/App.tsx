@@ -18,7 +18,7 @@ import {
 } from './types';
 import { loadAppState, saveAppState, recordTrialResultInState } from './storage/localStore';
 import { logTrial, getTrialsForTrack } from './storage/telemetryStore';
-import { PrecisionTimingEngine, FlashState } from './core/engines/timingEngine';
+import { PrecisionTimingEngine } from './core/engines/timingEngine';
 import { selectNextChord, selectNextArpeggio, checkTierPromotion, checkKeyStagePromotion } from './core/engines/adaptiveEngine';
 import { generateChordMultipleChoiceOptions, generateArpeggioMultipleChoiceOptions } from './core/engines/distractorEngine';
 import { buildChord, CHORD_FORMULAS } from './core/theory/chords';
@@ -50,7 +50,7 @@ export const App: React.FC = () => {
   const [currentArpeggio, setCurrentArpeggio] = useState<ArpeggioDefinition | null>(null);
   const [currentKey, setCurrentKey] = useState<KeySignatureDefinition>(KEY_SIGNATURES['C']);
   const [multipleChoiceOptions, setMultipleChoiceOptions] = useState<MultipleChoiceOption[]>([]);
-  const [flashState, setFlashState] = useState<FlashState>('idle');
+  const [isFeedback, setIsFeedback] = useState(false);
   const [lastResult, setLastResult] = useState<TrialFeedback | null>(null);
   const [lastPressedKey, setLastPressedKey] = useState<string | null>(null);
 
@@ -141,11 +141,8 @@ export const App: React.FC = () => {
       }
     }
 
-    setFlashState('flashing');
-    engine.startFlash({
-      durationMs: currentSettings.flashDurationMs,
-      onMask: () => setFlashState('masked')
-    });
+    setIsFeedback(false);
+    engine.startQuestion();
   }, [activeTrack, getActiveKeyForSampling]);
 
   // Cleanup timers & listeners on unmount
@@ -199,8 +196,8 @@ export const App: React.FC = () => {
     feedbackExtra?: Partial<TrialFeedback>
   ) => {
     const engine = timingEngineRef.current;
-    const { latencyMs, flashExposureMs } = engine.recordSubmission();
-    setFlashState('feedback');
+    const { latencyMs } = engine.recordSubmission();
+    setIsFeedback(true);
 
     const patternKey = activeTrack === 'chords' && currentChord
       ? `${trackSettings.clef}:${currentChord.quality}:${currentChord.inversion}`
@@ -222,7 +219,7 @@ export const App: React.FC = () => {
       root: activeTrack === 'chords' ? (currentChord?.root || '') : (currentArpeggio?.root || ''),
       quality: activeTrack === 'chords' ? (currentChord?.quality || '') : (currentArpeggio?.quality || ''),
       inversionOrShape: activeTrack === 'chords' ? (currentChord?.inversion || '') : (currentArpeggio?.contour || ''),
-      flashDurationMs: flashExposureMs,
+      flashDurationMs: 0,
       latencyMs,
       isCorrect,
       userInput: userInputStr,
@@ -418,21 +415,6 @@ export const App: React.FC = () => {
     setAppState(next);
   };
 
-  const handleFlashDurationChange = (flashDurationMs: number) => {
-    const next: AppState = {
-      ...appState,
-      settings: {
-        ...appState.settings,
-        [activeTrack]: {
-          ...appState.settings[activeTrack],
-          flashDurationMs
-        }
-      }
-    };
-    saveAppState(next);
-    setAppState(next);
-  };
-
   const handleKeyModeChange = (keyMode: KeyMode) => {
     const next: AppState = {
       ...appState,
@@ -543,21 +525,18 @@ export const App: React.FC = () => {
               onClefChange={handleClefChange}
               inputMode={trackSettings.inputMode}
               onInputModeChange={handleInputModeChange}
-              flashDurationMs={trackSettings.flashDurationMs}
-              onFlashDurationChange={handleFlashDurationChange}
               currentTier={trackProgress.currentTier}
               onOpenTierModal={() => setIsTierModalOpen(true)}
             />
 
-            {/* Notation Flash Stage */}
+            {/* Notation Stage */}
             <NotationStage
               track={activeTrack}
               chord={currentChord || undefined}
               arpeggio={currentArpeggio || undefined}
               keySignature={currentKey}
-              flashState={flashState}
+              isFeedback={isFeedback}
               lastResult={lastResult}
-              flashDurationMs={trackSettings.flashDurationMs}
               darkMode={appState.settings.theme !== 'light'}
               onContinue={spawnNextProblem}
               onOpenKeyModal={() => setIsKeyModalOpen(true)}
@@ -578,7 +557,7 @@ export const App: React.FC = () => {
               {trackSettings.inputMode === 'direct_entry' && (
                 <SlotBufferInput
                   onSubmit={handleDirectEntrySubmit}
-                  disabled={flashState === 'feedback'}
+                  disabled={isFeedback}
                   onKeyPressFeedback={setLastPressedKey}
                 />
               )}
@@ -587,7 +566,7 @@ export const App: React.FC = () => {
                 <MultipleChoicePad
                   options={multipleChoiceOptions}
                   onSelect={handleMultipleChoiceSelect}
-                  disabled={flashState === 'feedback'}
+                  disabled={isFeedback}
                   onKeyPressFeedback={setLastPressedKey}
                 />
               )}

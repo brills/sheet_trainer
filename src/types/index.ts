@@ -87,8 +87,8 @@ export interface PatternStats {
 export interface TrackSettings {
   clef: Clef;
   inputMode: InputMode;
-  flashMode: FlashMode;
-  flashDurationMs: number;
+  flashMode?: FlashMode;
+  flashDurationMs?: number;
   feedbackDelayMs?: number;
   keyMode: KeyMode;
   activeKeyId: string;

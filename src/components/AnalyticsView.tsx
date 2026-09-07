@@ -219,7 +219,6 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                     <th className="p-3">Status</th>
                     <th className="p-3">Pattern</th>
                     <th className="p-3">Clef</th>
-                    <th className="p-3">Exposure</th>
                     <th className="p-3">Latency</th>
                     <th className="p-3">Time</th>
                   </tr>
@@ -240,7 +239,6 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                       </td>
                       <td className="p-3 font-semibold text-slate-100">{t.patternId}</td>
                       <td className="p-3 text-slate-400">{t.clef === 'treble' ? '𝄞 Treble' : '𝄢 Bass'}</td>
-                      <td className="p-3 text-slate-400">{t.flashDurationMs}ms</td>
                       <td className="p-3 text-sky-300">{t.latencyMs}ms</td>
                       <td className="p-3 text-slate-500 text-[10px]">
                         {new Date(t.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}

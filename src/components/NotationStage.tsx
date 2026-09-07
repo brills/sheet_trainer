@@ -1,18 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 import { ChordDefinition, ArpeggioDefinition, TrackType, TrialFeedback, KeySignatureDefinition } from '../types';
 import { renderChordToSvg, renderArpeggioToSvg } from '../core/theory/vexflowAdapter';
-import { FlashState } from '../core/engines/timingEngine';
 import { formatNoteName } from '../core/theory/notes';
-import { Eye, EyeOff, CheckCircle2, XCircle, ArrowRight, Compass } from 'lucide-react';
+import { CheckCircle2, XCircle, ArrowRight, Compass } from 'lucide-react';
 
 interface NotationStageProps {
   track: TrackType;
   chord?: ChordDefinition;
   arpeggio?: ArpeggioDefinition;
   keySignature?: KeySignatureDefinition;
-  flashState: FlashState;
+  isFeedback: boolean;
   lastResult?: TrialFeedback | null;
-  flashDurationMs: number;
   darkMode?: boolean;
   onContinue?: () => void;
   onOpenKeyModal?: () => void;
@@ -23,9 +21,8 @@ export const NotationStage: React.FC<NotationStageProps> = ({
   chord,
   arpeggio,
   keySignature,
-  flashState,
+  isFeedback,
   lastResult,
-  flashDurationMs,
   darkMode = true,
   onContinue,
   onOpenKeyModal
@@ -66,7 +63,7 @@ export const NotationStage: React.FC<NotationStageProps> = ({
 
   // Render side-by-side comparison staves when feedback is active and incorrect
   useEffect(() => {
-    if (flashState !== 'feedback' || !lastResult || lastResult.isCorrect) return;
+    if (!isFeedback || !lastResult || lastResult.isCorrect) return;
 
     if (track === 'chords') {
       if (lastResult.userChord && userDiffRef.current) {
@@ -107,11 +104,8 @@ export const NotationStage: React.FC<NotationStageProps> = ({
         });
       }
     }
-  }, [flashState, lastResult, track, darkMode, activeKey]);
+  }, [isFeedback, lastResult, track, darkMode, activeKey]);
 
-  const isMasked = flashState === 'masked';
-  const isFlashing = flashState === 'flashing';
-  const isFeedback = flashState === 'feedback';
   const isIncorrect = isFeedback && lastResult && !lastResult.isCorrect;
   const hasSideBySide = isIncorrect && ((lastResult.userChord && lastResult.correctChord) || (lastResult.userArpeggio && lastResult.correctArpeggio));
 
@@ -161,14 +155,11 @@ export const NotationStage: React.FC<NotationStageProps> = ({
           </button>
         )}
 
-        {/* Regular Single Stave (shown when flashing, masked, or when answer is correct) */}
+        {/* Regular Single Stave (always visible while answering or on correct feedback) */}
         {!hasSideBySide && (
           <div 
             ref={visibleRef}
-            className={`
-              transition-all duration-200 transform flex items-center justify-center
-              ${isMasked ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}
-            `}
+            className="transition-all duration-200 transform flex items-center justify-center opacity-100 scale-100"
           />
         )}
 
@@ -198,17 +189,6 @@ export const NotationStage: React.FC<NotationStageProps> = ({
                 </span>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* Masked State Overlay */}
-        {isMasked && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
-            <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/60 text-slate-300 mb-2 shadow-inner">
-              <EyeOff className="w-6 h-6 text-slate-400 animate-pulse" />
-            </div>
-            <p className="text-sm font-bold text-slate-200">Image Masked</p>
-            <p className="text-xs text-slate-400 mt-0.5">Recall pattern from iconic memory</p>
           </div>
         )}
 
@@ -302,21 +282,6 @@ export const NotationStage: React.FC<NotationStageProps> = ({
               <ArrowRight className="w-3.5 h-3.5" />
               <span className="text-[10px] opacity-75 font-normal ml-1">(Space / Enter)</span>
             </button>
-          </div>
-        )}
-
-        {/* Flash Indicator Pill (shown when not in feedback) */}
-        {!isFeedback && (
-          <div className="absolute bottom-2 left-3 flex items-center gap-1.5 text-[11px] font-mono text-slate-500">
-            {isFlashing ? (
-              <span className="flex items-center gap-1 text-emerald-400 font-medium">
-                <Eye className="w-3.5 h-3.5 animate-pulse" /> Flash ({flashDurationMs}ms)
-              </span>
-            ) : isMasked ? (
-              <span className="text-slate-400">Captured</span>
-            ) : (
-              <span>Ready</span>
-            )}
           </div>
         )}
       </div>

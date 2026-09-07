@@ -173,6 +173,17 @@ assert(stagePromoPass.shouldPromote && stagePromoPass.nextStage === 1, 'Stage 0 
 const stagePromoSlow = checkKeyStagePromotion(0, Array(20).fill({ isCorrect: true, latencyMs: 2300 }));
 assert(!stagePromoSlow.shouldPromote, 'Key stage promotion fails if avg latency is > 2.0s');
 
+// 7. Untimed Precision Latency Engine Tests
+console.log('\n--- 7. Timing & Latency Engine ---');
+import { PrecisionTimingEngine } from '../src/core/engines/timingEngine';
+
+const timer = new PrecisionTimingEngine();
+timer.startQuestion();
+assert(timer.getState() === 'active', 'Timing engine enters active state on question start');
+const sub = timer.recordSubmission();
+assert(timer.getState() === 'feedback', 'Timing engine enters feedback state on submission');
+assert(sub.latencyMs >= 0, 'Submission latency recorded accurately without time limits');
+
 console.log(`\n================================`);
 console.log(`Suite finished: ${passedTests} Passed, ${failedTests} Failed.`);
 if (failedTests > 0) {

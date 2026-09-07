@@ -2,7 +2,7 @@ import React from 'react';
 import { Clef, InputMode, TrackType } from '../types';
 import { CHORD_TIERS } from '../core/theory/chords';
 import { ARPEGGIO_TIERS } from '../core/theory/arpeggios';
-import { Layers, Zap } from 'lucide-react';
+import { Layers } from 'lucide-react';
 
 interface TrackHeaderProps {
   track: TrackType;
@@ -10,8 +10,6 @@ interface TrackHeaderProps {
   onClefChange: (clef: Clef) => void;
   inputMode: InputMode;
   onInputModeChange: (mode: InputMode) => void;
-  flashDurationMs: number;
-  onFlashDurationChange: (duration: number) => void;
   currentTier: number;
   onOpenTierModal: () => void;
 }
@@ -22,22 +20,12 @@ export const TrackHeader: React.FC<TrackHeaderProps> = ({
   onClefChange,
   inputMode,
   onInputModeChange,
-  flashDurationMs,
-  onFlashDurationChange,
   currentTier,
   onOpenTierModal
 }) => {
   const tierConfig = track === 'chords' 
     ? CHORD_TIERS[currentTier] || CHORD_TIERS[1.1]
     : ARPEGGIO_TIERS[currentTier] || ARPEGGIO_TIERS[1.1];
-
-  const speedPresets = [
-    { label: '800ms', val: 800 },
-    { label: '400ms', val: 400 },
-    { label: '250ms', val: 250 },
-    { label: '150ms', val: 150 },
-    { label: 'Study', val: 0 }
-  ];
 
   return (
     <div className="w-full max-w-md mx-auto flex flex-col gap-2.5 mb-3">
@@ -67,14 +55,14 @@ export const TrackHeader: React.FC<TrackHeaderProps> = ({
         </div>
       </button>
 
-      {/* Control Bar: Clef + Input Mode + Flash Speed */}
-      <div className="grid grid-cols-3 gap-2">
+      {/* Control Bar: Clef Toggle + Input Mode Selector */}
+      <div className="grid grid-cols-2 gap-2">
         {/* 1. Clef Toggle */}
         <div className="flex p-1 rounded-xl bg-slate-900/80 border border-slate-800">
           <button
             type="button"
             onClick={() => onClefChange('treble')}
-            className={`flex-1 py-1 text-[11px] font-bold rounded-lg transition-all ${
+            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
               clef === 'treble' 
                 ? 'bg-emerald-500 text-slate-950 shadow-sm' 
                 : 'text-slate-400 hover:text-slate-200'
@@ -85,7 +73,7 @@ export const TrackHeader: React.FC<TrackHeaderProps> = ({
           <button
             type="button"
             onClick={() => onClefChange('bass')}
-            className={`flex-1 py-1 text-[11px] font-bold rounded-lg transition-all ${
+            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
               clef === 'bass' 
                 ? 'bg-emerald-500 text-slate-950 shadow-sm' 
                 : 'text-slate-400 hover:text-slate-200'
@@ -96,32 +84,14 @@ export const TrackHeader: React.FC<TrackHeaderProps> = ({
         </div>
 
         {/* 2. Input Mode Selector */}
-        <div className="flex p-1 rounded-xl bg-slate-900/80 border border-slate-800 col-span-1">
+        <div className="flex p-1 rounded-xl bg-slate-900/80 border border-slate-800">
           <select
             value={inputMode}
             onChange={e => onInputModeChange(e.target.value as InputMode)}
-            className="w-full bg-transparent text-[11px] font-semibold text-slate-300 focus:outline-none cursor-pointer px-1"
+            className="w-full bg-transparent text-xs font-semibold text-slate-300 focus:outline-none cursor-pointer px-2"
           >
             <option value="direct_entry" className="bg-slate-900 text-slate-200">⌨️ Direct Entry</option>
             <option value="multiple_choice" className="bg-slate-900 text-slate-200">🎴 Multiple Choice</option>
-          </select>
-        </div>
-
-        {/* 3. Flash Speed Selector */}
-        <div className="flex items-center justify-between p-1 rounded-xl bg-slate-900/80 border border-slate-800">
-          <div className="flex items-center gap-1 pl-1 text-[11px] text-slate-400 font-mono">
-            <Zap className="w-3 h-3 text-emerald-400" />
-          </div>
-          <select
-            value={flashDurationMs}
-            onChange={e => onFlashDurationChange(Number(e.target.value))}
-            className="w-full bg-transparent text-[11px] font-semibold font-mono text-emerald-400 focus:outline-none cursor-pointer text-right pr-1"
-          >
-            {speedPresets.map(s => (
-              <option key={s.val} value={s.val} className="bg-slate-900 text-slate-200">
-                {s.label}
-              </option>
-            ))}
           </select>
         </div>
       </div>
