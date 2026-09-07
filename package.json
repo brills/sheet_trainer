@@ -1,7 +1,9 @@
 {
   "name": "sheet-trainer",
-  "private": true,
+  "private": false,
   "version": "1.0.0",
+  "description": "Fast Sight-Reading Pattern Chunking & Reflex Trainer",
+  "license": "GPL-3.0-only",
   "type": "module",
   "scripts": {
     "dev": "vite",
