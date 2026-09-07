@@ -19,8 +19,11 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
   tier
 }) => {
   const tierConfig = tier !== undefined ? CHORD_TIERS[tier] : undefined;
-  const isFixedInversion = tierConfig !== undefined && tierConfig.inversions.length === 1;
-  const fixedInversion = isFixedInversion ? tierConfig.inversions[0] : null;
+  const isDropVoicing = tierConfig?.voicing === 'drop2' || tierConfig?.voicing === 'drop3';
+  const isFixedInversion = (tierConfig !== undefined && tierConfig.inversions.length === 1) || isDropVoicing;
+  const fixedInversion = isDropVoicing 
+    ? 'root' 
+    : (tierConfig !== undefined && tierConfig.inversions.length === 1 ? tierConfig.inversions[0] : null);
 
   const [stateMachine] = useState(() => new ChordInputStateMachine(undefined, fixedInversion));
   const [slotState, setSlotState] = useState<ChordSlotState>(stateMachine.getState());
@@ -109,6 +112,12 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
     syncState();
   };
 
+  // Determine quality buttons to display
+  const standardQualities: ChordQuality[] = ['major', 'minor', 'dom7', 'maj7', 'min7', 'half_dim7', 'diminished', 'augmented'];
+  const displayQualities: ChordQuality[] = tierConfig && tierConfig.qualities.length > 0
+    ? Array.from(new Set([...tierConfig.qualities, ...standardQualities])).slice(0, 8)
+    : standardQualities;
+
   return (
     <div className="w-full max-w-md mx-auto flex flex-col gap-4 mt-2">
       {/* 4-Slot Visual Display */}
@@ -146,7 +155,7 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
           </span>
         </div>
 
-        {/* Slot 4: Inversion */}
+        {/* Slot 4: Inversion / Voicing */}
         <div className={`
           flex flex-col items-center justify-center h-16 rounded-xl border transition-all
           ${isFixedInversion 
@@ -154,14 +163,22 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
             : (activeSlot === 3 ? 'border-emerald-500 bg-emerald-950/30 ring-2 ring-emerald-500/30 shadow-lg shadow-emerald-500/10' : 'border-slate-800 bg-slate-950/60')}
         `}>
           <div className="flex items-center gap-1 mb-0.5">
-            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">4. Inv</span>
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">
+              {isDropVoicing ? '4. Voicing' : '4. Inv'}
+            </span>
             {isFixedInversion && (
               <span className="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700">Tier</span>
             )}
           </div>
-          <span className={`text-base font-bold font-mono ${isFixedInversion ? 'text-emerald-400/80' : 'text-emerald-400'}`}>
-            {slotState.inversion ? (slotState.inversion === 'root' ? 'Root' : slotState.inversion) : <span className="text-slate-700 font-normal">_</span>}
-          </span>
+          {isDropVoicing ? (
+            <span className="text-xs font-bold font-mono text-emerald-400/90">
+              {tierConfig?.voicing === 'drop2' ? 'Drop-2' : 'Drop-3'}
+            </span>
+          ) : (
+            <span className={`text-base font-bold font-mono ${isFixedInversion ? 'text-emerald-400/80' : 'text-emerald-400'}`}>
+              {slotState.inversion ? (slotState.inversion === 'root' ? 'Root' : slotState.inversion) : <span className="text-slate-700 font-normal">_</span>}
+            </span>
+          )}
         </div>
       </div>
 
@@ -226,11 +243,11 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
               <button
                 key={inv}
                 type="button"
-                disabled={disabled || isFixedInversion || !isAllowedInTier}
+                disabled={disabled || isFixedInversion || !isAllowedInTier || isDropVoicing}
                 onClick={() => onSelectInversion(inv)}
                 className={`
                   h-10 rounded-xl font-mono text-xs font-bold border active:scale-95 transition-all
-                  ${isThisFixed
+                  ${isThisFixed || isDropVoicing
                     ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                     : isAllowedInTier
                       ? (slotState.inversion === inv
@@ -246,8 +263,8 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
         </div>
 
         {/* Row 3: Qualities */}
-        <div className="grid grid-cols-6 gap-1.5">
-          {(['major', 'minor', 'diminished', 'augmented', 'dom7', 'maj7'] as ChordQuality[]).map(q => {
+        <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
+          {displayQualities.map(q => {
             const isAllowedInTier = !tierConfig || tierConfig.qualities.includes(q);
 
             return (

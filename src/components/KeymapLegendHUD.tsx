@@ -67,18 +67,20 @@ export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
             <span className="text-slate-400 font-medium mr-0.5">Quality:</span>
             <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('m') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[m] Min</span>
             <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('M') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[M] Maj</span>
-            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('d') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[d] Dim</span>
             <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('7') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[7] 7th</span>
+            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('j') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[j] Maj7</span>
+            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('k') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[k] m7</span>
+            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('h') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[h] ø7 / m7♭5</span>
           </div>
 
           <span className="text-slate-700">|</span>
 
-          {/* Inversion */}
+          {/* Inversion / Voicing */}
           <div className="flex items-center gap-1">
             <span className="text-slate-400 font-medium mr-0.5">Inv:</span>
-            {tier && (tier === 1.1 || tier === 1.2 || tier === 1.3 || tier === 3.1 || tier === 4.1 || tier === 4.2) ? (
+            {tier && (tier === 1.1 || tier === 1.2 || tier === 1.3 || tier === 3.1 || tier === 3.2 || tier === 3.3 || tier === 3.4 || tier === 3.6 || tier === 3.7 || tier === 4.1 || tier === 4.2) ? (
               <span className="px-2 py-0.5 rounded border bg-slate-800/50 border-slate-700/40 text-emerald-400/80 text-[10px]">
-                Auto (Fixed in Tier)
+                {tier === 3.6 ? 'Drop-2 (Auto)' : (tier === 3.7 ? 'Drop-3 (Auto)' : 'Auto (Fixed in Tier)')}
               </span>
             ) : (
               <>

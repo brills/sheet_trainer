@@ -49,6 +49,8 @@ export interface NotePitch {
   octave: number; // e.g. 4 for C4
 }
 
+export type VoicingType = 'close' | 'drop2' | 'drop3';
+
 export interface ChordDefinition {
   id: string; // e.g. "C_MIN_1ST_INV"
   root: NoteLetter;
@@ -59,6 +61,7 @@ export interface ChordDefinition {
   clef: Clef;
   tier: number; // e.g. 1.1, 1.2, 3.1
   displayName: string; // e.g. "Cm / 1st Inv"
+  voicing?: VoicingType;
   keySignature?: KeySignatureDefinition;
 }
 
@@ -148,6 +151,7 @@ export interface MultipleChoiceOption {
     accidental: Accidental;
     quality: ChordQuality;
     inversion: Inversion;
+    voicing?: VoicingType;
   };
   arpeggioData?: {
     root: NoteLetter;

@@ -202,10 +202,45 @@ const t13Chord = buildChord('E', 'natural', 'minor', '2nd', 'treble', 1.3, 4);
 const t13Distractors = generateChordMultipleChoiceOptions(t13Chord);
 assert(t13Distractors.every(d => d.sublabel === '2nd Inversion'), 'Tier 1.3 (2nd Inversion): ALL 4 options strictly have "2nd Inversion"');
 
-// Tier 3.2 (7th Inversions: ['1st', '2nd', '3rd']): no option should have Root Position
-const t32Chord = buildChord('G', 'natural', 'dom7', '2nd', 'treble', 3.2, 4);
+// Tier 3.2 (7th 1st Inversion): all options strictly 1st Inversion
+const t32Chord = buildChord('G', 'natural', 'dom7', '1st', 'treble', 3.2, 4);
 const t32Distractors = generateChordMultipleChoiceOptions(t32Chord);
-assert(t32Distractors.every(d => d.sublabel !== 'Root Position'), 'Tier 3.2 (7th Inversions 1st/2nd/3rd): Distractors NEVER contain Root Position');
+assert(t32Distractors.every(d => d.sublabel === '1st Inversion'), 'Tier 3.2 (7th 1st Inversion): ALL 4 options strictly have "1st Inversion"');
+
+// Tier 3.3 (7th 2nd Inversion): all options strictly 2nd Inversion
+const t33Chord = buildChord('G', 'natural', 'dom7', '2nd', 'treble', 3.3, 4);
+const t33Distractors = generateChordMultipleChoiceOptions(t33Chord);
+assert(t33Distractors.every(d => d.sublabel === '2nd Inversion'), 'Tier 3.3 (7th 2nd Inversion): ALL 4 options strictly have "2nd Inversion"');
+
+// Tier 3.4 (7th 3rd Inversion): all options strictly 3rd Inversion
+const t34Chord = buildChord('G', 'natural', 'dom7', '3rd', 'treble', 3.4, 4);
+const t34Distractors = generateChordMultipleChoiceOptions(t34Chord);
+assert(t34Distractors.every(d => d.sublabel === '3rd Inversion'), 'Tier 3.4 (7th 3rd Inversion): ALL 4 options strictly have "3rd Inversion"');
+
+// Tier 3.6 (Drop-2 Voicings): note construction & distractors
+const drop2Chord = buildChord('C', 'natural', 'maj7', 'root', 'treble', 3.6, 4, 'drop2');
+assert(drop2Chord.notes[0].letter === 'G' && drop2Chord.notes[0].octave === 3, 'Drop-2 Cmaj7 (Root Close C4-E4-G4-B4) drops 2nd voice from top to G3 in bass');
+assert(drop2Chord.notes[1].letter === 'C' && drop2Chord.notes[2].letter === 'E' && drop2Chord.notes[3].letter === 'B', 'Drop-2 Cmaj7 notes are G3 - C4 - E4 - B4');
+const drop2Distractors = generateChordMultipleChoiceOptions(drop2Chord);
+assert(drop2Distractors.every(d => d.sublabel === 'Drop-2 Voicing'), 'Tier 3.6 (Drop-2): ALL 4 options strictly have "Drop-2 Voicing" sublabel');
+
+// Tier 3.7 (Drop-3 Voicings): note construction & distractors
+const drop3Chord = buildChord('C', 'natural', 'maj7', 'root', 'treble', 3.7, 4, 'drop3');
+assert(drop3Chord.notes[0].letter === 'E' && drop3Chord.notes[0].octave === 3, 'Drop-3 Cmaj7 (Root Close C4-E4-G4-B4) drops 3rd voice from top to E3 in bass');
+assert(drop3Chord.notes[1].letter === 'C' && drop3Chord.notes[2].letter === 'G' && drop3Chord.notes[3].letter === 'B', 'Drop-3 Cmaj7 notes are E3 - C4 - G4 - B4');
+const drop3Distractors = generateChordMultipleChoiceOptions(drop3Chord);
+assert(drop3Distractors.every(d => d.sublabel === 'Drop-3 Voicing'), 'Tier 3.7 (Drop-3): ALL 4 options strictly have "Drop-3 Voicing" sublabel');
+
+// Half-Diminished 7th (m7b5 / ø7) Tests
+const halfDimChord = buildChord('B', 'natural', 'half_dim7', 'root', 'treble', 3.1, 4);
+assert(
+  halfDimChord.notes[0].letter === 'B' &&
+  halfDimChord.notes[1].letter === 'D' &&
+  halfDimChord.notes[2].letter === 'F' &&
+  halfDimChord.notes[3].letter === 'A',
+  'Bø7 / Bm7b5 builds B - D - F - A'
+);
+assert(CHORD_TIERS[3.1].qualities.includes('half_dim7') && CHORD_TIERS[3.6].qualities.includes('half_dim7'), 'm7b5 / ø7 is included in 7th Root tier and Drop-2 tier');
 
 // Test that Tier 1.3 strictly generates 2nd inversions even if weakness matrix contains root-pos errors
 const mockProgress = {

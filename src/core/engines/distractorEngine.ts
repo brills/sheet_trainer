@@ -16,7 +16,10 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
   const options: MultipleChoiceOption[] = [];
   const rootStr = formatNoteName(target.root, target.rootAccidental);
   const qualityStr = CHORD_FORMULAS[target.quality].shortName;
-  const invStr = formatInversionName(target.inversion, 'full');
+  const isDropVoicing = target.voicing === 'drop2' || target.voicing === 'drop3';
+  const invStr = isDropVoicing 
+    ? (target.voicing === 'drop2' ? 'Drop-2 Voicing' : 'Drop-3 Voicing')
+    : formatInversionName(target.inversion, 'full');
 
   // 1. Correct Option
   options.push({
@@ -28,7 +31,8 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
       root: target.root,
       accidental: target.rootAccidental,
       quality: target.quality,
-      inversion: target.inversion
+      inversion: target.inversion,
+      voicing: target.voicing
     }
   });
 
@@ -58,14 +62,15 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
           root: target.root,
           accidental: target.rootAccidental,
           quality: trapQuality,
-          inversion: target.inversion
+          inversion: target.inversion,
+          voicing: target.voicing
         }
       });
     }
   }
 
-  // Candidate 2: Inversion Trap (ONLY if tier has multiple inversions!)
-  if (otherInversions.length > 0) {
+  // Candidate 2: Inversion Trap (ONLY for close-position tiers with multiple inversions)
+  if (!isDropVoicing && otherInversions.length > 0) {
     const trapInv = otherInversions[Math.floor(Math.random() * otherInversions.length)];
     const trapInvStr = formatInversionName(trapInv, 'full');
     const sig = `${rootStr}:${target.quality}:${trapInv}`;
@@ -80,7 +85,8 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
           root: target.root,
           accidental: target.rootAccidental,
           quality: target.quality,
-          inversion: trapInv
+          inversion: trapInv,
+          voicing: target.voicing
         }
       });
     }
@@ -91,8 +97,8 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
   for (const trapRoot of shuffledRoots) {
     if (options.length >= 4) break;
     const trapRootStr = formatNoteName(trapRoot, target.rootAccidental);
-    const trapInv = allowedInversions[Math.floor(Math.random() * allowedInversions.length)];
-    const trapInvStr = formatInversionName(trapInv, 'full');
+    const trapInv = isDropVoicing ? target.inversion : allowedInversions[Math.floor(Math.random() * allowedInversions.length)];
+    const trapInvStr = isDropVoicing ? invStr : formatInversionName(trapInv, 'full');
     const trapQual = allowedQualities[Math.floor(Math.random() * allowedQualities.length)];
     const trapQualStr = CHORD_FORMULAS[trapQual]?.shortName || 'Maj';
     const sig = `${trapRootStr}:${trapQual}:${trapInv}`;
@@ -107,7 +113,8 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
           root: trapRoot,
           accidental: target.rootAccidental,
           quality: trapQual,
-          inversion: trapInv
+          inversion: trapInv,
+          voicing: target.voicing
         }
       });
     }
@@ -118,22 +125,27 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
   while (options.length < 4) {
     const fallbackRoot = NOTE_LETTERS[fallbackIndex % NOTE_LETTERS.length];
     const fallbackRootStr = formatNoteName(fallbackRoot, target.rootAccidental);
-    const fallbackQual = allowedQualities[0];
+    const fallbackQual = allowedQualities[fallbackIndex % allowedQualities.length];
     const fallbackQualStr = CHORD_FORMULAS[fallbackQual]?.shortName || 'Maj';
-    const fallbackInv = target.inversion;
-    const fallbackInvStr = formatInversionName(fallbackInv, 'full');
-    options.push({
-      id: `trap_fallback_${fallbackIndex}_${target.id}`,
-      label: `${fallbackRootStr}${fallbackQualStr}`,
-      sublabel: fallbackInvStr,
-      isCorrect: false,
-      chordData: {
-        root: fallbackRoot,
-        accidental: target.rootAccidental,
-        quality: fallbackQual,
-        inversion: fallbackInv
-      }
-    });
+    const fallbackInv = isDropVoicing ? target.inversion : allowedInversions[fallbackIndex % allowedInversions.length];
+    const fallbackInvStr = isDropVoicing ? invStr : formatInversionName(fallbackInv, 'full');
+    const sig = `${fallbackRootStr}:${fallbackQual}:${fallbackInv}`;
+    if (!seen.has(sig)) {
+      seen.add(sig);
+      options.push({
+        id: `fallback_${fallbackIndex}`,
+        label: `${fallbackRootStr}${fallbackQualStr}`,
+        sublabel: fallbackInvStr,
+        isCorrect: false,
+        chordData: {
+          root: fallbackRoot,
+          accidental: target.rootAccidental,
+          quality: fallbackQual,
+          inversion: fallbackInv,
+          voicing: target.voicing
+        }
+      });
+    }
     fallbackIndex++;
   }
 
