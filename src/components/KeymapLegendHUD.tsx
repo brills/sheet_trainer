@@ -1,11 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { Keyboard } from 'lucide-react';
+import { CHORD_TIERS } from '../core/theory/chords';
+import { ChordQuality } from '../types';
 
 interface KeymapLegendHUDProps {
   lastPressedKey?: string | null;
   mode?: 'direct_entry' | 'multiple_choice';
   tier?: number;
 }
+
+const QUALITY_LEGEND_MAP: Record<string, { key: string; label: string }> = {
+  minor: { key: 'm', label: 'Min' },
+  major: { key: 'M', label: 'Maj' },
+  dom7: { key: '7', label: '7th' },
+  maj7: { key: 'j', label: 'Maj7' },
+  min7: { key: 'k', label: 'm7' },
+  half_dim7: { key: 'h', label: 'ø7' },
+  diminished: { key: 'd', label: 'Dim' },
+  augmented: { key: 'a', label: 'Aug' },
+  sus4: { key: '4', label: 'Sus4' },
+  sus2: { key: '2', label: 'Sus2' },
+  dim7: { key: 'o', label: '°7' },
+  add9: { key: '9', label: 'Add9' },
+  '6': { key: '6', label: '6' },
+  m6: { key: 'm', label: 'm6' },
+  '9': { key: '9', label: '9' },
+  '7s9': { key: '7', label: '7♯9' },
+  '7b9': { key: '7', label: '7♭9' }
+};
 
 export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
   lastPressedKey,
@@ -23,6 +45,9 @@ export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
   }, [lastPressedKey]);
 
   const isKeyActive = (key: string) => activeKey === key.toLowerCase();
+
+  const tierConfig = tier ? CHORD_TIERS[tier] : undefined;
+  const activeQualities: ChordQuality[] = tierConfig?.qualities || ['major', 'minor', 'dom7', 'maj7', 'min7', 'half_dim7'];
 
   return (
     <div className="hidden md:flex items-center justify-center gap-4 px-4 py-2 mt-4 rounded-xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md text-[11px] font-mono text-slate-400 select-none shadow-lg">
@@ -65,12 +90,22 @@ export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
           {/* Qualities */}
           <div className="flex items-center gap-1">
             <span className="text-slate-400 font-medium mr-0.5">Quality:</span>
-            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('m') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[m] Min</span>
-            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('M') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[M] Maj</span>
-            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('7') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[7] 7th</span>
-            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('j') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[j] Maj7</span>
-            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('k') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[k] m7</span>
-            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('h') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[h] ø7 / m7♭5</span>
+            {activeQualities.map(q => {
+              const info = QUALITY_LEGEND_MAP[q];
+              if (!info) return null;
+              return (
+                <span
+                  key={q}
+                  className={`px-1.5 py-0.5 rounded border transition-colors ${
+                    isKeyActive(info.key)
+                      ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold'
+                      : 'bg-slate-800/80 border-slate-700/60 text-slate-300'
+                  }`}
+                >
+                  [{info.key}] {info.label}
+                </span>
+              );
+            })}
           </div>
 
           <span className="text-slate-700">|</span>
