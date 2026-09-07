@@ -383,6 +383,30 @@ const calcAvgLatency = testRecentTrials.length > 0
   : 0;
 assert(testRecentTrials.length === 0 && calcAccuracy === 0 && calcAvgLatency === 0, 'Switching tier or key resets rolling trials count to 0 and average latency/accuracy stats to 0 (HUD shows --)');
 
+// Test 9: Mastery Unlocking Triggered Strictly on Correct Answers
+console.log('\n--- 9. Mastery Event Triggering on Correct Answers ---');
+// Simulate evaluateSubmission logic:
+const simulateTrialMastery = (isCorrect: boolean, recent: Array<{ isCorrect: boolean, latencyMs: number }>) => {
+  if (!isCorrect) {
+    return { didMaster: false, masteryNotification: undefined };
+  }
+  const promo = checkTierPromotion('chords', 1.1, recent);
+  if (promo.shouldPromote && promo.nextTier) {
+    return {
+      didMaster: true,
+      masteryNotification: `🎉 Tier 1.1 Mastered! Tier ${promo.nextTier} is now unlocked.`
+    };
+  }
+  return { didMaster: false, masteryNotification: undefined };
+};
+
+const passingTrials = Array(20).fill({ isCorrect: true, latencyMs: 1500 });
+const incorrectAttempt = simulateTrialMastery(false, passingTrials);
+assert(!incorrectAttempt.didMaster && incorrectAttempt.masteryNotification === undefined, 'Incorrect answer submission NEVER triggers mastery or unlocking banner');
+
+const correctAttempt = simulateTrialMastery(true, passingTrials);
+assert(correctAttempt.didMaster && correctAttempt.masteryNotification !== undefined && correctAttempt.masteryNotification.includes('Tier 1.1 Mastered'), 'Correct answer meeting threshold triggers mastery notification for the Correct Answer screen');
+
 console.log(`\n================================`);
 console.log(`Suite finished: ${passedTests} Passed, ${failedTests} Failed.`);
 if (failedTests > 0) {

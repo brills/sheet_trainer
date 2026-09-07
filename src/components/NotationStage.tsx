@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { ChordDefinition, ArpeggioDefinition, TrackType, TrialFeedback, KeySignatureDefinition } from '../types';
 import { renderChordToSvg, renderArpeggioToSvg } from '../core/theory/vexflowAdapter';
 import { formatNoteName } from '../core/theory/notes';
-import { CheckCircle2, XCircle, ArrowRight, Compass } from 'lucide-react';
+import { CheckCircle2, XCircle, ArrowRight, Compass, Award } from 'lucide-react';
 
 interface NotationStageProps {
   track: TrackType;
@@ -269,6 +269,14 @@ export const NotationStage: React.FC<NotationStageProps> = ({
                 <span>Recent Avg Latency: <strong className={lastResult.rollingAvgLatencyMs <= 2000 ? 'text-emerald-400' : 'text-sky-300'}>{(lastResult.rollingAvgLatencyMs / 1000).toFixed(2)}s</strong></span>
                 <span>·</span>
                 <span>This Trial: <strong className="text-slate-200">{((lastResult.latencyMs || 0) / 1000).toFixed(2)}s</strong></span>
+              </div>
+            )}
+
+            {/* Celebratory Mastery Notification Banner (shown only on correct answer screen) */}
+            {lastResult?.isCorrect && lastResult?.masteryNotification && (
+              <div className="w-full mt-2.5 mb-1 p-2.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-emerald-500/25 to-amber-500/20 border-2 border-emerald-400 text-emerald-100 text-xs font-bold text-center flex items-center justify-center gap-2 shadow-xl shadow-emerald-950/80 animate-in zoom-in-95">
+                <Award className="w-4 h-4 text-amber-300 shrink-0 animate-bounce" />
+                <span>{lastResult.masteryNotification}</span>
               </div>
             )}
 

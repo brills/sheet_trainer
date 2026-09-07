@@ -194,84 +194,92 @@ export const App: React.FC = () => {
     };
     logTrial(log);
 
-    // 3. Update recent tier trials & check tier mastery (NO auto-promotion)
+    // 3. Update recent tier trials
     const newRecent = [{ isCorrect, latencyMs }, ...recentTrials.slice(0, 19)];
     setRecentTrials(newRecent);
 
-    let nextProgState = updatedState;
-    let didMasterTier = false;
-
-    const promotion = checkTierPromotion(activeTrack, trackProgress.currentTier, newRecent);
-    if (promotion.shouldPromote && promotion.nextTier) {
-      const isNewlyMastered = !trackProgress.masteredTiers.includes(trackProgress.currentTier);
-      if (isNewlyMastered) {
-        didMasterTier = true;
-        const updatedTiers = Array.from(new Set([...trackProgress.masteredTiers, trackProgress.currentTier]));
-        // Keep currentTier unchanged! Add to masteredTiers.
-        nextProgState = {
-          ...nextProgState,
-          progress: {
-            ...nextProgState.progress,
-            [activeTrack]: {
-              ...nextProgState.progress[activeTrack],
-              masteredTiers: updatedTiers
-            }
-          }
-        };
-        setPromotionNotification(`🎉 Tier ${trackProgress.currentTier} Mastered! Tier ${promotion.nextTier} is now unlocked.`);
-      }
-    }
-
-    // 4. Update recent key trials & check Key Stage Progression (NO auto-promotion)
+    // 4. Update recent key trials
     const newKeyRecent = [{ isCorrect, latencyMs }, ...recentKeyTrials.slice(0, 19)];
     setRecentKeyTrials(newKeyRecent);
 
-    if (newKeyRecent.length >= 20) {
-      const correctCount = newKeyRecent.filter(t => t.isCorrect).length;
-      const keyAccuracy = correctCount / newKeyRecent.length;
-      const keyAvgLatency = Math.round(newKeyRecent.reduce((sum, t) => sum + t.latencyMs, 0) / newKeyRecent.length);
+    let nextProgState = updatedState;
+    let masteryNotification: string | undefined = undefined;
 
-      if (keyAccuracy >= 0.85 && keyAvgLatency <= 2000) {
-        const currentKeyId = currentKey.id;
-        const currentMasteredKeys = trackProgress.masteredKeys || [];
-        if (!currentMasteredKeys.includes(currentKeyId)) {
-          const updatedMasteredKeys = [...currentMasteredKeys, currentKeyId];
-          const unlockedStages = trackProgress.unlockedKeyStages || [0];
-          const currentStage = currentKey.stage;
-          const nextStage = currentStage < KEY_STAGES.length - 1 ? currentStage + 1 : null;
+    // Unlocking & Mastery events ONLY trigger upon a correct submission (presented on the Correct Answer screen)
+    if (isCorrect) {
+      const masteryParts: string[] = [];
 
-          let updatedUnlockedStages = unlockedStages;
-          let unlockedNewStage = false;
-
-          if (nextStage !== null && !unlockedStages.includes(nextStage)) {
-            const currentStageKeys = KEY_STAGES[currentStage]?.keys || [];
-            const allStageKeysMastered = currentStageKeys.every(k => updatedMasteredKeys.includes(k));
-            if (allStageKeysMastered || currentStageKeys.length <= 1) {
-              updatedUnlockedStages = Array.from(new Set([...unlockedStages, nextStage]));
-              unlockedNewStage = true;
-            }
-          }
-
+      // Check Tier Mastery (NO auto-promotion)
+      const promotion = checkTierPromotion(activeTrack, trackProgress.currentTier, newRecent);
+      if (promotion.shouldPromote && promotion.nextTier) {
+        const isNewlyMastered = !trackProgress.masteredTiers.includes(trackProgress.currentTier);
+        if (isNewlyMastered) {
+          const updatedTiers = Array.from(new Set([...trackProgress.masteredTiers, trackProgress.currentTier]));
+          // Keep currentTier unchanged! Add to masteredTiers.
           nextProgState = {
             ...nextProgState,
             progress: {
               ...nextProgState.progress,
               [activeTrack]: {
                 ...nextProgState.progress[activeTrack],
-                masteredKeys: updatedMasteredKeys,
-                unlockedKeyStages: updatedUnlockedStages
+                masteredTiers: updatedTiers
               }
             }
           };
+          masteryParts.push(`🎉 Tier ${trackProgress.currentTier} Mastered! Tier ${promotion.nextTier} is now unlocked.`);
+        }
+      }
 
-          if (!didMasterTier) {
+      // Check Key Stage Progression & Mastery (NO auto-promotion)
+      if (newKeyRecent.length >= 20) {
+        const correctCount = newKeyRecent.filter(t => t.isCorrect).length;
+        const keyAccuracy = correctCount / newKeyRecent.length;
+        const keyAvgLatency = Math.round(newKeyRecent.reduce((sum, t) => sum + t.latencyMs, 0) / newKeyRecent.length);
+
+        if (keyAccuracy >= 0.85 && keyAvgLatency <= 2000) {
+          const currentKeyId = currentKey.id;
+          const currentMasteredKeys = trackProgress.masteredKeys || [];
+          if (!currentMasteredKeys.includes(currentKeyId)) {
+            const updatedMasteredKeys = [...currentMasteredKeys, currentKeyId];
+            const unlockedStages = trackProgress.unlockedKeyStages || [0];
+            const currentStage = currentKey.stage;
+            const nextStage = currentStage < KEY_STAGES.length - 1 ? currentStage + 1 : null;
+
+            let updatedUnlockedStages = unlockedStages;
+            let unlockedNewStage = false;
+
+            if (nextStage !== null && !unlockedStages.includes(nextStage)) {
+              const currentStageKeys = KEY_STAGES[currentStage]?.keys || [];
+              const allStageKeysMastered = currentStageKeys.every(k => updatedMasteredKeys.includes(k));
+              if (allStageKeysMastered || currentStageKeys.length <= 1) {
+                updatedUnlockedStages = Array.from(new Set([...unlockedStages, nextStage]));
+                unlockedNewStage = true;
+              }
+            }
+
+            nextProgState = {
+              ...nextProgState,
+              progress: {
+                ...nextProgState.progress,
+                [activeTrack]: {
+                  ...nextProgState.progress[activeTrack],
+                  masteredKeys: updatedMasteredKeys,
+                  unlockedKeyStages: updatedUnlockedStages
+                }
+              }
+            };
+
             if (unlockedNewStage && nextStage !== null) {
-              setPromotionNotification(`🎉 Key Mastered: ${currentKey.name}! Unlocked ${KEY_STAGES[nextStage].title} in Circle of Fifths.`);
+              masteryParts.push(`🎉 Key Mastered: ${currentKey.name}! Unlocked ${KEY_STAGES[nextStage].title} in Circle of Fifths.`);
             } else {
-              setPromotionNotification(`🎉 Key Mastered: ${currentKey.name}!`);
+              masteryParts.push(`🎉 Key Mastered: ${currentKey.name}!`);
             }
           }
         }
+      }
+
+      if (masteryParts.length > 0) {
+        masteryNotification = masteryParts.join(' • ');
       }
     }
 
@@ -289,6 +297,7 @@ export const App: React.FC = () => {
       latencyMs,
       rollingAvgLatencyMs,
       message: isCorrect ? undefined : `Answer: ${correctAnswerStr}`,
+      masteryNotification,
       ...feedbackExtra
     });
 

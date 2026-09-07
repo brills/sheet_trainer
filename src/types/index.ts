@@ -178,4 +178,5 @@ export interface TrialFeedback {
   correctArpeggio?: ArpeggioDefinition;
   slotDiffs?: SlotDiffItem[];
   message?: string;
+  masteryNotification?: string;
 }
