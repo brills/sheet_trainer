@@ -157,6 +157,8 @@ export interface TrialFeedback {
   isCorrect: boolean;
   userStr: string;
   correctStr: string;
+  latencyMs?: number;
+  rollingAvgLatencyMs?: number;
   userChord?: ChordDefinition;
   correctChord?: ChordDefinition;
   userArpeggio?: ArpeggioDefinition;

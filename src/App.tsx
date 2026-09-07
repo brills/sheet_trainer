@@ -17,7 +17,7 @@ import {
   KeySignatureDefinition
 } from './types';
 import { loadAppState, saveAppState, recordTrialResultInState } from './storage/localStore';
-import { logTrial } from './storage/telemetryStore';
+import { logTrial, getTrialsForTrack } from './storage/telemetryStore';
 import { PrecisionTimingEngine, FlashState } from './core/engines/timingEngine';
 import { selectNextChord, selectNextArpeggio, checkTierPromotion, checkKeyStagePromotion } from './core/engines/adaptiveEngine';
 import { generateChordMultipleChoiceOptions, generateArpeggioMultipleChoiceOptions } from './core/engines/distractorEngine';
@@ -162,6 +162,23 @@ export const App: React.FC = () => {
     };
   }, []);
 
+  // Synchronize rolling stats memory per-track from telemetry store
+  useEffect(() => {
+    let isMounted = true;
+    getTrialsForTrack(activeTrack).then(logs => {
+      if (!isMounted) return;
+      if (logs && logs.length > 0) {
+        const recent = logs.slice(0, 20).map(l => ({ isCorrect: l.isCorrect, latencyMs: l.latencyMs }));
+        setRecentTrials(recent);
+      } else {
+        setRecentTrials([]);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [activeTrack]);
+
   // Track initial mounting and explicit configuration changes ONLY
   const prevConfigRef = useRef<string>('');
   useEffect(() => {
@@ -266,10 +283,14 @@ export const App: React.FC = () => {
       setAppState(nextProgState);
     }
 
+    const rollingAvgLatencyMs = Math.round(newRecent.reduce((sum, t) => sum + t.latencyMs, 0) / newRecent.length);
+
     setLastResult({
       isCorrect,
       userStr: userInputStr,
       correctStr: correctAnswerStr,
+      latencyMs,
+      rollingAvgLatencyMs,
       message: isCorrect ? undefined : `Answer: ${correctAnswerStr}`,
       ...feedbackExtra
     });
@@ -549,6 +570,7 @@ export const App: React.FC = () => {
               totalTrials={trackProgress.totalTrialsCompleted}
               accuracy={accuracy}
               avgLatencyMs={avgLatencyMs}
+              recentCount={recentTrials.length}
             />
 
             {/* Dynamic Response Pad based on Input Mode */}

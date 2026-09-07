@@ -218,10 +218,20 @@ export const NotationStage: React.FC<NotationStageProps> = ({
             {lastResult.isCorrect ? (
               <span className="flex items-center gap-1.5 text-emerald-300 bg-emerald-950/90 border border-emerald-500/40 px-3 py-1 rounded-full font-bold shadow-md shadow-emerald-950/50">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Correct!
+                {lastResult.rollingAvgLatencyMs !== undefined && lastResult.rollingAvgLatencyMs > 0 && (
+                  <span className="text-[11px] font-mono text-emerald-200/90 font-normal ml-1 pl-1.5 border-l border-emerald-700/60">
+                    Avg: {(lastResult.rollingAvgLatencyMs / 1000).toFixed(2)}s
+                  </span>
+                )}
               </span>
             ) : (
               <span className="flex items-center gap-1.5 text-rose-300 bg-rose-950/90 border border-rose-500/40 px-3 py-1 rounded-full font-bold shadow-md shadow-rose-950/50">
                 <XCircle className="w-4 h-4 text-rose-400" /> Incorrect
+                {lastResult.rollingAvgLatencyMs !== undefined && lastResult.rollingAvgLatencyMs > 0 && (
+                  <span className="text-[11px] font-mono text-rose-200/90 font-normal ml-1 pl-1.5 border-l border-rose-700/60">
+                    Avg: {(lastResult.rollingAvgLatencyMs / 1000).toFixed(2)}s
+                  </span>
+                )}
               </span>
             )}
           </div>
@@ -266,6 +276,15 @@ export const NotationStage: React.FC<NotationStageProps> = ({
               <span className="text-[11px] font-mono text-slate-300">
                 Notes: {notesSummary}
               </span>
+            )}
+
+            {/* Latency Breakdown Line */}
+            {lastResult?.rollingAvgLatencyMs !== undefined && lastResult.rollingAvgLatencyMs > 0 && (
+              <div className="flex items-center gap-2 mt-1 text-[11px] font-mono text-slate-400">
+                <span>Recent Avg Latency: <strong className={lastResult.rollingAvgLatencyMs <= 2000 ? 'text-emerald-400' : 'text-sky-300'}>{(lastResult.rollingAvgLatencyMs / 1000).toFixed(2)}s</strong></span>
+                <span>·</span>
+                <span>This Trial: <strong className="text-slate-200">{((lastResult.latencyMs || 0) / 1000).toFixed(2)}s</strong></span>
+              </div>
             )}
 
             {/* Acknowledgment Action */}
