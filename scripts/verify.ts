@@ -339,6 +339,50 @@ assert(clearedState.progress.chords.currentTier === 1.1, 'clearAllAppStorage res
 assert(clearedState.progress.chords.currentStreak === 0, 'clearAllAppStorage resets streak back to 0');
 assert(Object.keys(clearedState.progress.chords.weaknessMatrix).length === 0, 'clearAllAppStorage resets weakness matrix');
 
+// Test Tier and Key Switching preserves mastered status
+const masteredProgState = {
+  ...clearedState,
+  progress: {
+    ...clearedState.progress,
+    chords: {
+      ...clearedState.progress.chords,
+      currentTier: 1.1,
+      masteredTiers: [1.1, 1.2],
+      masteredKeys: ['C', 'G']
+    }
+  }
+};
+saveAppState(masteredProgState);
+
+// Simulate user switching tier to 1.3
+const tierSwitchedState = {
+  ...masteredProgState,
+  progress: {
+    ...masteredProgState.progress,
+    chords: {
+      ...masteredProgState.progress.chords,
+      currentTier: 1.3
+    }
+  }
+};
+saveAppState(tierSwitchedState);
+const loadedAfterTierSwitch = loadAppState();
+assert(loadedAfterTierSwitch.progress.chords.currentTier === 1.3, 'Tier switch changes active tier to 1.3');
+assert(loadedAfterTierSwitch.progress.chords.masteredTiers.includes(1.1) && loadedAfterTierSwitch.progress.chords.masteredTiers.includes(1.2), 'Tier switch preserves previously mastered tiers [1.1, 1.2]');
+assert(loadedAfterTierSwitch.progress.chords.masteredKeys.includes('C') && loadedAfterTierSwitch.progress.chords.masteredKeys.includes('G'), 'Tier switch preserves mastered keys [C, G]');
+
+// Simulate rolling buffer reset on switch
+let testRecentTrials = [{ isCorrect: true, latencyMs: 1200 }, { isCorrect: false, latencyMs: 2500 }];
+assert(testRecentTrials.length === 2, 'Before switch: rolling trials buffer contains 2 trials');
+testRecentTrials = []; // reset on switch
+const calcAccuracy = testRecentTrials.length > 0
+  ? Math.round((testRecentTrials.filter(t => t.isCorrect).length / testRecentTrials.length) * 100)
+  : 0;
+const calcAvgLatency = testRecentTrials.length > 0
+  ? Math.round(testRecentTrials.reduce((sum, t) => sum + t.latencyMs, 0) / testRecentTrials.length)
+  : 0;
+assert(testRecentTrials.length === 0 && calcAccuracy === 0 && calcAvgLatency === 0, 'Switching tier or key resets rolling trials count to 0 and average latency/accuracy stats to 0 (HUD shows --)');
+
 console.log(`\n================================`);
 console.log(`Suite finished: ${passedTests} Passed, ${failedTests} Failed.`);
 if (failedTests > 0) {

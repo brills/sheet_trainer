@@ -17,7 +17,7 @@ import {
   KeySignatureDefinition
 } from './types';
 import { loadAppState, saveAppState, recordTrialResultInState, clearAllAppStorage, DEFAULT_APP_STATE } from './storage/localStore';
-import { logTrial, getTrialsForTrack } from './storage/telemetryStore';
+import { logTrial } from './storage/telemetryStore';
 import { PrecisionTimingEngine } from './core/engines/timingEngine';
 import { selectNextChord, selectNextArpeggio, checkTierPromotion } from './core/engines/adaptiveEngine';
 import { generateChordMultipleChoiceOptions, generateArpeggioMultipleChoiceOptions } from './core/engines/distractorEngine';
@@ -137,21 +137,10 @@ export const App: React.FC = () => {
     };
   }, []);
 
-  // Synchronize rolling stats memory per-track from telemetry store
+  // Synchronize rolling stats memory per-track (starts fresh on session / track switch)
   useEffect(() => {
-    let isMounted = true;
-    getTrialsForTrack(activeTrack).then(logs => {
-      if (!isMounted) return;
-      if (logs && logs.length > 0) {
-        const recent = logs.slice(0, 20).map(l => ({ isCorrect: l.isCorrect, latencyMs: l.latencyMs }));
-        setRecentTrials(recent);
-      } else {
-        setRecentTrials([]);
-      }
-    });
-    return () => {
-      isMounted = false;
-    };
+    setRecentTrials([]);
+    setRecentKeyTrials([]);
   }, [activeTrack]);
 
   // Track initial mounting and explicit configuration changes ONLY
@@ -440,6 +429,9 @@ export const App: React.FC = () => {
     };
     saveAppState(next);
     setAppState(next);
+    setRecentTrials([]);
+    setRecentKeyTrials([]);
+    setLastResult(null);
   };
 
   const handleInputModeChange = (inputMode: any) => {
@@ -470,6 +462,9 @@ export const App: React.FC = () => {
     };
     saveAppState(next);
     setAppState(next);
+    setRecentTrials([]);
+    setRecentKeyTrials([]);
+    setLastResult(null);
     spawnNextProblem();
   };
 
@@ -487,7 +482,9 @@ export const App: React.FC = () => {
     saveAppState(next);
     setAppState(next);
     setCurrentKey(KEY_SIGNATURES[keyId] || KEY_SIGNATURES['C']);
+    setRecentTrials([]);
     setRecentKeyTrials([]);
+    setLastResult(null);
     setIsKeyModalOpen(false);
     spawnNextProblem();
   };
@@ -505,6 +502,9 @@ export const App: React.FC = () => {
     };
     saveAppState(next);
     setAppState(next);
+    setRecentTrials([]);
+    setRecentKeyTrials([]);
+    setLastResult(null);
   };
 
   const handleClearAllStorage = async () => {
@@ -513,6 +513,7 @@ export const App: React.FC = () => {
     setCurrentKey(KEY_SIGNATURES['C']);
     setRecentTrials([]);
     setRecentKeyTrials([]);
+    setLastResult(null);
     setIsSettingsModalOpen(false);
     setPromotionNotification('All app storage and trial history have been cleared.');
     spawnNextProblem();
@@ -546,6 +547,9 @@ export const App: React.FC = () => {
         onTrackChange={(track) => {
           setActiveTrack(track);
           setCurrentRoute(track);
+          setRecentTrials([]);
+          setRecentKeyTrials([]);
+          setLastResult(null);
         }}
         activeKey={currentKey}
         isKeyMastered={isKeyMastered}
