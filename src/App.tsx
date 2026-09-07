@@ -16,7 +16,7 @@ import {
   KeyMode,
   KeySignatureDefinition
 } from './types';
-import { loadAppState, saveAppState, recordTrialResultInState } from './storage/localStore';
+import { loadAppState, saveAppState, recordTrialResultInState, clearAllAppStorage, DEFAULT_APP_STATE } from './storage/localStore';
 import { logTrial, getTrialsForTrack } from './storage/telemetryStore';
 import { PrecisionTimingEngine } from './core/engines/timingEngine';
 import { selectNextChord, selectNextArpeggio, checkTierPromotion, checkKeyStagePromotion } from './core/engines/adaptiveEngine';
@@ -464,6 +464,17 @@ export const App: React.FC = () => {
     setAppState(next);
   };
 
+  const handleClearAllStorage = async () => {
+    await clearAllAppStorage();
+    setAppState(DEFAULT_APP_STATE);
+    setCurrentKey(KEY_SIGNATURES['C']);
+    setRecentTrials([]);
+    setRecentStageTrials([]);
+    setIsSettingsModalOpen(false);
+    setPromotionNotification('All app storage and trial history have been cleared.');
+    spawnNextProblem();
+  };
+
   // Calculate rolling accuracy & latency for Stats HUD
   const accuracy = recentTrials.length > 0
     ? Math.round((recentTrials.filter(t => t.isCorrect).length / recentTrials.length) * 100)
@@ -617,6 +628,7 @@ export const App: React.FC = () => {
           setAppState(newState);
         }}
         onOpenKeyModal={() => setIsKeyModalOpen(true)}
+        onClearAllStorage={handleClearAllStorage}
       />
     </div>
   );

@@ -1,4 +1,5 @@
 import { AppState, TrackType, PatternStats } from '../types';
+import { clearAllTrials } from './telemetryStore';
 
 const STORAGE_KEY = 'sheet_trainer_state_v1';
 
@@ -135,3 +136,14 @@ export function recordTrialResultInState(
   saveAppState(updatedState);
   return updatedState;
 }
+
+export async function clearAllAppStorage(): Promise<void> {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.clear();
+    await clearAllTrials();
+  } catch (e) {
+    console.error('Failed to clear app storage:', e);
+  }
+}
+

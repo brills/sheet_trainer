@@ -3,7 +3,8 @@ import { loadAppState, saveAppState } from './localStore';
 import { getAllTrials } from './telemetryStore';
 import { set, createStore } from 'idb-keyval';
 
-const customStore = createStore('sheet_trainer_db', 'trial_logs');
+const isIndexedDBAvailable = typeof window !== 'undefined' && typeof indexedDB !== 'undefined';
+const customStore = isIndexedDBAvailable ? createStore('sheet_trainer_db', 'trial_logs') : undefined;
 const LOGS_KEY = 'all_trials';
 
 export interface ExportData {

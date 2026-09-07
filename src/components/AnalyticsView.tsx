@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AppState, TrackType, TrialLog } from '../types';
-import { getTrialsForTrack } from '../storage/telemetryStore';
+import { getTrialsForTrack, clearAllTrials } from '../storage/telemetryStore';
 import { exportAllDataToJson, downloadBackupFile, importDataFromJson } from '../storage/exportImport';
 import { 
   Download, 
@@ -9,7 +9,8 @@ import {
   XCircle, 
   Clock, 
   Target, 
-  ArrowLeft 
+  ArrowLeft,
+  Trash2
 } from 'lucide-react';
 
 interface AnalyticsViewProps {
@@ -67,6 +68,14 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
     reader.readAsText(file);
   };
 
+  const handleClearHistory = async () => {
+    if (window.confirm('Are you sure you want to clear all trial history logs? This cannot be undone.')) {
+      await clearAllTrials();
+      setTrials([]);
+      setImportStatus('Trial logs cleared.');
+    }
+  };
+
   return (
     <div className="w-full max-w-2xl mx-auto p-4 flex flex-col gap-6">
       {/* Top Header */}
@@ -83,21 +92,30 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
           Performance Analytics
         </h1>
 
-        {/* Export / Import */}
+        {/* Export / Import / Clear */}
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleExport}
             title="Download JSON backup"
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-medium text-emerald-400 hover:border-emerald-500/40"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-medium text-emerald-400 hover:border-emerald-500/40 transition-all"
           >
             <Download className="w-3.5 h-3.5" /> Export
           </button>
 
-          <label className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-medium text-sky-400 hover:border-sky-500/40 cursor-pointer">
+          <label className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-medium text-sky-400 hover:border-sky-500/40 cursor-pointer transition-all">
             <Upload className="w-3.5 h-3.5" /> Import
             <input type="file" accept=".json" onChange={handleImport} className="hidden" />
           </label>
+
+          <button
+            type="button"
+            onClick={handleClearHistory}
+            title="Clear trial logs"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-rose-950/30 border border-rose-900/60 text-xs font-medium text-rose-400 hover:bg-rose-950/60 hover:border-rose-800 transition-all"
+          >
+            <Trash2 className="w-3.5 h-3.5" /> Clear Logs
+          </button>
         </div>
       </div>
 

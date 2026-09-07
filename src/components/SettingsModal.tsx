@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppState } from '../types';
-import { X, Keyboard, RotateCcw, Compass } from 'lucide-react';
+import { X, Keyboard, RotateCcw, Compass, Trash2 } from 'lucide-react';
 import { DEFAULT_APP_STATE } from '../storage/localStore';
 
 interface SettingsModalProps {
@@ -9,6 +9,7 @@ interface SettingsModalProps {
   state: AppState;
   onUpdateState: (newState: AppState) => void;
   onOpenKeyModal?: () => void;
+  onClearAllStorage?: () => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -16,7 +17,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
   state,
   onUpdateState,
-  onOpenKeyModal
+  onOpenKeyModal,
+  onClearAllStorage
 }) => {
   if (!isOpen) return null;
 
@@ -31,12 +33,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   const onResetProgress = () => {
-    if (window.confirm('Are you sure you want to reset all progress and weakness stats?')) {
+    if (window.confirm('Are you sure you want to reset all tier progress and weakness matrix stats?')) {
       onUpdateState({
         ...state,
         progress: DEFAULT_APP_STATE.progress
       });
       onClose();
+    }
+  };
+
+  const handleClearStorage = () => {
+    if (window.confirm('Are you sure you want to completely wipe all app storage, settings, custom preferences, and trial telemetry? This cannot be undone.')) {
+      onClearAllStorage?.();
     }
   };
 
@@ -115,15 +123,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
         )}
 
-        {/* 4. Danger Zone / Reset */}
-        <div className="border-t border-slate-800 pt-3">
+        {/* 4. Danger Zone: Reset & Clear Storage */}
+        <div className="flex flex-col gap-2 border-t border-slate-800 pt-3">
           <button
             type="button"
             onClick={onResetProgress}
-            className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-rose-900/60 bg-rose-950/20 text-rose-400 hover:bg-rose-950/40 text-xs font-semibold transition-all active:scale-95"
+            className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-slate-800 bg-slate-800/60 hover:bg-slate-800 text-slate-300 text-xs font-semibold transition-all active:scale-95"
           >
-            <RotateCcw className="w-3.5 h-3.5" /> Reset All Progress & Weaknesses
+            <RotateCcw className="w-3.5 h-3.5 text-amber-400" /> Reset Progress & Weaknesses
           </button>
+
+          {onClearAllStorage && (
+            <button
+              type="button"
+              onClick={handleClearStorage}
+              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-rose-900/60 bg-rose-950/25 hover:bg-rose-950/50 text-rose-400 text-xs font-semibold transition-all active:scale-95"
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Clear All App Storage
+            </button>
+          )}
         </div>
       </div>
     </div>

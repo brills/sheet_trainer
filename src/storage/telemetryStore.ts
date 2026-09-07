@@ -1,10 +1,12 @@
 import { get, set, createStore } from 'idb-keyval';
 import { TrialLog, TrackType } from '../types';
 
-const customStore = createStore('sheet_trainer_db', 'trial_logs');
+const isIndexedDBAvailable = typeof window !== 'undefined' && typeof indexedDB !== 'undefined';
+const customStore = isIndexedDBAvailable ? createStore('sheet_trainer_db', 'trial_logs') : undefined;
 const LOGS_KEY = 'all_trials';
 
 export async function logTrial(log: TrialLog): Promise<void> {
+  if (!isIndexedDBAvailable || !customStore) return;
   try {
     const existingLogs: TrialLog[] = (await get(LOGS_KEY, customStore)) || [];
     // Keep max 2000 trials locally for performance
@@ -16,6 +18,7 @@ export async function logTrial(log: TrialLog): Promise<void> {
 }
 
 export async function getAllTrials(): Promise<TrialLog[]> {
+  if (!isIndexedDBAvailable || !customStore) return [];
   try {
     return (await get(LOGS_KEY, customStore)) || [];
   } catch (e) {
@@ -30,9 +33,11 @@ export async function getTrialsForTrack(track: TrackType): Promise<TrialLog[]> {
 }
 
 export async function clearAllTrials(): Promise<void> {
+  if (!isIndexedDBAvailable || !customStore) return;
   try {
     await set(LOGS_KEY, [], customStore);
   } catch (e) {
     console.error('Failed to clear trials from IndexedDB:', e);
   }
 }
+

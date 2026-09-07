@@ -262,6 +262,51 @@ const sub = timer.recordSubmission();
 assert(timer.getState() === 'feedback', 'Timing engine enters feedback state on submission');
 assert(sub.latencyMs >= 0, 'Submission latency recorded accurately without time limits');
 
+// 8. Storage & State Management Tests
+console.log('\n--- 8. Storage & Reset Management ---');
+
+// In-memory mock for localStorage in node test environment
+const mockStorage: Record<string, string> = {};
+(global as any).localStorage = {
+  getItem: (key: string) => mockStorage[key] || null,
+  setItem: (key: string, value: string) => { mockStorage[key] = value; },
+  removeItem: (key: string) => { delete mockStorage[key]; },
+  clear: () => { Object.keys(mockStorage).forEach(k => delete mockStorage[k]); }
+};
+
+import { DEFAULT_APP_STATE, loadAppState, saveAppState, clearAllAppStorage, recordTrialResultInState } from '../src/storage/localStore';
+
+const initialLoaded = loadAppState();
+assert(initialLoaded.progress.chords.currentTier === 1.1, 'Default state loads Tier 1.1');
+assert(initialLoaded.settings.chords.keyMode === 'progressive', 'Default state uses progressive key mode');
+
+const modifiedState = {
+  ...initialLoaded,
+  progress: {
+    ...initialLoaded.progress,
+    chords: {
+      ...initialLoaded.progress.chords,
+      currentTier: 2.1,
+      currentStreak: 15
+    }
+  }
+};
+saveAppState(modifiedState);
+const reloaded = loadAppState();
+assert(reloaded.progress.chords.currentTier === 2.1 && reloaded.progress.chords.currentStreak === 15, 'Saved custom progress correctly persists and loads');
+
+// Test recording trial result updates state & weakness matrix
+const updatedViaTrial = recordTrialResultInState(reloaded, 'chords', 'treble:minor:root', true, 1200);
+assert(updatedViaTrial.progress.chords.currentStreak === 16, 'Recording correct trial increments streak');
+assert(updatedViaTrial.progress.chords.weaknessMatrix['treble:minor:root'].correctCount === 1, 'Weakness matrix records correct attempt');
+
+// Test clearAllAppStorage wipes state back to pristine default
+await clearAllAppStorage();
+const clearedState = loadAppState();
+assert(clearedState.progress.chords.currentTier === 1.1, 'clearAllAppStorage resets tier back to 1.1');
+assert(clearedState.progress.chords.currentStreak === 0, 'clearAllAppStorage resets streak back to 0');
+assert(Object.keys(clearedState.progress.chords.weaknessMatrix).length === 0, 'clearAllAppStorage resets weakness matrix');
+
 console.log(`\n================================`);
 console.log(`Suite finished: ${passedTests} Passed, ${failedTests} Failed.`);
 if (failedTests > 0) {
@@ -269,3 +314,4 @@ if (failedTests > 0) {
 } else {
   console.log('🎉 All systems verified!');
 }
+
