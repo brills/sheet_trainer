@@ -109,6 +109,34 @@ const distractors = generateChordMultipleChoiceOptions(cMajRoot);
 assert(distractors.length === 4, 'Multiple choice generates exactly 4 options');
 assert(distractors.filter(d => d.isCorrect).length === 1, 'Exactly 1 option is marked correct');
 
+// 6. Key Signatures & Circle of Fifths Tests
+console.log('\n--- 6. Key Signatures & Circle of Fifths ---');
+import { KEY_SIGNATURES, KEY_STAGES, getRequiredAccidentalForNote, getDiatonicChordsForKey } from '../src/core/theory/keys';
+import { checkKeyStagePromotion } from '../src/core/engines/adaptiveEngine';
+
+assert(Object.keys(KEY_SIGNATURES).length >= 15, 'All major and minor key signatures defined');
+assert(KEY_STAGES.length === 5, 'Circle of Fifths organized into 5 progressive stages');
+
+// Test Accidental Delta in Key of G Major (F# in signature)
+const keyG = KEY_SIGNATURES['G'];
+const fSharpNote = { letter: 'F' as const, accidental: 'sharp' as const, octave: 4 };
+const fNaturalNote = { letter: 'F' as const, accidental: 'natural' as const, octave: 4 };
+const cSharpNote = { letter: 'C' as const, accidental: 'sharp' as const, octave: 4 };
+
+assert(getRequiredAccidentalForNote(fSharpNote, keyG) === null, 'In G Major: F# is implicit in key signature (no glyph)');
+assert(getRequiredAccidentalForNote(fNaturalNote, keyG) === 'natural', 'In G Major: F natural requires explicit natural glyph');
+assert(getRequiredAccidentalForNote(cSharpNote, keyG) === 'sharp', 'In G Major: C# requires explicit sharp glyph');
+
+// Test Diatonic Chords in G Major
+const gDiatonic = getDiatonicChordsForKey(keyG, 1.1, 'treble');
+assert(gDiatonic.length > 0, 'Diatonic chords generated for G Major');
+assert(gDiatonic.some(c => c.root === 'G' && c.quality === 'major'), 'G Major triad is diatonic in G Major');
+assert(gDiatonic.some(c => c.root === 'D' && c.quality === 'major'), 'D Major triad (V) is diatonic in G Major');
+
+// Test Key Stage Promotion
+const stagePromo = checkKeyStagePromotion(0, Array(15).fill({ isCorrect: true, latencyMs: 400 }));
+assert(stagePromo.shouldPromote && stagePromo.nextStage === 1, 'Stage 0 promotes to Stage 1 after 15 successful trials');
+
 console.log(`\n================================`);
 console.log(`Suite finished: ${passedTests} Passed, ${failedTests} Failed.`);
 if (failedTests > 0) {

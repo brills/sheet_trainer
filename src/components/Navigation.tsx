@@ -1,20 +1,28 @@
 import React from 'react';
-import { AppRoute, TrackType } from '../types';
-import { Music, Activity, BarChart2, Settings as SettingsIcon } from 'lucide-react';
+import { AppRoute, TrackType, KeySignatureDefinition } from '../types';
+import { Music, Activity, BarChart2, Settings as SettingsIcon, Compass } from 'lucide-react';
 
 interface NavigationProps {
   currentRoute: AppRoute;
   onRouteChange: (route: AppRoute) => void;
   activeTrack: TrackType;
   onTrackChange: (track: TrackType) => void;
+  activeKey?: KeySignatureDefinition;
+  onOpenKeyModal?: () => void;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
   currentRoute,
   onRouteChange,
   activeTrack,
-  onTrackChange
+  onTrackChange,
+  activeKey,
+  onOpenKeyModal
 }) => {
+  const accCount = activeKey
+    ? (activeKey.sharpsCount > 0 ? `${activeKey.sharpsCount}♯` : (activeKey.flatsCount > 0 ? `${activeKey.flatsCount}♭` : '0♮'))
+    : '0♮';
+
   return (
     <header className="w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40">
       <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -65,8 +73,23 @@ export const Navigation: React.FC<NavigationProps> = ({
           </button>
         </div>
 
-        {/* Right Tools (Analytics & Settings) */}
+        {/* Right Tools (Key Selector, Analytics & Settings) */}
         <div className="flex items-center gap-1.5">
+          {onOpenKeyModal && activeKey && (
+            <button
+              type="button"
+              onClick={onOpenKeyModal}
+              title="Open Circle of Fifths & Key Selector"
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-850 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-slate-100 text-xs font-semibold transition-all cursor-pointer"
+            >
+              <Compass className="w-3.5 h-3.5 text-emerald-400" />
+              <span>{activeKey.name}</span>
+              <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-slate-950 border border-slate-800 text-emerald-400">
+                {accCount}
+              </span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => onRouteChange('analytics')}

@@ -29,10 +29,23 @@ export type ChordQuality =
 export type Inversion = 'root' | '1st' | '2nd' | '3rd';
 
 export type ArpeggioContour = 'ascending' | 'descending' | 'arch' | 'valley' | 'alberti';
+export type KeyMode = 'progressive' | 'locked' | 'all_unlocked';
+
+export interface KeySignatureDefinition {
+  id: string; // e.g. "C", "G", "F", "Am", "Eb"
+  name: string; // e.g. "G Major", "E Minor"
+  vexKey: string; // e.g. "G", "F", "Am", "Eb"
+  mode: 'major' | 'minor';
+  sharpsCount: number;
+  flatsCount: number;
+  stage: number; // 0 to 4
+  accidentals: Partial<Record<NoteLetter, Accidental>>;
+  scalePitches?: NotePitch[];
+}
 
 export interface NotePitch {
   letter: NoteLetter;
-  accidental: Accidental; // 'natural' | 'sharp' | 'flat'
+  accidental: Accidental; // 'natural' | 'sharp' | 'flat' | 'double_sharp' | 'double_flat'
   octave: number; // e.g. 4 for C4
 }
 
@@ -46,6 +59,7 @@ export interface ChordDefinition {
   clef: Clef;
   tier: number; // e.g. 1.1, 1.2, 3.1
   displayName: string; // e.g. "Cm / 1st Inv"
+  keySignature?: KeySignatureDefinition;
 }
 
 export interface ArpeggioDefinition {
@@ -60,6 +74,7 @@ export interface ArpeggioDefinition {
   tier: number;
   displayName: string; // e.g. "C Maj (Ascending, Root)"
   isBeamed: boolean;
+  keySignature?: KeySignatureDefinition;
 }
 
 export interface PatternStats {
@@ -74,6 +89,8 @@ export interface TrackSettings {
   inputMode: InputMode;
   flashMode: FlashMode;
   flashDurationMs: number;
+  keyMode: KeyMode;
+  activeKeyId: string;
 }
 
 export interface TrackProgress {
@@ -82,6 +99,8 @@ export interface TrackProgress {
   currentStreak: number;
   totalTrialsCompleted: number;
   masteredTiers: number[];
+  unlockedKeyStages: number[];
+  masteredKeys: string[];
   weaknessMatrix: Record<string, PatternStats>;
 }
 
@@ -115,6 +134,7 @@ export interface TrialLog {
   isCorrect: boolean;
   userInput: string;
   correctAnswer: string;
+  keySignature?: string;
 }
 
 export interface MultipleChoiceOption {

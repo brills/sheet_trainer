@@ -11,13 +11,17 @@ export const DEFAULT_APP_STATE: AppState = {
       clef: 'treble',
       inputMode: 'direct_entry',
       flashMode: 'fixed',
-      flashDurationMs: 400
+      flashDurationMs: 400,
+      keyMode: 'progressive',
+      activeKeyId: 'C'
     },
     arpeggios: {
       clef: 'treble',
       inputMode: 'shape_only',
       flashMode: 'fixed',
-      flashDurationMs: 500
+      flashDurationMs: 500,
+      keyMode: 'progressive',
+      activeKeyId: 'C'
     }
   },
   progress: {
@@ -27,6 +31,8 @@ export const DEFAULT_APP_STATE: AppState = {
       currentStreak: 0,
       totalTrialsCompleted: 0,
       masteredTiers: [],
+      unlockedKeyStages: [0],
+      masteredKeys: [],
       weaknessMatrix: {}
     },
     arpeggios: {
@@ -35,6 +41,8 @@ export const DEFAULT_APP_STATE: AppState = {
       currentStreak: 0,
       totalTrialsCompleted: 0,
       masteredTiers: [],
+      unlockedKeyStages: [0],
+      masteredKeys: [],
       weaknessMatrix: {}
     }
   }

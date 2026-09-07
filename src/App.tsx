@@ -13,15 +13,18 @@ import {
   ChordQuality,
   TrialLog,
   TrialFeedback,
-  SlotDiffItem
+  SlotDiffItem,
+  KeyMode,
+  KeySignatureDefinition
 } from './types';
 import { loadAppState, saveAppState, recordTrialResultInState } from './storage/localStore';
 import { logTrial } from './storage/telemetryStore';
 import { PrecisionTimingEngine, FlashState } from './core/engines/timingEngine';
-import { selectNextChord, selectNextArpeggio, checkTierPromotion } from './core/engines/adaptiveEngine';
+import { selectNextChord, selectNextArpeggio, checkTierPromotion, checkKeyStagePromotion } from './core/engines/adaptiveEngine';
 import { generateChordMultipleChoiceOptions, generateArpeggioMultipleChoiceOptions } from './core/engines/distractorEngine';
 import { buildChord, CHORD_FORMULAS } from './core/theory/chords';
 import { formatNoteName } from './core/theory/notes';
+import { KEY_SIGNATURES, KEY_STAGES } from './core/theory/keys';
 import { Navigation } from './components/Navigation';
 import { TrackHeader } from './components/TrackHeader';
 import { NotationStage } from './components/NotationStage';
@@ -33,6 +36,7 @@ import { KeymapLegendHUD } from './components/KeymapLegendHUD';
 import { TierSelector } from './components/TierSelector';
 import { AnalyticsView } from './components/AnalyticsView';
 import { SettingsModal } from './components/SettingsModal';
+import { CircleOfFifthsModal } from './components/CircleOfFifthsModal';
 
 export const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(() => loadAppState());
@@ -46,6 +50,7 @@ export const App: React.FC = () => {
   // Question & State
   const [currentChord, setCurrentChord] = useState<ChordDefinition | null>(null);
   const [currentArpeggio, setCurrentArpeggio] = useState<ArpeggioDefinition | null>(null);
+  const [currentKey, setCurrentKey] = useState<KeySignatureDefinition>(KEY_SIGNATURES['C']);
   const [multipleChoiceOptions, setMultipleChoiceOptions] = useState<MultipleChoiceOption[]>([]);
   const [flashState, setFlashState] = useState<FlashState>('idle');
   const [lastResult, setLastResult] = useState<TrialFeedback | null>(null);
@@ -53,11 +58,13 @@ export const App: React.FC = () => {
 
   // Modals
   const [isTierModalOpen, setIsTierModalOpen] = useState(false);
+  const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [promotionNotification, setPromotionNotification] = useState<string | null>(null);
 
   // Recent trial memory for rolling HUD stats & promotion checks
   const [recentTrials, setRecentTrials] = useState<{ isCorrect: boolean; latencyMs: number }[]>([]);
+  const [recentStageTrials, setRecentStageTrials] = useState<{ isCorrect: boolean; latencyMs: number }[]>([]);
 
   // Engine instance & Timers
   const timingEngineRef = useRef<PrecisionTimingEngine>(new PrecisionTimingEngine());
@@ -65,6 +72,36 @@ export const App: React.FC = () => {
 
   const trackSettings = appState.settings[activeTrack];
   const trackProgress = appState.progress[activeTrack];
+
+  // Helper to determine active key for next problem
+  const getActiveKeyForSampling = useCallback((): KeySignatureDefinition => {
+    const settings = appStateRef.current.settings[activeTrack];
+    const progress = appStateRef.current.progress[activeTrack];
+
+    if (settings.keyMode === 'locked') {
+      return KEY_SIGNATURES[settings.activeKeyId] || KEY_SIGNATURES['C'];
+    }
+
+    if (settings.keyMode === 'all_unlocked') {
+      const allKeys = Object.keys(KEY_SIGNATURES);
+      const pickedKey = allKeys[Math.floor(Math.random() * allKeys.length)];
+      return KEY_SIGNATURES[pickedKey] || KEY_SIGNATURES['C'];
+    }
+
+    // Progressive mode: sample from unlocked stages
+    const unlocked = progress.unlockedKeyStages && progress.unlockedKeyStages.length > 0 
+      ? progress.unlockedKeyStages 
+      : [0];
+    const highestStage = Math.max(...unlocked);
+    // 60% chance to focus on current highest stage, 40% on previous unlocked stages
+    const stageToSample = Math.random() < 0.6 || unlocked.length === 1 
+      ? highestStage 
+      : unlocked[Math.floor(Math.random() * unlocked.length)];
+
+    const stageKeys = KEY_STAGES[stageToSample]?.keys || ['C'];
+    const keyId = stageKeys[Math.floor(Math.random() * stageKeys.length)];
+    return KEY_SIGNATURES[keyId] || KEY_SIGNATURES['C'];
+  }, [activeTrack]);
 
   // Spawn next problem cleanly (single point of truth)
   const spawnNextProblem = useCallback(() => {
@@ -80,8 +117,11 @@ export const App: React.FC = () => {
     const currentTrack = currentState.progress[activeTrack];
     const currentSettings = currentState.settings[activeTrack];
 
+    const activeKeyDef = getActiveKeyForSampling();
+    setCurrentKey(activeKeyDef);
+
     if (activeTrack === 'chords') {
-      const chord = selectNextChord(currentTrack.currentTier, currentSettings.clef, currentTrack);
+      const chord = selectNextChord(currentTrack.currentTier, currentSettings.clef, currentTrack, activeKeyDef);
       setCurrentChord(chord);
       setCurrentArpeggio(null);
 
@@ -89,7 +129,7 @@ export const App: React.FC = () => {
         setMultipleChoiceOptions(generateChordMultipleChoiceOptions(chord));
       }
     } else {
-      const arpeggio = selectNextArpeggio(currentTrack.currentTier, currentSettings.clef, currentTrack);
+      const arpeggio = selectNextArpeggio(currentTrack.currentTier, currentSettings.clef, currentTrack, activeKeyDef);
       setCurrentArpeggio(arpeggio);
       setCurrentChord(null);
 
@@ -103,19 +143,19 @@ export const App: React.FC = () => {
       durationMs: currentSettings.flashDurationMs,
       onMask: () => setFlashState('masked')
     });
-  }, [activeTrack]);
+  }, [activeTrack, getActiveKeyForSampling]);
 
   // Track initial mounting and explicit configuration changes ONLY
   const prevConfigRef = useRef<string>('');
   useEffect(() => {
-    const configKey = `${activeTrack}-${trackSettings.clef}-${trackSettings.inputMode}-${trackProgress.currentTier}-${currentRoute}`;
+    const configKey = `${activeTrack}-${trackSettings.clef}-${trackSettings.inputMode}-${trackSettings.keyMode}-${trackSettings.activeKeyId}-${trackProgress.currentTier}-${currentRoute}`;
     if (prevConfigRef.current !== configKey) {
       prevConfigRef.current = configKey;
       if (currentRoute === 'chords' || currentRoute === 'arpeggios') {
         spawnNextProblem();
       }
     }
-  }, [activeTrack, trackSettings.clef, trackSettings.inputMode, trackProgress.currentTier, currentRoute, spawnNextProblem]);
+  }, [activeTrack, trackSettings.clef, trackSettings.inputMode, trackSettings.keyMode, trackSettings.activeKeyId, trackProgress.currentTier, currentRoute, spawnNextProblem]);
 
   // Handle Trial Evaluation
   const evaluateSubmission = useCallback((
@@ -156,27 +196,57 @@ export const App: React.FC = () => {
     };
     logTrial(log);
 
-    // 3. Update recent trials & check promotion
+    // 3. Update recent trials & check tier promotion
     const newRecent = [{ isCorrect, latencyMs }, ...recentTrials.slice(0, 19)];
     setRecentTrials(newRecent);
 
+    let nextProgState = updatedState;
+
     const promotion = checkTierPromotion(activeTrack, trackProgress.currentTier, newRecent);
     if (promotion.shouldPromote && promotion.nextTier) {
-      setPromotionNotification(`🎉 Mastery Achieved! Unlocked Tier ${promotion.nextTier}`);
+      setPromotionNotification(`🎉 Tier Mastery Achieved! Unlocked Tier ${promotion.nextTier}`);
       const updatedTiers = Array.from(new Set([...trackProgress.masteredTiers, trackProgress.currentTier]));
-      const nextState: AppState = {
-        ...updatedState,
+      nextProgState = {
+        ...nextProgState,
         progress: {
-          ...updatedState.progress,
+          ...nextProgState.progress,
           [activeTrack]: {
-            ...updatedState.progress[activeTrack],
+            ...nextProgState.progress[activeTrack],
             currentTier: promotion.nextTier,
             masteredTiers: updatedTiers
           }
         }
       };
-      saveAppState(nextState);
-      setAppState(nextState);
+    }
+
+    // 4. Check Key Stage Promotion (in progressive mode)
+    if (trackSettings.keyMode === 'progressive') {
+      const newStageRecent = [{ isCorrect, latencyMs }, ...recentStageTrials.slice(0, 19)];
+      setRecentStageTrials(newStageRecent);
+
+      const unlocked = trackProgress.unlockedKeyStages || [0];
+      const highestStage = Math.max(...unlocked);
+      const keyPromo = checkKeyStagePromotion(highestStage, newStageRecent);
+
+      if (keyPromo.shouldPromote && keyPromo.nextStage !== null) {
+        setPromotionNotification(keyPromo.message || `🎉 Key Mastery Achieved! Unlocked Stage ${keyPromo.nextStage}`);
+        const newUnlockedStages = Array.from(new Set([...unlocked, keyPromo.nextStage]));
+        nextProgState = {
+          ...nextProgState,
+          progress: {
+            ...nextProgState.progress,
+            [activeTrack]: {
+              ...nextProgState.progress[activeTrack],
+              unlockedKeyStages: newUnlockedStages
+            }
+          }
+        };
+      }
+    }
+
+    if (nextProgState !== updatedState) {
+      saveAppState(nextProgState);
+      setAppState(nextProgState);
     }
 
     setLastResult({
@@ -215,7 +285,7 @@ export const App: React.FC = () => {
       };
       window.addEventListener('keydown', ackListener, { once: true });
     }
-  }, [activeTrack, currentChord, currentArpeggio, recentTrials, trackProgress, trackSettings.clef, spawnNextProblem]);
+  }, [activeTrack, currentChord, currentArpeggio, recentTrials, recentStageTrials, trackProgress, trackSettings.clef, trackSettings.keyMode, spawnNextProblem]);
 
   // Input Handlers
   const handleDirectEntrySubmit = (input: { root: NoteLetter; accidental: Accidental; quality: ChordQuality; inversion: Inversion }) => {
@@ -347,6 +417,40 @@ export const App: React.FC = () => {
     setAppState(next);
   };
 
+  const handleKeyModeChange = (keyMode: KeyMode) => {
+    const next: AppState = {
+      ...appState,
+      settings: {
+        ...appState.settings,
+        [activeTrack]: {
+          ...appState.settings[activeTrack],
+          keyMode
+        }
+      }
+    };
+    saveAppState(next);
+    setAppState(next);
+    spawnNextProblem();
+  };
+
+  const handleSelectKey = (keyId: string) => {
+    const next: AppState = {
+      ...appState,
+      settings: {
+        ...appState.settings,
+        [activeTrack]: {
+          ...appState.settings[activeTrack],
+          activeKeyId: keyId,
+          keyMode: 'locked' // lock to selected key when explicitly tapped
+        }
+      }
+    };
+    saveAppState(next);
+    setAppState(next);
+    setIsKeyModalOpen(false);
+    spawnNextProblem();
+  };
+
   const handleSelectTier = (tier: number) => {
     const next: AppState = {
       ...appState,
@@ -388,6 +492,8 @@ export const App: React.FC = () => {
           setActiveTrack(track);
           setCurrentRoute(track);
         }}
+        activeKey={currentKey}
+        onOpenKeyModal={() => setIsKeyModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -432,10 +538,13 @@ export const App: React.FC = () => {
               track={activeTrack}
               chord={currentChord || undefined}
               arpeggio={currentArpeggio || undefined}
+              keySignature={currentKey}
               flashState={flashState}
               lastResult={lastResult}
               flashDurationMs={trackSettings.flashDurationMs}
               darkMode={appState.settings.theme !== 'light'}
+              onContinue={spawnNextProblem}
+              onOpenKeyModal={() => setIsKeyModalOpen(true)}
             />
 
             {/* Real-Time Stats HUD */}
@@ -497,6 +606,18 @@ export const App: React.FC = () => {
         masteredTiers={trackProgress.masteredTiers}
       />
 
+      {/* Circle of Fifths & Key Selector Modal */}
+      <CircleOfFifthsModal
+        isOpen={isKeyModalOpen}
+        onClose={() => setIsKeyModalOpen(false)}
+        keyMode={trackSettings.keyMode || 'progressive'}
+        onKeyModeChange={handleKeyModeChange}
+        activeKeyId={currentKey.id}
+        onSelectKey={handleSelectKey}
+        unlockedStages={trackProgress.unlockedKeyStages || [0]}
+        masteredKeys={trackProgress.masteredKeys || []}
+      />
+
       {/* Settings Modal */}
       <SettingsModal
         isOpen={isSettingsModalOpen}
@@ -506,6 +627,7 @@ export const App: React.FC = () => {
           saveAppState(newState);
           setAppState(newState);
         }}
+        onOpenKeyModal={() => setIsKeyModalOpen(true)}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppState } from '../types';
-import { X, Moon, Sun, Monitor, Keyboard, RotateCcw } from 'lucide-react';
+import { X, Moon, Sun, Monitor, Keyboard, RotateCcw, Compass } from 'lucide-react';
 import { DEFAULT_APP_STATE } from '../storage/localStore';
 
 interface SettingsModalProps {
@@ -8,13 +8,15 @@ interface SettingsModalProps {
   onClose: () => void;
   state: AppState;
   onUpdateState: (newState: AppState) => void;
+  onOpenKeyModal?: () => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
   onClose,
   state,
-  onUpdateState
+  onUpdateState,
+  onOpenKeyModal
 }) => {
   if (!isOpen) return null;
 
@@ -116,6 +118,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             `} />
           </button>
         </div>
+
+        {/* 3. Key Signatures & Circle of Fifths */}
+        {onOpenKeyModal && (
+          <div className="flex items-center justify-between py-2 border-t border-slate-800">
+            <div className="flex items-center gap-2">
+              <Compass className="w-4 h-4 text-emerald-400" />
+              <div className="flex flex-col">
+                <span className="text-xs font-semibold text-slate-200">Circle of Fifths & Keys</span>
+                <span className="text-[10px] text-slate-400">Configure key progression & stage unlock</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onOpenKeyModal();
+              }}
+              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition-all border border-slate-700"
+            >
+              Configure
+            </button>
+          </div>
+        )}
 
         {/* 3. Danger Zone / Reset */}
         <div className="border-t border-slate-800 pt-3">

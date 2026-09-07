@@ -1,30 +1,34 @@
 import React, { useEffect, useRef } from 'react';
-import { ChordDefinition, ArpeggioDefinition, TrackType, TrialFeedback } from '../types';
+import { ChordDefinition, ArpeggioDefinition, TrackType, TrialFeedback, KeySignatureDefinition } from '../types';
 import { renderChordToSvg, renderArpeggioToSvg } from '../core/theory/vexflowAdapter';
 import { FlashState } from '../core/engines/timingEngine';
 import { formatNoteName } from '../core/theory/notes';
-import { Eye, EyeOff, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle2, XCircle, ArrowRight, Compass } from 'lucide-react';
 
 interface NotationStageProps {
   track: TrackType;
   chord?: ChordDefinition;
   arpeggio?: ArpeggioDefinition;
+  keySignature?: KeySignatureDefinition;
   flashState: FlashState;
   lastResult?: TrialFeedback | null;
   flashDurationMs: number;
   darkMode?: boolean;
   onContinue?: () => void;
+  onOpenKeyModal?: () => void;
 }
 
 export const NotationStage: React.FC<NotationStageProps> = ({
   track,
   chord,
   arpeggio,
+  keySignature,
   flashState,
   lastResult,
   flashDurationMs,
   darkMode = true,
-  onContinue
+  onContinue,
+  onOpenKeyModal
 }) => {
   const visibleRef = useRef<HTMLDivElement>(null);
   const offscreenRef = useRef<HTMLDivElement>(null);
@@ -33,20 +37,32 @@ export const NotationStage: React.FC<NotationStageProps> = ({
   const userDiffRef = useRef<HTMLDivElement>(null);
   const targetDiffRef = useRef<HTMLDivElement>(null);
 
+  const activeKey = keySignature || chord?.keySignature || arpeggio?.keySignature;
+
   // Pre-render and update visible display
   useEffect(() => {
     if (!offscreenRef.current || !visibleRef.current) return;
 
     // Render offscreen first (Double-buffering)
     if (track === 'chords' && chord) {
-      renderChordToSvg(offscreenRef.current, chord, { width: 340, height: 180, darkMode });
+      renderChordToSvg(offscreenRef.current, chord, { 
+        width: 340, 
+        height: 180, 
+        darkMode,
+        keySignature: activeKey 
+      });
     } else if (track === 'arpeggios' && arpeggio) {
-      renderArpeggioToSvg(offscreenRef.current, arpeggio, { width: 360, height: 180, darkMode });
+      renderArpeggioToSvg(offscreenRef.current, arpeggio, { 
+        width: 360, 
+        height: 180, 
+        darkMode,
+        keySignature: activeKey 
+      });
     }
 
     // Instant swap to visible container
     visibleRef.current.innerHTML = offscreenRef.current.innerHTML;
-  }, [track, chord, arpeggio, darkMode]);
+  }, [track, chord, arpeggio, darkMode, activeKey]);
 
   // Render side-by-side comparison staves when feedback is active and incorrect
   useEffect(() => {
@@ -58,6 +74,7 @@ export const NotationStage: React.FC<NotationStageProps> = ({
           width: 170, 
           height: 150, 
           darkMode,
+          keySignature: activeKey,
           strokeColor: '#f43f5e' // rose-500 for user error
         });
       }
@@ -66,6 +83,7 @@ export const NotationStage: React.FC<NotationStageProps> = ({
           width: 170, 
           height: 150, 
           darkMode,
+          keySignature: activeKey,
           strokeColor: '#10b981' // emerald-500 for correct target
         });
       }
@@ -75,6 +93,7 @@ export const NotationStage: React.FC<NotationStageProps> = ({
           width: 175, 
           height: 150, 
           darkMode,
+          keySignature: activeKey,
           strokeColor: '#f43f5e' 
         });
       }
@@ -83,11 +102,12 @@ export const NotationStage: React.FC<NotationStageProps> = ({
           width: 175, 
           height: 150, 
           darkMode,
+          keySignature: activeKey,
           strokeColor: '#10b981' 
         });
       }
     }
-  }, [flashState, lastResult, track, darkMode]);
+  }, [flashState, lastResult, track, darkMode, activeKey]);
 
   const isMasked = flashState === 'masked';
   const isFlashing = flashState === 'flashing';
@@ -101,6 +121,10 @@ export const NotationStage: React.FC<NotationStageProps> = ({
     : arpeggio
       ? arpeggio.notes.map(n => formatNoteName(n.letter, n.accidental, true, n.octave)).join(' → ')
       : '';
+
+  const accBadge = activeKey 
+    ? (activeKey.sharpsCount > 0 ? `${activeKey.sharpsCount}♯` : (activeKey.flatsCount > 0 ? `${activeKey.flatsCount}♭` : '0♮'))
+    : null;
 
   return (
     <div className="relative w-full max-w-md mx-auto flex flex-col items-center">
@@ -119,6 +143,24 @@ export const NotationStage: React.FC<NotationStageProps> = ({
         ${isFeedback && lastResult?.isCorrect ? 'border-emerald-500 ring-4 ring-emerald-500/20' : ''}
         ${isIncorrect ? 'border-rose-500/80 ring-4 ring-rose-500/20' : ''}
       `}>
+        {/* Key Badge in Top Left */}
+        {activeKey && (
+          <button
+            type="button"
+            onClick={onOpenKeyModal}
+            title="Click to view Circle of Fifths & change Key"
+            className="absolute top-2.5 left-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white transition-all text-xs font-semibold backdrop-blur-md cursor-pointer group shadow-sm"
+          >
+            <Compass className="w-3.5 h-3.5 text-emerald-400 group-hover:rotate-45 transition-transform" />
+            <span>Key: {activeKey.name}</span>
+            {accBadge && (
+              <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-slate-950/80 border border-slate-700/80 text-emerald-300">
+                {accBadge}
+              </span>
+            )}
+          </button>
+        )}
+
         {/* Regular Single Stave (shown when flashing, masked, or when answer is correct) */}
         {!hasSideBySide && (
           <div 

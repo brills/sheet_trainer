@@ -4,7 +4,8 @@ import {
   TrackType, 
   Clef, 
   PatternStats,
-  TrackProgress
+  TrackProgress,
+  KeySignatureDefinition
 } from '../../types';
 import { 
   generateRandomChordForTier, 
@@ -18,6 +19,11 @@ import {
   ARPEGGIO_TIERS,
   getValidArpeggioRootsForQuality
 } from '../theory/arpeggios';
+import { 
+  getDiatonicChordsForKey, 
+  getDiatonicArpeggiosForKey,
+  KEY_STAGES 
+} from '../theory/keys';
 
 export function calculatePatternWeight(stats?: PatternStats): number {
   if (!stats || stats.totalSeen === 0) {
@@ -31,11 +37,22 @@ export function calculatePatternWeight(stats?: PatternStats): number {
 export function selectNextChord(
   tier: number,
   clef: Clef,
-  progress: TrackProgress
+  progress: TrackProgress,
+  keySignature?: KeySignatureDefinition
 ): ChordDefinition {
   const matrix = progress.weaknessMatrix;
 
-  // 40% chance to target a known weakness in this tier if available
+  // If a key signature is active, 80% chance to sample diatonic chords in this key
+  if (keySignature && Math.random() < 0.8) {
+    const diatonicChords = getDiatonicChordsForKey(keySignature, tier, clef);
+    if (diatonicChords.length > 0) {
+      const picked = diatonicChords[Math.floor(Math.random() * diatonicChords.length)];
+      picked.keySignature = keySignature;
+      return picked;
+    }
+  }
+
+  // 40% chance of the remaining trials to target a known weakness in this tier
   const tierWeaknesses = Object.entries(matrix).filter(([k, stats]) => {
     return k.startsWith(clef) && stats.totalSeen > 0 && (stats.correctCount / stats.totalSeen < 0.85);
   });
@@ -50,20 +67,35 @@ export function selectNextChord(
       const inversion = parts[2] as any;
       const validRoots = getValidRootsForQuality(quality, tier, clef);
       const picked = validRoots[Math.floor(Math.random() * validRoots.length)];
-      return buildChord(picked.root, picked.accidental, quality, inversion, clef, tier);
+      const chord = buildChord(picked.root, picked.accidental, quality, inversion, clef, tier);
+      if (keySignature) chord.keySignature = keySignature;
+      return chord;
     }
   }
 
-  return generateRandomChordForTier(tier, clef);
+  const randomChord = generateRandomChordForTier(tier, clef);
+  if (keySignature) randomChord.keySignature = keySignature;
+  return randomChord;
 }
 
 export function selectNextArpeggio(
   tier: number,
   clef: Clef,
-  progress: TrackProgress
+  progress: TrackProgress,
+  keySignature?: KeySignatureDefinition
 ): ArpeggioDefinition {
   const config = ARPEGGIO_TIERS[tier] || ARPEGGIO_TIERS[1.1];
   const matrix = progress.weaknessMatrix;
+
+  // 80% chance to sample diatonic arpeggios in the active key
+  if (keySignature && Math.random() < 0.8) {
+    const diatonicArps = getDiatonicArpeggiosForKey(keySignature, tier, clef);
+    if (diatonicArps.length > 0) {
+      const picked = diatonicArps[Math.floor(Math.random() * diatonicArps.length)];
+      picked.keySignature = keySignature;
+      return picked;
+    }
+  }
 
   const tierWeaknesses = Object.entries(matrix).filter(([k, stats]) => {
     return k.startsWith(clef) && stats.totalSeen > 0 && (stats.correctCount / stats.totalSeen < 0.85);
@@ -79,11 +111,15 @@ export function selectNextArpeggio(
       const startingDegree = config.startingDegrees[Math.floor(Math.random() * config.startingDegrees.length)];
       const validRoots = getValidArpeggioRootsForQuality(quality, tier, clef);
       const picked = validRoots[Math.floor(Math.random() * validRoots.length)];
-      return buildArpeggio(picked.root, picked.accidental, quality, contour, startingDegree, clef, tier);
+      const arp = buildArpeggio(picked.root, picked.accidental, quality, contour, startingDegree, clef, tier);
+      if (keySignature) arp.keySignature = keySignature;
+      return arp;
     }
   }
 
-  return generateRandomArpeggioForTier(tier, clef);
+  const randomArp = generateRandomArpeggioForTier(tier, clef);
+  if (keySignature) randomArp.keySignature = keySignature;
+  return randomArp;
 }
 
 export interface PromotionCheckResult {
@@ -135,6 +171,50 @@ export function checkTierPromotion(
     avgLatencyMs: avgLatency,
     message: passed && nextTier !== null 
       ? `Mastery achieved! Tier ${nextTier} unlocked.` 
+      : undefined
+  };
+}
+
+export interface KeyStagePromotionResult {
+  shouldPromote: boolean;
+  currentStage: number;
+  nextStage: number | null;
+  accuracy: number;
+  avgLatencyMs: number;
+  message?: string;
+}
+
+export function checkKeyStagePromotion(
+  currentStage: number,
+  recentTrialsInStage: { isCorrect: boolean; latencyMs: number }[]
+): KeyStagePromotionResult {
+  if (recentTrialsInStage.length < 15) {
+    return {
+      shouldPromote: false,
+      currentStage,
+      nextStage: null,
+      accuracy: 0,
+      avgLatencyMs: 0
+    };
+  }
+
+  const last15 = recentTrialsInStage.slice(0, 15);
+  const correctCount = last15.filter(t => t.isCorrect).length;
+  const accuracy = correctCount / last15.length;
+  const avgLatency = Math.round(last15.reduce((sum, t) => sum + t.latencyMs, 0) / last15.length);
+
+  const passed = accuracy >= 0.85 && avgLatency < 900;
+  const maxStage = KEY_STAGES.length - 1;
+  const nextStage = currentStage < maxStage ? currentStage + 1 : null;
+
+  return {
+    shouldPromote: passed && nextStage !== null,
+    currentStage,
+    nextStage,
+    accuracy: Math.round(accuracy * 100),
+    avgLatencyMs: avgLatency,
+    message: passed && nextStage !== null 
+      ? `🎉 Key Mastery Achieved! Unlocked Circle of Fifths ${KEY_STAGES[nextStage].title}`
       : undefined
   };
 }

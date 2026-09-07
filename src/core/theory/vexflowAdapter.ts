@@ -1,6 +1,7 @@
 import { Renderer, Stave, StaveNote, Accidental as VexAccidental, Formatter, Beam, Voice } from 'vexflow';
-import { ChordDefinition, ArpeggioDefinition } from '../../types';
+import { ChordDefinition, ArpeggioDefinition, KeySignatureDefinition } from '../../types';
 import { accidentalToVexFlow } from './notes';
+import { getRequiredAccidentalForNote } from './keys';
 
 export interface RenderOptions {
   width?: number;
@@ -8,6 +9,7 @@ export interface RenderOptions {
   darkMode?: boolean;
   strokeColor?: string;
   clef?: 'treble' | 'bass';
+  keySignature?: KeySignatureDefinition;
 }
 
 export function renderChordToSvg(
@@ -41,6 +43,17 @@ export function renderChordToSvg(
   // Set clef and styling for lines and ledger lines
   const clef = options.clef || (chord.clef === 'bass' ? 'bass' : 'treble');
   stave.addClef(clef);
+
+  // Apply Key Signature to Stave if present
+  const keySig = options.keySignature || chord.keySignature;
+  if (keySig && keySig.vexKey) {
+    try {
+      stave.addKeySignature(keySig.vexKey);
+    } catch {
+      // Fallback for non-standard key specs
+    }
+  }
+
   stave.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
   
   if (typeof (stave as any).setLedgerLineStyle === 'function') {
@@ -59,13 +72,16 @@ export function renderChordToSvg(
     align_center: true
   });
 
-  // Attach accidentals to respective note indices
+  // Attach accidentals: Only for notes that differ from the active key signature!
   chord.notes.forEach((note, idx) => {
-    const accChar = accidentalToVexFlow(note.accidental);
-    if (accChar && accChar !== 'n') {
-      const acc = new VexAccidental(accChar);
-      acc.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
-      staveNote.addModifier(acc, idx);
+    const requiredAcc = getRequiredAccidentalForNote(note, keySig);
+    if (requiredAcc) {
+      const accChar = accidentalToVexFlow(requiredAcc);
+      if (accChar) {
+        const acc = new VexAccidental(accChar);
+        acc.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
+        staveNote.addModifier(acc, idx);
+      }
     }
   });
 
@@ -110,6 +126,16 @@ export function renderArpeggioToSvg(
 
   const clef = options.clef || (arpeggio.clef === 'bass' ? 'bass' : 'treble');
   stave.addClef(clef);
+
+  const keySig = options.keySignature || arpeggio.keySignature;
+  if (keySig && keySig.vexKey) {
+    try {
+      stave.addKeySignature(keySig.vexKey);
+    } catch {
+      // Fallback
+    }
+  }
+
   stave.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
   
   if (typeof (stave as any).setLedgerLineStyle === 'function') {
@@ -128,11 +154,14 @@ export function renderArpeggioToSvg(
       duration: duration
     });
 
-    const accChar = accidentalToVexFlow(note.accidental);
-    if (accChar && accChar !== 'n') {
-      const acc = new VexAccidental(accChar);
-      acc.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
-      sn.addModifier(acc, 0);
+    const requiredAcc = getRequiredAccidentalForNote(note, keySig);
+    if (requiredAcc) {
+      const accChar = accidentalToVexFlow(requiredAcc);
+      if (accChar) {
+        const acc = new VexAccidental(accChar);
+        acc.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
+        sn.addModifier(acc, 0);
+      }
     }
 
     sn.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
