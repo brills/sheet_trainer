@@ -182,66 +182,86 @@ export const CHORD_FORMULAS: Record<ChordQuality, ChordFormula> = {
   }
 };
 
+interface NoteWithDegree {
+  note: NotePitch;
+  degreeStep: number;
+}
+
 export function constructChordNotes(
   root: NoteLetter,
   rootAccidental: Accidental,
   quality: ChordQuality,
   inversion: Inversion,
   rootOctave: number,
-  voicing: VoicingType = 'close'
+  voicing: VoicingType = 'close',
+  omit5: boolean = false
 ): NotePitch[] {
   const formula = CHORD_FORMULAS[quality];
   const rootNote: NotePitch = { letter: root, accidental: rootAccidental, octave: rootOctave };
 
-  // Generate root position notes
-  const rootPosNotes: NotePitch[] = formula.intervals.map((semitones, idx) => {
-    return transposePitch(rootNote, semitones, formula.degreeSteps[idx]);
+  // Generate root position notes paired with scale degree steps
+  const rootPosNotes: NoteWithDegree[] = formula.intervals.map((semitones, idx) => {
+    return {
+      note: transposePitch(rootNote, semitones, formula.degreeSteps[idx]),
+      degreeStep: formula.degreeSteps[idx]
+    };
   });
 
   // Apply close inversion
   const count = rootPosNotes.length;
-  let closeNotes: NotePitch[];
+  let closeNotes: NoteWithDegree[];
   if (inversion === 'root') {
     closeNotes = [...rootPosNotes];
   } else if (inversion === '1st') {
     closeNotes = [
       ...rootPosNotes.slice(1),
-      { ...rootPosNotes[0], octave: rootPosNotes[0].octave + 1 }
+      { ...rootPosNotes[0], note: { ...rootPosNotes[0].note, octave: rootPosNotes[0].note.octave + 1 } }
     ];
   } else if (inversion === '2nd') {
     closeNotes = [
       ...rootPosNotes.slice(2),
-      { ...rootPosNotes[0], octave: rootPosNotes[0].octave + 1 },
-      { ...rootPosNotes[1], octave: rootPosNotes[1].octave + 1 }
+      { ...rootPosNotes[0], note: { ...rootPosNotes[0].note, octave: rootPosNotes[0].note.octave + 1 } },
+      { ...rootPosNotes[1], note: { ...rootPosNotes[1].note, octave: rootPosNotes[1].note.octave + 1 } }
     ];
   } else if (inversion === '3rd' && count >= 4) {
     closeNotes = [
       ...rootPosNotes.slice(3),
-      { ...rootPosNotes[0], octave: rootPosNotes[0].octave + 1 },
-      { ...rootPosNotes[1], octave: rootPosNotes[1].octave + 1 },
-      { ...rootPosNotes[2], octave: rootPosNotes[2].octave + 1 }
+      { ...rootPosNotes[0], note: { ...rootPosNotes[0].note, octave: rootPosNotes[0].note.octave + 1 } },
+      { ...rootPosNotes[1], note: { ...rootPosNotes[1].note, octave: rootPosNotes[1].note.octave + 1 } },
+      { ...rootPosNotes[2], note: { ...rootPosNotes[2].note, octave: rootPosNotes[2].note.octave + 1 } }
     ];
   } else {
     closeNotes = [...rootPosNotes];
   }
 
-  if (voicing === 'close' || closeNotes.length < 4) {
-    return closeNotes;
-  }
+  let spreadNotes: NoteWithDegree[] = closeNotes;
 
   // Open / Spread Voicings for 4-note collections
   // closeNotes: [N0 (bass), N1 (tenor), N2 (alto), N3 (soprano)]
-  if (voicing === 'drop2') {
-    // Drop 2nd voice from top (alto = index 2) down 1 octave
-    const droppedN2 = { ...closeNotes[2], octave: closeNotes[2].octave - 1 };
-    return [droppedN2, closeNotes[0], closeNotes[1], closeNotes[3]];
-  } else if (voicing === 'drop3') {
-    // Drop 3rd voice from top (tenor = index 1) down 1 octave
-    const droppedN1 = { ...closeNotes[1], octave: closeNotes[1].octave - 1 };
-    return [droppedN1, closeNotes[0], closeNotes[2], closeNotes[3]];
+  if (closeNotes.length >= 4) {
+    if (voicing === 'drop2') {
+      // Drop 2nd voice from top (alto = index 2) down 1 octave
+      const droppedN2: NoteWithDegree = {
+        ...closeNotes[2],
+        note: { ...closeNotes[2].note, octave: closeNotes[2].note.octave - 1 }
+      };
+      spreadNotes = [droppedN2, closeNotes[0], closeNotes[1], closeNotes[3]];
+    } else if (voicing === 'drop3') {
+      // Drop 3rd voice from top (tenor = index 1) down 1 octave
+      const droppedN1: NoteWithDegree = {
+        ...closeNotes[1],
+        note: { ...closeNotes[1].note, octave: closeNotes[1].note.octave - 1 }
+      };
+      spreadNotes = [droppedN1, closeNotes[0], closeNotes[2], closeNotes[3]];
+    }
   }
 
-  return closeNotes;
+  // If omit5 is requested, omit the 5th scale degree (degreeStep === 4)
+  if (omit5 && formula.degreeSteps.includes(4)) {
+    spreadNotes = spreadNotes.filter(n => n.degreeStep !== 4);
+  }
+
+  return spreadNotes.map(n => n.note);
 }
 
 export function getValidOctavesForChord(
@@ -250,14 +270,15 @@ export function getValidOctavesForChord(
   quality: ChordQuality,
   inversion: Inversion,
   clef: Clef,
-  voicing: VoicingType = 'close'
+  voicing: VoicingType = 'close',
+  omit5: boolean = false
 ): number[] {
   const candidateOctaves = clef === 'bass' ? [2, 3] : (clef === 'treble' ? [3, 4, 5] : [2, 3, 4, 5]);
   const bounds = CLEF_BOUNDS[clef] || CLEF_BOUNDS.treble;
   const validOctaves: number[] = [];
 
   for (const oct of candidateOctaves) {
-    const notes = constructChordNotes(root, rootAccidental, quality, inversion, oct, voicing);
+    const notes = constructChordNotes(root, rootAccidental, quality, inversion, oct, voicing, omit5);
     const inBounds = notes.every(n => {
       const midi = noteToMidi(n);
       return midi >= bounds.minMidi && midi <= bounds.maxMidi;
@@ -272,7 +293,7 @@ export function getValidOctavesForChord(
     let bestOct = candidateOctaves[0];
     let minOverflow = Infinity;
     for (const oct of candidateOctaves) {
-      const notes = constructChordNotes(root, rootAccidental, quality, inversion, oct, voicing);
+      const notes = constructChordNotes(root, rootAccidental, quality, inversion, oct, voicing, omit5);
       const overflow = notes.reduce((sum, n) => {
         const midi = noteToMidi(n);
         if (midi < bounds.minMidi) return sum + (bounds.minMidi - midi);
@@ -305,31 +326,39 @@ export function buildChord(
   clef: Clef,
   tier: number,
   octave?: number,
-  voicing?: VoicingType
+  voicing?: VoicingType,
+  omit5?: boolean
 ): ChordDefinition {
   const formula = CHORD_FORMULAS[quality];
   const tierConfig = CHORD_TIERS[tier];
   const effectiveVoicing: VoicingType = voicing || tierConfig?.voicing || 'close';
+  const effectiveOmit5 = omit5 !== undefined ? omit5 : false;
 
-  const validOctaves = getValidOctavesForChord(root, rootAccidental, quality, inversion, clef, effectiveVoicing);
+  const validOctaves = getValidOctavesForChord(root, rootAccidental, quality, inversion, clef, effectiveVoicing, effectiveOmit5);
   const chosenOctave = octave !== undefined
     ? octave
     : validOctaves[Math.floor(Math.random() * validOctaves.length)];
 
-  const invertedNotes = constructChordNotes(root, rootAccidental, quality, inversion, chosenOctave, effectiveVoicing);
+  const invertedNotes = constructChordNotes(root, rootAccidental, quality, inversion, chosenOctave, effectiveVoicing, effectiveOmit5);
 
   const rootName = formatNoteName(root, rootAccidental);
   let displayName: string;
   if (effectiveVoicing === 'drop2') {
-    displayName = `${rootName}${formula.shortName} (Drop-2)`;
+    displayName = effectiveOmit5
+      ? `${rootName}${formula.shortName} (Drop-2, omit 5)`
+      : `${rootName}${formula.shortName} (Drop-2)`;
   } else if (effectiveVoicing === 'drop3') {
-    displayName = `${rootName}${formula.shortName} (Drop-3)`;
+    displayName = effectiveOmit5
+      ? `${rootName}${formula.shortName} (Drop-3, omit 5)`
+      : `${rootName}${formula.shortName} (Drop-3)`;
   } else {
     const invStr = formatInversionName(inversion, 'short');
-    displayName = `${rootName}${formula.shortName} (${invStr})`;
+    displayName = effectiveOmit5
+      ? `${rootName}${formula.shortName} (${invStr}, omit 5)`
+      : `${rootName}${formula.shortName} (${invStr})`;
   }
 
-  const id = `${rootName}_${quality.toUpperCase()}_${inversion.toUpperCase()}_${effectiveVoicing.toUpperCase()}_${clef.toUpperCase()}`;
+  const id = `${rootName}_${quality.toUpperCase()}_${inversion.toUpperCase()}_${effectiveVoicing.toUpperCase()}${effectiveOmit5 ? '_OMIT5' : ''}_${clef.toUpperCase()}`;
 
   return {
     id,
@@ -341,7 +370,8 @@ export function buildChord(
     clef,
     tier,
     displayName,
-    voicing: effectiveVoicing
+    voicing: effectiveVoicing,
+    omit5: effectiveOmit5
   };
 }
 
@@ -525,7 +555,12 @@ export function generateRandomChordForTier(tier: number, clef: Clef): ChordDefin
   const validRoots = getValidRootsForQuality(quality, tier, clef);
   const picked = validRoots[Math.floor(Math.random() * validRoots.length)];
 
-  return buildChord(picked.root, picked.accidental, quality, inversion, clef, tier);
+  const isDropVoicing = config.voicing === 'drop2' || config.voicing === 'drop3';
+  // Blend in omit 5 for ~45% of drop voicings on qualities that have a standard 5th (maj7, dom7, min7)
+  const canOmit5 = isDropVoicing && (quality === 'maj7' || quality === 'dom7' || quality === 'min7');
+  const omit5 = canOmit5 && Math.random() < 0.45;
+
+  return buildChord(picked.root, picked.accidental, quality, inversion, clef, tier, undefined, undefined, omit5);
 }
 
 /**
@@ -541,9 +576,10 @@ export function alignChordToTargetOctave(
   targetChord: ChordDefinition
 ): ChordDefinition {
   const voicing = targetChord.voicing || 'close';
-  const validOctaves = getValidOctavesForChord(root, rootAccidental, quality, inversion, clef, voicing);
+  const omit5 = targetChord.omit5 || false;
+  const validOctaves = getValidOctavesForChord(root, rootAccidental, quality, inversion, clef, voicing, omit5);
   if (validOctaves.length === 1) {
-    const chord = buildChord(root, rootAccidental, quality, inversion, clef, tier, validOctaves[0], voicing);
+    const chord = buildChord(root, rootAccidental, quality, inversion, clef, tier, validOctaves[0], voicing, omit5);
     if (targetChord.keySignature) chord.keySignature = targetChord.keySignature;
     return chord;
   }
@@ -557,7 +593,7 @@ export function alignChordToTargetOctave(
   let minScore = Infinity;
 
   for (const oct of validOctaves) {
-    const candidateNotes = constructChordNotes(root, rootAccidental, quality, inversion, oct, voicing);
+    const candidateNotes = constructChordNotes(root, rootAccidental, quality, inversion, oct, voicing, omit5);
     const candidateLowestMidi = noteToMidi(candidateNotes[0]);
     const candidateHighestMidi = noteToMidi(candidateNotes[candidateNotes.length - 1]);
     const candidateCenterMidi = (candidateLowestMidi + candidateHighestMidi) / 2;
@@ -572,7 +608,7 @@ export function alignChordToTargetOctave(
     }
   }
 
-  const alignedChord = buildChord(root, rootAccidental, quality, inversion, clef, tier, bestOctave, voicing);
+  const alignedChord = buildChord(root, rootAccidental, quality, inversion, clef, tier, bestOctave, voicing, omit5);
   if (targetChord.keySignature) {
     alignedChord.keySignature = targetChord.keySignature;
   }

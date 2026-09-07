@@ -18,7 +18,9 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
   const qualityStr = CHORD_FORMULAS[target.quality].shortName;
   const isDropVoicing = target.voicing === 'drop2' || target.voicing === 'drop3';
   const invStr = isDropVoicing 
-    ? (target.voicing === 'drop2' ? 'Drop-2 Voicing' : 'Drop-3 Voicing')
+    ? (target.voicing === 'drop2' 
+        ? (target.omit5 ? 'Drop-2 (omit 5)' : 'Drop-2 Voicing') 
+        : (target.omit5 ? 'Drop-3 (omit 5)' : 'Drop-3 Voicing'))
     : formatInversionName(target.inversion, 'full');
 
   // 1. Correct Option
@@ -32,7 +34,8 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
       accidental: target.rootAccidental,
       quality: target.quality,
       inversion: target.inversion,
-      voicing: target.voicing
+      voicing: target.voicing,
+      omit5: target.omit5
     }
   });
 
@@ -63,7 +66,8 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
           accidental: target.rootAccidental,
           quality: trapQuality,
           inversion: target.inversion,
-          voicing: target.voicing
+          voicing: target.voicing,
+          omit5: target.omit5
         }
       });
     }
@@ -86,7 +90,8 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
           accidental: target.rootAccidental,
           quality: target.quality,
           inversion: trapInv,
-          voicing: target.voicing
+          voicing: target.voicing,
+          omit5: target.omit5
         }
       });
     }
@@ -114,7 +119,8 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
           accidental: target.rootAccidental,
           quality: trapQual,
           inversion: trapInv,
-          voicing: target.voicing
+          voicing: target.voicing,
+          omit5: target.omit5
         }
       });
     }
@@ -142,7 +148,8 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
           accidental: target.rootAccidental,
           quality: fallbackQual,
           inversion: fallbackInv,
-          voicing: target.voicing
+          voicing: target.voicing,
+          omit5: target.omit5
         }
       });
     }

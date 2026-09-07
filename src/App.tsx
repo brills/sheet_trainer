@@ -328,6 +328,11 @@ export const App: React.FC = () => {
     if (!currentChord) return;
 
     const isDrop = currentChord.voicing === 'drop2' || currentChord.voicing === 'drop3';
+    const dropLabel = isDrop 
+      ? (currentChord.voicing === 'drop2' 
+          ? (currentChord.omit5 ? 'Drop-2 (omit 5)' : 'Drop-2') 
+          : (currentChord.omit5 ? 'Drop-3 (omit 5)' : 'Drop-3'))
+      : '';
     const isRootMatch = input.root === currentChord.root;
     const isAccMatch = input.accidental === currentChord.rootAccidental;
     const isQualityMatch = input.quality === currentChord.quality;
@@ -369,14 +374,14 @@ export const App: React.FC = () => {
       {
         slot: 'inversion',
         label: isDrop ? 'Voicing' : 'Inv',
-        userVal: isDrop ? (currentChord.voicing === 'drop2' ? 'Drop-2' : 'Drop-3') : formatInversionName(input.inversion, 'short'),
-        correctVal: isDrop ? (currentChord.voicing === 'drop2' ? 'Drop-2' : 'Drop-3') : formatInversionName(currentChord.inversion, 'short'),
+        userVal: isDrop ? dropLabel : formatInversionName(input.inversion, 'short'),
+        correctVal: isDrop ? dropLabel : formatInversionName(currentChord.inversion, 'short'),
         isMatch: isInvMatch
       }
     ];
 
     const userStr = isDrop
-      ? `${formatNoteName(input.root, input.accidental)}${CHORD_FORMULAS[input.quality].shortName} (${currentChord.voicing === 'drop2' ? 'Drop-2' : 'Drop-3'})`
+      ? `${formatNoteName(input.root, input.accidental)}${CHORD_FORMULAS[input.quality].shortName} (${dropLabel})`
       : `${formatNoteName(input.root, input.accidental)}${CHORD_FORMULAS[input.quality].shortName} (${formatInversionName(input.inversion, 'short')})`;
 
     evaluateSubmission(isCorrect, userStr, currentChord.displayName, {

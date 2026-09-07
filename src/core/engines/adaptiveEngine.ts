@@ -78,7 +78,10 @@ export function selectNextChord(
       const inversion = parts[2] as Inversion;
       const validRoots = getValidRootsForQuality(quality, tier, clef);
       const picked = validRoots[Math.floor(Math.random() * validRoots.length)];
-      const chord = buildChord(picked.root, picked.accidental, quality, inversion, clef, tier);
+      const isDropVoicing = config.voicing === 'drop2' || config.voicing === 'drop3';
+      const canOmit5 = isDropVoicing && (quality === 'maj7' || quality === 'dom7' || quality === 'min7');
+      const omit5 = canOmit5 && Math.random() < 0.45;
+      const chord = buildChord(picked.root, picked.accidental, quality, inversion, clef, tier, undefined, undefined, omit5);
       if (keySignature) chord.keySignature = keySignature;
       return chord;
     }

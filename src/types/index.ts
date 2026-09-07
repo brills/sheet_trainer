@@ -62,6 +62,7 @@ export interface ChordDefinition {
   tier: number; // e.g. 1.1, 1.2, 3.1
   displayName: string; // e.g. "Cm / 1st Inv"
   voicing?: VoicingType;
+  omit5?: boolean;
   keySignature?: KeySignatureDefinition;
 }
 
@@ -152,6 +153,7 @@ export interface MultipleChoiceOption {
     quality: ChordQuality;
     inversion: Inversion;
     voicing?: VoicingType;
+    omit5?: boolean;
   };
   arpeggioData?: {
     root: NoteLetter;

@@ -309,6 +309,13 @@ export function getDiatonicChordsForKey(
         const chord = buildChord(rootLetter, rootAccidental, quality, inversion, clef, tier);
         chord.keySignature = key;
         chords.push(chord);
+
+        const isDrop = config.voicing === 'drop2' || config.voicing === 'drop3';
+        if (isDrop && (quality === 'maj7' || quality === 'dom7' || quality === 'min7')) {
+          const omit5Chord = buildChord(rootLetter, rootAccidental, quality, inversion, clef, tier, undefined, undefined, true);
+          omit5Chord.keySignature = key;
+          chords.push(omit5Chord);
+        }
       }
     }
   }

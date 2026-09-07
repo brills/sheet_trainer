@@ -1,5 +1,5 @@
 import { NOTE_LETTERS, noteToMidi, transposePitch, formatNoteName } from '../src/core/theory/notes';
-import { buildChord, CHORD_TIERS, CHORD_FORMULAS, getValidOctavesForChord, alignChordToTargetOctave } from '../src/core/theory/chords';
+import { buildChord, CHORD_TIERS, CHORD_FORMULAS, getValidOctavesForChord, alignChordToTargetOctave, generateRandomChordForTier } from '../src/core/theory/chords';
 import { buildArpeggio, ARPEGGIO_TIERS, getValidOctavesForArpeggio, alignArpeggioToTargetOctave } from '../src/core/theory/arpeggios';
 import { ChordInputStateMachine } from '../src/core/engines/stateMachine';
 import { calculatePatternWeight, checkTierPromotion, selectNextChord } from '../src/core/engines/adaptiveEngine';
@@ -224,12 +224,66 @@ assert(drop2Chord.notes[1].letter === 'C' && drop2Chord.notes[2].letter === 'E' 
 const drop2Distractors = generateChordMultipleChoiceOptions(drop2Chord);
 assert(drop2Distractors.every(d => d.sublabel === 'Drop-2 Voicing'), 'Tier 3.6 (Drop-2): ALL 4 options strictly have "Drop-2 Voicing" sublabel');
 
+// Tier 3.6 (Drop-2, omit 5): 3-note shell/drop voicings
+const drop2Omit5 = buildChord('C', 'natural', 'maj7', 'root', 'treble', 3.6, 4, 'drop2', true);
+assert(drop2Omit5.notes.length === 3, 'Drop-2 Cmaj7 (omit 5) has exactly 3 notes (5th omitted)');
+assert(
+  drop2Omit5.notes[0].letter === 'C' && drop2Omit5.notes[0].octave === 4 &&
+  drop2Omit5.notes[1].letter === 'E' && drop2Omit5.notes[1].octave === 4 &&
+  drop2Omit5.notes[2].letter === 'B' && drop2Omit5.notes[2].octave === 4,
+  'Drop-2 Cmaj7 (omit 5) notes are C4 - E4 - B4'
+);
+assert(drop2Omit5.displayName.includes('Drop-2, omit 5'), 'Drop-2 (omit 5) displayName formatted correctly');
+
+const drop2Omit5Distractors = generateChordMultipleChoiceOptions(drop2Omit5);
+assert(drop2Omit5Distractors.every(d => d.sublabel === 'Drop-2 (omit 5)'), 'Drop-2 (omit 5): ALL 4 options strictly have "Drop-2 (omit 5)" sublabel');
+assert(drop2Omit5Distractors.every(d => d.chordData?.omit5 === true), 'Drop-2 (omit 5): distractor chordData preserves omit5 for diff reconstruction');
+
+// 1st Inversion Drop-2 (omit 5)
+const drop2Inv1Omit5 = buildChord('C', 'natural', 'maj7', '1st', 'treble', 3.6, 4, 'drop2', true);
+assert(
+  drop2Inv1Omit5.notes[0].letter === 'B' && drop2Inv1Omit5.notes[0].octave === 3 &&
+  drop2Inv1Omit5.notes[1].letter === 'E' && drop2Inv1Omit5.notes[1].octave === 4 &&
+  drop2Inv1Omit5.notes[2].letter === 'C' && drop2Inv1Omit5.notes[2].octave === 5,
+  'Drop-2 1st Inv Cmaj7 (omit 5) notes are B3 - E4 - C5'
+);
+
 // Tier 3.7 (Drop-3 Voicings): note construction & distractors
 const drop3Chord = buildChord('C', 'natural', 'maj7', 'root', 'treble', 3.7, 4, 'drop3');
 assert(drop3Chord.notes[0].letter === 'E' && drop3Chord.notes[0].octave === 3, 'Drop-3 Cmaj7 (Root Close C4-E4-G4-B4) drops 3rd voice from top to E3 in bass');
 assert(drop3Chord.notes[1].letter === 'C' && drop3Chord.notes[2].letter === 'G' && drop3Chord.notes[3].letter === 'B', 'Drop-3 Cmaj7 notes are E3 - C4 - G4 - B4');
 const drop3Distractors = generateChordMultipleChoiceOptions(drop3Chord);
 assert(drop3Distractors.every(d => d.sublabel === 'Drop-3 Voicing'), 'Tier 3.7 (Drop-3): ALL 4 options strictly have "Drop-3 Voicing" sublabel');
+
+// Tier 3.7 (Drop-3, omit 5)
+const drop3Omit5 = buildChord('C', 'natural', 'maj7', 'root', 'treble', 3.7, 4, 'drop3', true);
+assert(drop3Omit5.notes.length === 3, 'Drop-3 Cmaj7 (omit 5) has exactly 3 notes');
+assert(
+  drop3Omit5.notes[0].letter === 'E' && drop3Omit5.notes[0].octave === 3 &&
+  drop3Omit5.notes[1].letter === 'C' && drop3Omit5.notes[1].octave === 4 &&
+  drop3Omit5.notes[2].letter === 'B' && drop3Omit5.notes[2].octave === 4,
+  'Drop-3 Cmaj7 (omit 5) notes are E3 - C4 - B4'
+);
+
+// Diff Stave Octave Alignment with omit 5
+const userGuessAligned = alignChordToTargetOctave('C', 'natural', 'min7', '1st', 'treble', 3.6, drop2Inv1Omit5);
+assert(userGuessAligned.notes.length === 3 && userGuessAligned.omit5 === true, 'User guess diff stave preserves target omit5 (3 notes)');
+assert(
+  userGuessAligned.notes[0].letter === 'B' && userGuessAligned.notes[0].accidental === 'flat' &&
+  userGuessAligned.notes[1].letter === 'E' && userGuessAligned.notes[1].accidental === 'flat' &&
+  userGuessAligned.notes[2].letter === 'C',
+  'User guess diff stave for Cm7 aligns to Bb3 - Eb4 - C5 against B3 - E4 - C5'
+);
+
+// Blended generation in Drop tiers
+let sawFullDrop = false;
+let sawOmit5Drop = false;
+for (let i = 0; i < 100; i++) {
+  const c = generateRandomChordForTier(3.6, 'treble');
+  if (c.omit5) sawOmit5Drop = true;
+  else sawFullDrop = true;
+}
+assert(sawFullDrop && sawOmit5Drop, 'Tier 3.6 blends both full 4-part drop voicings and 3-part omit-5 voicings');
 
 // Half-Diminished 7th (m7b5 / ø7) Tests
 const halfDimChord = buildChord('B', 'natural', 'half_dim7', 'root', 'treble', 3.1, 4);
