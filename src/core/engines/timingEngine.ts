@@ -12,8 +12,6 @@ export function getAutoAdvanceDelayMs(inputMode: InputMode, customDelayMs?: numb
   switch (inputMode) {
     case 'multiple_choice':
       return 1400; // Shorter delay for multiple choice
-    case 'shape_only':
-      return 1800; // Moderate delay for shape recognition
     case 'direct_entry':
     default:
       return 2600; // Generous delay for direct entry (reading text notation & slot breakdown)

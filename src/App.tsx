@@ -7,7 +7,6 @@ import {
   ArpeggioDefinition, 
   MultipleChoiceOption, 
   Inversion, 
-  ArpeggioContour, 
   NoteLetter, 
   Accidental, 
   ChordQuality,
@@ -31,7 +30,6 @@ import { NotationStage } from './components/NotationStage';
 import { StatsHUD } from './components/StatsHUD';
 import { SlotBufferInput } from './components/SlotBufferInput';
 import { MultipleChoicePad } from './components/MultipleChoicePad';
-import { ShapeReflexPad } from './components/ShapeReflexPad';
 import { KeymapLegendHUD } from './components/KeymapLegendHUD';
 import { TierSelector } from './components/TierSelector';
 import { AnalyticsView } from './components/AnalyticsView';
@@ -371,20 +369,6 @@ export const App: React.FC = () => {
     });
   };
 
-  const handleShapeReflexSelect = (value: Inversion | ArpeggioContour) => {
-    if (activeTrack === 'chords' && currentChord) {
-      const isCorrect = value === currentChord.inversion;
-      evaluateSubmission(isCorrect, String(value), currentChord.inversion, {
-        correctChord: currentChord
-      });
-    } else if (activeTrack === 'arpeggios' && currentArpeggio) {
-      const isCorrect = value === currentArpeggio.contour;
-      evaluateSubmission(isCorrect, String(value), currentArpeggio.contour, {
-        correctArpeggio: currentArpeggio
-      });
-    }
-  };
-
   // State Updates from UI
   const handleClefChange = (clef: any) => {
     const next: AppState = {
@@ -584,15 +568,6 @@ export const App: React.FC = () => {
                 <MultipleChoicePad
                   options={multipleChoiceOptions}
                   onSelect={handleMultipleChoiceSelect}
-                  disabled={flashState === 'feedback'}
-                  onKeyPressFeedback={setLastPressedKey}
-                />
-              )}
-
-              {trackSettings.inputMode === 'shape_only' && (
-                <ShapeReflexPad
-                  type={activeTrack === 'chords' ? 'inversion' : 'contour'}
-                  onSelect={handleShapeReflexSelect}
                   disabled={flashState === 'feedback'}
                   onKeyPressFeedback={setLastPressedKey}
                 />

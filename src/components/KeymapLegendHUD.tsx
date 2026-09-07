@@ -3,7 +3,7 @@ import { Keyboard } from 'lucide-react';
 
 interface KeymapLegendHUDProps {
   lastPressedKey?: string | null;
-  mode?: 'direct_entry' | 'multiple_choice' | 'shape_only';
+  mode?: 'direct_entry' | 'multiple_choice';
 }
 
 export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
@@ -90,16 +90,6 @@ export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
               Option [{i + 1}]
             </span>
           ))}
-        </div>
-      )}
-
-      {mode === 'shape_only' && (
-        <div className="flex items-center gap-2">
-          <span>Inversions:</span>
-          <span className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-200">[0/R] Root</span>
-          <span className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-200">[1] 1st</span>
-          <span className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-200">[2] 2nd</span>
-          <span className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-200">[3] 3rd</span>
         </div>
       )}
     </div>

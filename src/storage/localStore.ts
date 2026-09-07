@@ -17,7 +17,7 @@ export const DEFAULT_APP_STATE: AppState = {
     },
     arpeggios: {
       clef: 'treble',
-      inputMode: 'shape_only',
+      inputMode: 'multiple_choice',
       flashMode: 'fixed',
       flashDurationMs: 500,
       keyMode: 'progressive',

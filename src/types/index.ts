@@ -1,5 +1,5 @@
 export type Clef = 'treble' | 'bass' | 'grand';
-export type InputMode = 'direct_entry' | 'multiple_choice' | 'shape_only';
+export type InputMode = 'direct_entry' | 'multiple_choice';
 export type FlashMode = 'fixed' | 'adaptive';
 export type TrackType = 'chords' | 'arpeggios';
 export type AppRoute = 'chords' | 'arpeggios' | 'analytics' | 'settings';

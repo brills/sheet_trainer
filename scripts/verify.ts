@@ -142,7 +142,6 @@ console.log('\n--- 7. Feedback & Reading Delays ---');
 import { getAutoAdvanceDelayMs } from '../src/core/engines/timingEngine';
 
 assert(getAutoAdvanceDelayMs('multiple_choice') === 1400, 'Multiple choice delay is 1400ms');
-assert(getAutoAdvanceDelayMs('shape_only') === 1800, 'Shape reflex delay is 1800ms');
 assert(getAutoAdvanceDelayMs('direct_entry') === 2600, 'Direct entry delay is 2600ms (sufficient to parse text notation)');
 assert(getAutoAdvanceDelayMs('direct_entry', 3500) === 3500, 'Custom relaxed delay is 3500ms');
 assert(getAutoAdvanceDelayMs('direct_entry', -1) === -1, 'Manual acknowledgment returns -1');

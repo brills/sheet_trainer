@@ -104,7 +104,6 @@ export const TrackHeader: React.FC<TrackHeaderProps> = ({
           >
             <option value="direct_entry" className="bg-slate-900 text-slate-200">⌨️ Direct Entry</option>
             <option value="multiple_choice" className="bg-slate-900 text-slate-200">🎴 Multiple Choice</option>
-            <option value="shape_only" className="bg-slate-900 text-slate-200">⚡ Shape Reflex</option>
           </select>
         </div>
 
