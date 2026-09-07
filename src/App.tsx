@@ -204,32 +204,35 @@ export const App: React.FC = () => {
     };
     logTrial(log);
 
-    // 3. Update recent tier trials & check tier promotion
+    // 3. Update recent tier trials & check tier mastery (NO auto-promotion)
     const newRecent = [{ isCorrect, latencyMs }, ...recentTrials.slice(0, 19)];
     setRecentTrials(newRecent);
 
     let nextProgState = updatedState;
-    let didPromoteTier = false;
+    let didMasterTier = false;
 
     const promotion = checkTierPromotion(activeTrack, trackProgress.currentTier, newRecent);
     if (promotion.shouldPromote && promotion.nextTier) {
-      didPromoteTier = true;
-      setPromotionNotification(`🎉 Tier Mastery Achieved! Unlocked Tier ${promotion.nextTier}`);
-      const updatedTiers = Array.from(new Set([...trackProgress.masteredTiers, trackProgress.currentTier]));
-      nextProgState = {
-        ...nextProgState,
-        progress: {
-          ...nextProgState.progress,
-          [activeTrack]: {
-            ...nextProgState.progress[activeTrack],
-            currentTier: promotion.nextTier,
-            masteredTiers: updatedTiers
+      const isNewlyMastered = !trackProgress.masteredTiers.includes(trackProgress.currentTier);
+      if (isNewlyMastered) {
+        didMasterTier = true;
+        const updatedTiers = Array.from(new Set([...trackProgress.masteredTiers, trackProgress.currentTier]));
+        // Keep currentTier unchanged! Add to masteredTiers.
+        nextProgState = {
+          ...nextProgState,
+          progress: {
+            ...nextProgState.progress,
+            [activeTrack]: {
+              ...nextProgState.progress[activeTrack],
+              masteredTiers: updatedTiers
+            }
           }
-        }
-      };
+        };
+        setPromotionNotification(`🎉 Tier ${trackProgress.currentTier} Mastered! Tier ${promotion.nextTier} is now unlocked.`);
+      }
     }
 
-    // 4. Update recent key trials & check Key Stage Progression (never force-changing active key)
+    // 4. Update recent key trials & check Key Stage Progression (NO auto-promotion)
     const newKeyRecent = [{ isCorrect, latencyMs }, ...recentKeyTrials.slice(0, 19)];
     setRecentKeyTrials(newKeyRecent);
 
@@ -271,11 +274,11 @@ export const App: React.FC = () => {
             }
           };
 
-          if (!didPromoteTier) {
+          if (!didMasterTier) {
             if (unlockedNewStage && nextStage !== null) {
-              setPromotionNotification(`🎉 Key Mastery: ${currentKey.name} mastered! Unlocked ${KEY_STAGES[nextStage].title} in Circle of Fifths.`);
+              setPromotionNotification(`🎉 Key Mastered: ${currentKey.name}! Unlocked ${KEY_STAGES[nextStage].title} in Circle of Fifths.`);
             } else {
-              setPromotionNotification(`🎉 Key Mastery: ${currentKey.name} mastered!`);
+              setPromotionNotification(`🎉 Key Mastered: ${currentKey.name}!`);
             }
           }
         }
@@ -492,6 +495,9 @@ export const App: React.FC = () => {
     ? Math.round(recentTrials.reduce((sum, t) => sum + t.latencyMs, 0) / recentTrials.length)
     : 0;
 
+  const isTierMastered = (trackProgress.masteredTiers || []).includes(trackProgress.currentTier);
+  const isKeyMastered = (trackProgress.masteredKeys || []).includes(currentKey.id);
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
       {/* Navigation Bar */}
@@ -510,6 +516,7 @@ export const App: React.FC = () => {
           setCurrentRoute(track);
         }}
         activeKey={currentKey}
+        isKeyMastered={isKeyMastered}
         onOpenKeyModal={() => setIsKeyModalOpen(true)}
       />
 
@@ -545,6 +552,7 @@ export const App: React.FC = () => {
               inputMode={trackSettings.inputMode}
               onInputModeChange={handleInputModeChange}
               currentTier={trackProgress.currentTier}
+              isMastered={isTierMastered}
               onOpenTierModal={() => setIsTierModalOpen(true)}
             />
 
@@ -554,6 +562,7 @@ export const App: React.FC = () => {
               chord={currentChord || undefined}
               arpeggio={currentArpeggio || undefined}
               keySignature={currentKey}
+              isKeyMastered={isKeyMastered}
               isFeedback={isFeedback}
               lastResult={lastResult}
               darkMode={true}

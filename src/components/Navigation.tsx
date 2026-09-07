@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppRoute, TrackType, KeySignatureDefinition } from '../types';
-import { Music, Activity, BarChart2, Settings as SettingsIcon, Compass } from 'lucide-react';
+import { Music, Activity, BarChart2, Settings as SettingsIcon, Compass, CheckCircle2 } from 'lucide-react';
 
 interface NavigationProps {
   currentRoute: AppRoute;
@@ -8,6 +8,7 @@ interface NavigationProps {
   activeTrack: TrackType;
   onTrackChange: (track: TrackType) => void;
   activeKey?: KeySignatureDefinition;
+  isKeyMastered?: boolean;
   onOpenKeyModal?: () => void;
 }
 
@@ -17,6 +18,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   activeTrack,
   onTrackChange,
   activeKey,
+  isKeyMastered = false,
   onOpenKeyModal
 }) => {
   const accCount = activeKey
@@ -84,6 +86,9 @@ export const Navigation: React.FC<NavigationProps> = ({
             >
               <Compass className="w-3.5 h-3.5 text-emerald-400" />
               <span>{activeKey.name}</span>
+              {isKeyMastered && (
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              )}
               <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-slate-950 border border-slate-800 text-emerald-400">
                 {accCount}
               </span>

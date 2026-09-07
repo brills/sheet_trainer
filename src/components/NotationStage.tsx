@@ -9,6 +9,7 @@ interface NotationStageProps {
   chord?: ChordDefinition;
   arpeggio?: ArpeggioDefinition;
   keySignature?: KeySignatureDefinition;
+  isKeyMastered?: boolean;
   isFeedback: boolean;
   lastResult?: TrialFeedback | null;
   darkMode?: boolean;
@@ -21,6 +22,7 @@ export const NotationStage: React.FC<NotationStageProps> = ({
   chord,
   arpeggio,
   keySignature,
+  isKeyMastered = false,
   isFeedback,
   lastResult,
   darkMode = true,
@@ -147,6 +149,9 @@ export const NotationStage: React.FC<NotationStageProps> = ({
           >
             <Compass className="w-3.5 h-3.5 text-emerald-400 group-hover:rotate-45 transition-transform" />
             <span>Key: {activeKey.name}</span>
+            {isKeyMastered && (
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+            )}
             {accBadge && (
               <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-slate-950/80 border border-slate-700/80 text-emerald-300">
                 {accBadge}
