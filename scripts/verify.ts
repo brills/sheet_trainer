@@ -242,6 +242,17 @@ assert(gDiatonic.some(c => c.root === 'G' && c.quality === 'major'), 'G Major tr
 assert(gDiatonic.some(c => c.root === 'D' && c.quality === 'major'), 'D Major triad (V) is diatonic in G / Em');
 assert(gDiatonic.some(c => c.root === 'E' && c.quality === 'minor'), 'E Minor triad (vi / i) is diatonic in G / Em');
 
+// Test Key Context Stability: chords stay firmly in the active key context
+let allKeyGChords = true;
+for (let i = 0; i < 30; i++) {
+  const chord = selectNextChord(1.1, 'treble', mockProgress, keyG);
+  if (!chord.keySignature || chord.keySignature.id !== 'G') {
+    allKeyGChords = false;
+    break;
+  }
+}
+assert(allKeyGChords, 'Chords generated in active key context strictly preserve the active Key Signature across all trials');
+
 // Test Key Stage Promotion
 const stagePromoShort = checkKeyStagePromotion(0, Array(19).fill({ isCorrect: true, latencyMs: 1600 }));
 assert(!stagePromoShort.shouldPromote, 'Key stage promotion requires at least 20 trials');

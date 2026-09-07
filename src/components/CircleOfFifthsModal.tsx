@@ -62,26 +62,13 @@ export const CircleOfFifthsModal: React.FC<CircleOfFifthsModalProps> = ({
             onClick={() => onKeyModeChange('progressive')}
             className={`
               flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5
-              ${keyMode === 'progressive'
+              ${keyMode !== 'all_unlocked'
                 ? 'bg-emerald-500 text-slate-950 shadow-md'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'}
             `}
           >
             <Zap className="w-3.5 h-3.5" />
-            <span>Progressive Auto-Unlock</span>
-          </button>
-
-          <button
-            onClick={() => onKeyModeChange('locked')}
-            className={`
-              flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5
-              ${keyMode === 'locked'
-                ? 'bg-sky-500 text-slate-950 shadow-md'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'}
-            `}
-          >
-            <Lock className="w-3.5 h-3.5" />
-            <span>Locked Key Mode</span>
+            <span>Circle of Fifths Progression</span>
           </button>
 
           <button
@@ -89,12 +76,12 @@ export const CircleOfFifthsModal: React.FC<CircleOfFifthsModalProps> = ({
             className={`
               flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5
               ${keyMode === 'all_unlocked'
-                ? 'bg-indigo-500 text-slate-950 shadow-md'
+                ? 'bg-emerald-500 text-slate-950 shadow-md'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'}
             `}
           >
             <Award className="w-3.5 h-3.5" />
-            <span>Free All-Keys Mode</span>
+            <span>Unlock All 15 Keys</span>
           </button>
         </div>
 
