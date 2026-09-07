@@ -9,14 +9,15 @@ import {
 import { 
   generateRandomChordForTier, 
   buildChord, 
-  CHORD_TIERS 
+  CHORD_TIERS,
+  getValidRootsForQuality
 } from '../theory/chords';
 import { 
   generateRandomArpeggioForTier, 
   buildArpeggio, 
-  ARPEGGIO_TIERS 
+  ARPEGGIO_TIERS,
+  getValidArpeggioRootsForQuality
 } from '../theory/arpeggios';
-import { NOTE_LETTERS } from '../theory/notes';
 
 export function calculatePatternWeight(stats?: PatternStats): number {
   if (!stats || stats.totalSeen === 0) {
@@ -32,7 +33,6 @@ export function selectNextChord(
   clef: Clef,
   progress: TrackProgress
 ): ChordDefinition {
-  const config = CHORD_TIERS[tier] || CHORD_TIERS[1.1];
   const matrix = progress.weaknessMatrix;
 
   // 40% chance to target a known weakness in this tier if available
@@ -48,9 +48,9 @@ export function selectNextChord(
     if (parts.length >= 3) {
       const quality = parts[1] as any;
       const inversion = parts[2] as any;
-      const root = NOTE_LETTERS[Math.floor(Math.random() * NOTE_LETTERS.length)];
-      const rootAccidental = config.accidentals[Math.floor(Math.random() * config.accidentals.length)];
-      return buildChord(root, rootAccidental, quality, inversion, clef, tier);
+      const validRoots = getValidRootsForQuality(quality, tier, clef);
+      const picked = validRoots[Math.floor(Math.random() * validRoots.length)];
+      return buildChord(picked.root, picked.accidental, quality, inversion, clef, tier);
     }
   }
 
@@ -76,10 +76,10 @@ export function selectNextArpeggio(
     if (parts.length >= 3) {
       const quality = parts[1] as any;
       const contour = parts[2] as any;
-      const root = NOTE_LETTERS[Math.floor(Math.random() * NOTE_LETTERS.length)];
-      const rootAccidental = config.accidentals[Math.floor(Math.random() * config.accidentals.length)];
       const startingDegree = config.startingDegrees[Math.floor(Math.random() * config.startingDegrees.length)];
-      return buildArpeggio(root, rootAccidental, quality, contour, startingDegree, clef, tier);
+      const validRoots = getValidArpeggioRootsForQuality(quality, tier, clef);
+      const picked = validRoots[Math.floor(Math.random() * validRoots.length)];
+      return buildArpeggio(picked.root, picked.accidental, quality, contour, startingDegree, clef, tier);
     }
   }
 

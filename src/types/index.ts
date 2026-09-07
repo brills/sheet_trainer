@@ -4,7 +4,7 @@ export type FlashMode = 'fixed' | 'adaptive';
 export type TrackType = 'chords' | 'arpeggios';
 export type AppRoute = 'chords' | 'arpeggios' | 'analytics' | 'settings';
 
-export type Accidental = 'natural' | 'sharp' | 'flat';
+export type Accidental = 'natural' | 'sharp' | 'flat' | 'double_sharp' | 'double_flat';
 export type NoteLetter = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
 
 export type ChordQuality = 

@@ -48,6 +48,31 @@ assert(cMaj2nd.notes[0].letter === 'G' && cMaj2nd.notes[1].letter === 'C' && cMa
 const c7th3rd = buildChord('C', 'natural', 'dom7', '3rd', 'treble', 3.2);
 assert(c7th3rd.notes[0].letter === 'B' && c7th3rd.notes[0].accidental === 'flat', 'C7 3rd Inv has Bb in bass');
 
+// Gb Maj vs G min vs Gb min tests
+const gbMaj = buildChord('G', 'flat', 'major', 'root', 'treble', 1.1);
+assert(
+  gbMaj.notes[0].letter === 'G' && gbMaj.notes[0].accidental === 'flat' &&
+  gbMaj.notes[1].letter === 'B' && gbMaj.notes[1].accidental === 'flat' &&
+  gbMaj.notes[2].letter === 'D' && gbMaj.notes[2].accidental === 'flat',
+  'Gb Major triad is Gb - Bb - Db'
+);
+
+const gMin = buildChord('G', 'natural', 'minor', 'root', 'treble', 1.1);
+assert(
+  gMin.notes[0].letter === 'G' && gMin.notes[0].accidental === 'natural' &&
+  gMin.notes[1].letter === 'B' && gMin.notes[1].accidental === 'flat' &&
+  gMin.notes[2].letter === 'D' && gMin.notes[2].accidental === 'natural',
+  'G minor triad is G - Bb - D'
+);
+
+const gbMin = buildChord('G', 'flat', 'minor', 'root', 'treble', 1.1);
+assert(
+  gbMin.notes[0].letter === 'G' && gbMin.notes[0].accidental === 'flat' &&
+  gbMin.notes[1].letter === 'B' && gbMin.notes[1].accidental === 'double_flat' &&
+  gbMin.notes[2].letter === 'D' && gbMin.notes[2].accidental === 'flat',
+  'Gb minor triad has B double-flat (Gb - Bbb - Db)'
+);
+
 // 3. Arpeggio Tests
 console.log('\n--- 3. Arpeggio Contours ---');
 const gAsc = buildArpeggio('G', 'natural', 'major', 'ascending', 'root', 'treble', 1.1);

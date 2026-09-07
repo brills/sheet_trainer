@@ -354,13 +354,37 @@ export const CHORD_TIERS: Record<number, TierConfig> = {
   }
 };
 
+export function getValidRootsForQuality(quality: ChordQuality, tier: number, clef: Clef = 'treble'): { root: NoteLetter, accidental: Accidental }[] {
+  const config = CHORD_TIERS[tier] || CHORD_TIERS[1.1];
+  const candidates: { root: NoteLetter, accidental: Accidental }[] = [];
+  
+  for (const root of NOTE_LETTERS) {
+    for (const accidental of config.accidentals) {
+      const chord = buildChord(root, accidental, quality, 'root', clef, tier);
+      if (tier < 3.0) {
+        // For basic triads (Tiers 1 & 2), maintain standard single-accidental notation
+        const hasDouble = chord.notes.some(n => n.accidental === 'double_sharp' || n.accidental === 'double_flat');
+        if (!hasDouble) {
+          candidates.push({ root, accidental });
+        }
+      } else {
+        // For advanced/7th tiers, allow double accidentals (like C°7)
+        candidates.push({ root, accidental });
+      }
+    }
+  }
+
+  // Fallback if empty
+  return candidates.length > 0 ? candidates : [{ root: 'C', accidental: 'natural' }];
+}
+
 export function generateRandomChordForTier(tier: number, clef: Clef): ChordDefinition {
   const config = CHORD_TIERS[tier] || CHORD_TIERS[1.1];
   
-  const root = NOTE_LETTERS[Math.floor(Math.random() * NOTE_LETTERS.length)];
-  const rootAccidental = config.accidentals[Math.floor(Math.random() * config.accidentals.length)];
   const quality = config.qualities[Math.floor(Math.random() * config.qualities.length)];
   const inversion = config.inversions[Math.floor(Math.random() * config.inversions.length)];
+  const validRoots = getValidRootsForQuality(quality, tier, clef);
+  const picked = validRoots[Math.floor(Math.random() * validRoots.length)];
 
-  return buildChord(root, rootAccidental, quality, inversion, clef, tier);
+  return buildChord(picked.root, picked.accidental, quality, inversion, clef, tier);
 }

@@ -14,7 +14,9 @@ export const NATURAL_SEMITONES: Record<NoteLetter, number> = {
 
 export function accidentalToSemitones(acc: Accidental): number {
   switch (acc) {
+    case 'double_sharp': return 2;
     case 'sharp': return 1;
+    case 'double_flat': return -2;
     case 'flat': return -1;
     case 'natural': return 0;
   }
@@ -22,7 +24,9 @@ export function accidentalToSemitones(acc: Accidental): number {
 
 export function accidentalSymbol(acc: Accidental): string {
   switch (acc) {
+    case 'double_sharp': return '𝄪';
     case 'sharp': return '♯';
+    case 'double_flat': return '𝄫';
     case 'flat': return '♭';
     case 'natural': return '';
   }
@@ -30,7 +34,9 @@ export function accidentalSymbol(acc: Accidental): string {
 
 export function accidentalToVexFlow(acc: Accidental): string | null {
   switch (acc) {
+    case 'double_sharp': return '##';
     case 'sharp': return '#';
+    case 'double_flat': return 'bb';
     case 'flat': return 'b';
     case 'natural': return 'n';
     default: return null;
@@ -67,10 +73,13 @@ export function transposePitch(note: NotePitch, semitones: number, degreeStep: n
   const diff = desiredMidi - naturalTargetMidi;
 
   let acc: Accidental = 'natural';
-  if (diff === 1) acc = 'sharp';
+  if (diff === 0) acc = 'natural';
+  else if (diff === 1) acc = 'sharp';
+  else if (diff === 2) acc = 'double_sharp';
   else if (diff === -1) acc = 'flat';
-  else if (diff >= 2) acc = 'sharp';
-  else if (diff <= -2) acc = 'flat';
+  else if (diff === -2) acc = 'double_flat';
+  else if (diff > 2) acc = 'double_sharp';
+  else if (diff < -2) acc = 'double_flat';
 
   return {
     letter: targetLetter,

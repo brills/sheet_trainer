@@ -218,14 +218,35 @@ export function buildArpeggio(
   };
 }
 
+export function getValidArpeggioRootsForQuality(quality: ChordQuality, tier: number, clef: Clef = 'treble'): { root: NoteLetter, accidental: Accidental }[] {
+  const config = ARPEGGIO_TIERS[tier] || ARPEGGIO_TIERS[1.1];
+  const candidates: { root: NoteLetter, accidental: Accidental }[] = [];
+  
+  for (const root of NOTE_LETTERS) {
+    for (const accidental of config.accidentals) {
+      const arp = buildArpeggio(root, accidental, quality, 'ascending', 'root', clef, tier);
+      if (tier < 3.0) {
+        const hasDouble = arp.notes.some(n => n.accidental === 'double_sharp' || n.accidental === 'double_flat');
+        if (!hasDouble) {
+          candidates.push({ root, accidental });
+        }
+      } else {
+        candidates.push({ root, accidental });
+      }
+    }
+  }
+
+  return candidates.length > 0 ? candidates : [{ root: 'C', accidental: 'natural' }];
+}
+
 export function generateRandomArpeggioForTier(tier: number, clef: Clef): ArpeggioDefinition {
   const config = ARPEGGIO_TIERS[tier] || ARPEGGIO_TIERS[1.1];
 
-  const root = NOTE_LETTERS[Math.floor(Math.random() * NOTE_LETTERS.length)];
-  const rootAccidental = config.accidentals[Math.floor(Math.random() * config.accidentals.length)];
   const quality = config.qualities[Math.floor(Math.random() * config.qualities.length)];
   const contour = config.contours[Math.floor(Math.random() * config.contours.length)];
   const startingDegree = config.startingDegrees[Math.floor(Math.random() * config.startingDegrees.length)];
+  const validRoots = getValidArpeggioRootsForQuality(quality, tier, clef);
+  const picked = validRoots[Math.floor(Math.random() * validRoots.length)];
 
-  return buildArpeggio(root, rootAccidental, quality, contour, startingDegree, clef, tier);
+  return buildArpeggio(picked.root, picked.accidental, quality, contour, startingDegree, clef, tier);
 }
