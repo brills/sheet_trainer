@@ -21,7 +21,8 @@ import { logTrial, getTrialsForTrack } from './storage/telemetryStore';
 import { PrecisionTimingEngine } from './core/engines/timingEngine';
 import { selectNextChord, selectNextArpeggio, checkTierPromotion } from './core/engines/adaptiveEngine';
 import { generateChordMultipleChoiceOptions, generateArpeggioMultipleChoiceOptions } from './core/engines/distractorEngine';
-import { buildChord, CHORD_FORMULAS, formatInversionName } from './core/theory/chords';
+import { CHORD_FORMULAS, formatInversionName, alignChordToTargetOctave } from './core/theory/chords';
+import { alignArpeggioToTargetOctave } from './core/theory/arpeggios';
 import { formatNoteName } from './core/theory/notes';
 import { KEY_SIGNATURES, KEY_STAGES } from './core/theory/keys';
 import { Navigation } from './components/Navigation';
@@ -334,13 +335,14 @@ export const App: React.FC = () => {
     const isInvMatch = input.inversion === currentChord.inversion;
     const isCorrect = isRootMatch && isAccMatch && isQualityMatch && isInvMatch;
 
-    const userChord = buildChord(
+    const userChord = alignChordToTargetOctave(
       input.root, 
       input.accidental, 
       input.quality, 
       input.inversion, 
       trackSettings.clef, 
-      trackProgress.currentTier
+      trackProgress.currentTier,
+      currentChord
     );
 
     const slotDiffs: SlotDiffItem[] = [
@@ -388,7 +390,37 @@ export const App: React.FC = () => {
     if (!selected) return;
     const correctOption = multipleChoiceOptions.find(o => o.isCorrect);
 
+    let userChord: ChordDefinition | undefined;
+    let userArpeggio: ArpeggioDefinition | undefined;
+
+    if (!selected.isCorrect) {
+      if (activeTrack === 'chords' && currentChord && selected.chordData) {
+        userChord = alignChordToTargetOctave(
+          selected.chordData.root,
+          selected.chordData.accidental,
+          selected.chordData.quality,
+          selected.chordData.inversion,
+          trackSettings.clef,
+          trackProgress.currentTier,
+          currentChord
+        );
+      } else if (activeTrack === 'arpeggios' && currentArpeggio && selected.arpeggioData) {
+        userArpeggio = alignArpeggioToTargetOctave(
+          selected.arpeggioData.root,
+          selected.arpeggioData.accidental,
+          selected.arpeggioData.quality,
+          selected.arpeggioData.contour,
+          selected.arpeggioData.startingDegree,
+          trackSettings.clef,
+          trackProgress.currentTier,
+          currentArpeggio
+        );
+      }
+    }
+
     evaluateSubmission(selected.isCorrect, selected.label, correctOption?.label || '', {
+      userChord,
+      userArpeggio,
       correctChord: currentChord || undefined,
       correctArpeggio: currentArpeggio || undefined
     });

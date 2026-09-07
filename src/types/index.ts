@@ -143,6 +143,19 @@ export interface MultipleChoiceOption {
   label: string;
   sublabel?: string;
   isCorrect: boolean;
+  chordData?: {
+    root: NoteLetter;
+    accidental: Accidental;
+    quality: ChordQuality;
+    inversion: Inversion;
+  };
+  arpeggioData?: {
+    root: NoteLetter;
+    accidental: Accidental;
+    quality: ChordQuality;
+    contour: ArpeggioContour;
+    startingDegree: 'root' | '3rd' | '5th';
+  };
 }
 
 export interface SlotDiffItem {

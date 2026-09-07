@@ -1,6 +1,6 @@
 import { NOTE_LETTERS, noteToMidi, transposePitch, formatNoteName } from '../src/core/theory/notes';
-import { buildChord, CHORD_TIERS, CHORD_FORMULAS, getValidOctavesForChord } from '../src/core/theory/chords';
-import { buildArpeggio, ARPEGGIO_TIERS, getValidOctavesForArpeggio } from '../src/core/theory/arpeggios';
+import { buildChord, CHORD_TIERS, CHORD_FORMULAS, getValidOctavesForChord, alignChordToTargetOctave } from '../src/core/theory/chords';
+import { buildArpeggio, ARPEGGIO_TIERS, getValidOctavesForArpeggio, alignArpeggioToTargetOctave } from '../src/core/theory/arpeggios';
 import { ChordInputStateMachine } from '../src/core/engines/stateMachine';
 import { calculatePatternWeight, checkTierPromotion, selectNextChord } from '../src/core/engines/adaptiveEngine';
 import { generateChordMultipleChoiceOptions, generateArpeggioMultipleChoiceOptions } from '../src/core/engines/distractorEngine';
@@ -93,6 +93,19 @@ assert(
   'Gb minor triad has B double-flat (Gb - Bbb - Db)'
 );
 
+// Octave Alignment Tests for Diff Pane
+const targetChordC4_1st = buildChord('C', 'natural', 'major', '1st', 'treble', 1.2, 4); // E4 - G4 - C5
+const alignedUserRoot = alignChordToTargetOctave('C', 'natural', 'major', 'root', 'treble', 1.1, targetChordC4_1st);
+assert(alignedUserRoot.notes[0].octave === 4, 'Aligning Root Position C to C4 1st Inv (E4-G4-C5) selects Octave 4 (C4-E4-G4)');
+
+const targetChordA3 = buildChord('A', 'natural', 'minor', 'root', 'treble', 1.1, 3); // A3 - C4 - E4
+const alignedToA3 = alignChordToTargetOctave('C', 'natural', 'major', 'root', 'treble', 1.1, targetChordA3);
+assert(alignedToA3.notes[0].octave === 4, 'Aligning C Major to A3 minor (A3-C4-E4) selects C4 (C4-E4-G4) to share register');
+
+const targetChordA4 = buildChord('A', 'natural', 'minor', 'root', 'treble', 1.1, 4); // A4 - C5 - E5
+const alignedToA4 = alignChordToTargetOctave('C', 'natural', 'major', 'root', 'treble', 1.1, targetChordA4);
+assert(alignedToA4.notes[0].octave === 5, 'Aligning C Major to A4 minor (A4-C5-E5) selects C5 (C5-E5-G5) to match high register');
+
 // 3. Arpeggio Tests & Multi-Octave Range
 console.log('\n--- 3. Arpeggio Contours & Range ---');
 const gAsc = buildArpeggio('G', 'natural', 'major', 'ascending', 'root', 'treble', 1.1, 4);
@@ -101,6 +114,14 @@ assert(gAsc.notes[0].letter === 'G' && gAsc.notes[3].letter === 'G' && gAsc.note
 
 const arpValidOctaves = getValidOctavesForArpeggio('C', 'natural', 'major', 'ascending', 'root', 'treble');
 assert(arpValidOctaves.length > 0 && arpValidOctaves.includes(4), 'Arpeggios have valid multi-octave bounds');
+
+const targetArp3 = buildArpeggio('A', 'natural', 'minor', 'ascending', 'root', 'treble', 1.1, 3); // A3 to A4
+const alignedArp3 = alignArpeggioToTargetOctave('C', 'natural', 'major', 'ascending', 'root', 'treble', 1.1, targetArp3);
+assert(alignedArp3.notes[0].octave === 4, 'Aligning C Major arpeggio to A3 minor arpeggio (A3-A4) selects Octave 4 (C4-C5)');
+
+const targetArp4 = buildArpeggio('A', 'natural', 'minor', 'ascending', 'root', 'treble', 1.1, 4); // A4 to A5
+const alignedArp4 = alignArpeggioToTargetOctave('C', 'natural', 'major', 'ascending', 'root', 'treble', 1.1, targetArp4);
+assert(alignedArp4.notes[0].octave === 5, 'Aligning C Major arpeggio to A4 minor arpeggio (A4-A5) selects Octave 5 (C5-C6)');
 
 // 4. Input State Machine Tests & Fixed Inversion Auto-Skip
 console.log('\n--- 4. Input State Machine & Fixed Inversions ---');

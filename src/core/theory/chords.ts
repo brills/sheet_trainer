@@ -428,3 +428,54 @@ export function generateRandomChordForTier(tier: number, clef: Clef): ChordDefin
 
   return buildChord(picked.root, picked.accidental, quality, inversion, clef, tier);
 }
+
+/**
+ * Builds a chord aligned in octave register with a target chord for accurate side-by-side diff.
+ */
+export function alignChordToTargetOctave(
+  root: NoteLetter,
+  rootAccidental: Accidental,
+  quality: ChordQuality,
+  inversion: Inversion,
+  clef: Clef,
+  tier: number,
+  targetChord: ChordDefinition
+): ChordDefinition {
+  const validOctaves = getValidOctavesForChord(root, rootAccidental, quality, inversion, clef);
+  if (validOctaves.length === 1) {
+    const chord = buildChord(root, rootAccidental, quality, inversion, clef, tier, validOctaves[0]);
+    if (targetChord.keySignature) chord.keySignature = targetChord.keySignature;
+    return chord;
+  }
+
+  const targetNotes = targetChord.notes;
+  const targetLowestMidi = noteToMidi(targetNotes[0]);
+  const targetHighestMidi = noteToMidi(targetNotes[targetNotes.length - 1]);
+  const targetCenterMidi = (targetLowestMidi + targetHighestMidi) / 2;
+
+  let bestOctave = validOctaves[0];
+  let minScore = Infinity;
+
+  for (const oct of validOctaves) {
+    const candidateNotes = constructChordNotes(root, rootAccidental, quality, inversion, oct);
+    const candidateLowestMidi = noteToMidi(candidateNotes[0]);
+    const candidateHighestMidi = noteToMidi(candidateNotes[candidateNotes.length - 1]);
+    const candidateCenterMidi = (candidateLowestMidi + candidateHighestMidi) / 2;
+
+    const lowestDiff = Math.abs(candidateLowestMidi - targetLowestMidi);
+    const centerDiff = Math.abs(candidateCenterMidi - targetCenterMidi);
+    const score = lowestDiff + centerDiff;
+
+    if (score < minScore) {
+      minScore = score;
+      bestOctave = oct;
+    }
+  }
+
+  const alignedChord = buildChord(root, rootAccidental, quality, inversion, clef, tier, bestOctave);
+  if (targetChord.keySignature) {
+    alignedChord.keySignature = targetChord.keySignature;
+  }
+  return alignedChord;
+}
+

@@ -293,3 +293,55 @@ export function generateRandomArpeggioForTier(tier: number, clef: Clef): Arpeggi
 
   return buildArpeggio(picked.root, picked.accidental, quality, contour, startingDegree, clef, tier);
 }
+
+/**
+ * Builds an arpeggio aligned in octave register with a target arpeggio for accurate side-by-side diff.
+ */
+export function alignArpeggioToTargetOctave(
+  root: NoteLetter,
+  rootAccidental: Accidental,
+  quality: ChordQuality,
+  contour: ArpeggioContour,
+  startingDegree: 'root' | '3rd' | '5th',
+  clef: Clef,
+  tier: number,
+  targetArpeggio: ArpeggioDefinition
+): ArpeggioDefinition {
+  const validOctaves = getValidOctavesForArpeggio(root, rootAccidental, quality, contour, startingDegree, clef);
+  if (validOctaves.length === 1) {
+    const arp = buildArpeggio(root, rootAccidental, quality, contour, startingDegree, clef, tier, validOctaves[0]);
+    if (targetArpeggio.keySignature) arp.keySignature = targetArpeggio.keySignature;
+    return arp;
+  }
+
+  const targetNotes = targetArpeggio.notes;
+  const targetLowestMidi = Math.min(...targetNotes.map(n => noteToMidi(n)));
+  const targetHighestMidi = Math.max(...targetNotes.map(n => noteToMidi(n)));
+  const targetCenterMidi = (targetLowestMidi + targetHighestMidi) / 2;
+
+  let bestOctave = validOctaves[0];
+  let minScore = Infinity;
+
+  for (const oct of validOctaves) {
+    const candidateNotes = constructArpeggioNotes(root, rootAccidental, quality, contour, startingDegree, oct);
+    const candidateLowestMidi = Math.min(...candidateNotes.map(n => noteToMidi(n)));
+    const candidateHighestMidi = Math.max(...candidateNotes.map(n => noteToMidi(n)));
+    const candidateCenterMidi = (candidateLowestMidi + candidateHighestMidi) / 2;
+
+    const lowestDiff = Math.abs(candidateLowestMidi - targetLowestMidi);
+    const centerDiff = Math.abs(candidateCenterMidi - targetCenterMidi);
+    const score = lowestDiff + centerDiff;
+
+    if (score < minScore) {
+      minScore = score;
+      bestOctave = oct;
+    }
+  }
+
+  const alignedArp = buildArpeggio(root, rootAccidental, quality, contour, startingDegree, clef, tier, bestOctave);
+  if (targetArpeggio.keySignature) {
+    alignedArp.keySignature = targetArpeggio.keySignature;
+  }
+  return alignedArp;
+}
+

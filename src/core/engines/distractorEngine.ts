@@ -23,7 +23,13 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
     id: target.id,
     label: `${rootStr}${qualityStr}`,
     sublabel: invStr,
-    isCorrect: true
+    isCorrect: true,
+    chordData: {
+      root: target.root,
+      accidental: target.rootAccidental,
+      quality: target.quality,
+      inversion: target.inversion
+    }
   });
 
   const tierConfig = CHORD_TIERS[target.tier] || CHORD_TIERS[1.1];
@@ -47,7 +53,13 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
         id: `trap_qual_${trapQuality}_${target.inversion}`,
         label: `${rootStr}${trapQualityStr}`,
         sublabel: invStr,
-        isCorrect: false
+        isCorrect: false,
+        chordData: {
+          root: target.root,
+          accidental: target.rootAccidental,
+          quality: trapQuality,
+          inversion: target.inversion
+        }
       });
     }
   }
@@ -63,7 +75,13 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
         id: `trap_inv_${trapInv}`,
         label: `${rootStr}${qualityStr}`,
         sublabel: trapInvStr,
-        isCorrect: false
+        isCorrect: false,
+        chordData: {
+          root: target.root,
+          accidental: target.rootAccidental,
+          quality: target.quality,
+          inversion: trapInv
+        }
       });
     }
   }
@@ -84,7 +102,13 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
         id: `trap_root_${trapRoot}_${trapQual}_${trapInv}`,
         label: `${trapRootStr}${trapQualStr}`,
         sublabel: trapInvStr,
-        isCorrect: false
+        isCorrect: false,
+        chordData: {
+          root: trapRoot,
+          accidental: target.rootAccidental,
+          quality: trapQual,
+          inversion: trapInv
+        }
       });
     }
   }
@@ -102,7 +126,13 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
       id: `trap_fallback_${fallbackIndex}_${target.id}`,
       label: `${fallbackRootStr}${fallbackQualStr}`,
       sublabel: fallbackInvStr,
-      isCorrect: false
+      isCorrect: false,
+      chordData: {
+        root: fallbackRoot,
+        accidental: target.rootAccidental,
+        quality: fallbackQual,
+        inversion: fallbackInv
+      }
     });
     fallbackIndex++;
   }
@@ -121,7 +151,14 @@ export function generateArpeggioMultipleChoiceOptions(target: ArpeggioDefinition
     id: target.id,
     label: `${rootStr}${qualityStr} (${contourLabel})`,
     sublabel: `Starts on ${target.startingDegree}`,
-    isCorrect: true
+    isCorrect: true,
+    arpeggioData: {
+      root: target.root,
+      accidental: target.rootAccidental,
+      quality: target.quality,
+      contour: target.contour,
+      startingDegree: target.startingDegree
+    }
   });
 
   const tierConfig = ARPEGGIO_TIERS[target.tier] || ARPEGGIO_TIERS[1.1];
@@ -148,7 +185,14 @@ export function generateArpeggioMultipleChoiceOptions(target: ArpeggioDefinition
         id: `trap_qual_${trapQuality}`,
         label: `${rootStr}${trapQualityStr} (${contourLabel})`,
         sublabel: `Starts on ${target.startingDegree}`,
-        isCorrect: false
+        isCorrect: false,
+        arpeggioData: {
+          root: target.root,
+          accidental: target.rootAccidental,
+          quality: trapQuality,
+          contour: target.contour,
+          startingDegree: target.startingDegree
+        }
       });
     }
   }
@@ -164,7 +208,14 @@ export function generateArpeggioMultipleChoiceOptions(target: ArpeggioDefinition
         id: `trap_contour_${trapContour}`,
         label: `${rootStr}${qualityStr} (${trapContourLabel})`,
         sublabel: `Starts on ${target.startingDegree}`,
-        isCorrect: false
+        isCorrect: false,
+        arpeggioData: {
+          root: target.root,
+          accidental: target.rootAccidental,
+          quality: target.quality,
+          contour: trapContour,
+          startingDegree: target.startingDegree
+        }
       });
     }
   }
@@ -179,7 +230,14 @@ export function generateArpeggioMultipleChoiceOptions(target: ArpeggioDefinition
         id: `trap_degree_${trapDegree}`,
         label: `${rootStr}${qualityStr} (${contourLabel})`,
         sublabel: `Starts on ${trapDegree}`,
-        isCorrect: false
+        isCorrect: false,
+        arpeggioData: {
+          root: target.root,
+          accidental: target.rootAccidental,
+          quality: target.quality,
+          contour: target.contour,
+          startingDegree: trapDegree
+        }
       });
     }
   }
@@ -201,7 +259,14 @@ export function generateArpeggioMultipleChoiceOptions(target: ArpeggioDefinition
         id: `trap_root_${trapRoot}_${trapQual}`,
         label: `${trapRootStr}${trapQualStr} (${trapContourLabel})`,
         sublabel: `Starts on ${trapDegree}`,
-        isCorrect: false
+        isCorrect: false,
+        arpeggioData: {
+          root: trapRoot,
+          accidental: target.rootAccidental,
+          quality: trapQual,
+          contour: trapContour,
+          startingDegree: trapDegree
+        }
       });
     }
   }
@@ -211,14 +276,25 @@ export function generateArpeggioMultipleChoiceOptions(target: ArpeggioDefinition
   while (options.length < 4) {
     const fallbackRoot = NOTE_LETTERS[fallbackIndex % NOTE_LETTERS.length];
     const fallbackRootStr = formatNoteName(fallbackRoot, target.rootAccidental);
+    const fallbackContour = target.contour;
+    const fallbackContourLabel = fallbackContour.charAt(0).toUpperCase() + fallbackContour.slice(1);
+    const fallbackDegree = target.startingDegree;
     options.push({
       id: `trap_arp_fallback_${fallbackIndex}_${target.id}`,
-      label: `${fallbackRootStr}${qualityStr} (${contourLabel})`,
-      sublabel: `Starts on ${target.startingDegree}`,
-      isCorrect: false
+      label: `${fallbackRootStr}${qualityStr} (${fallbackContourLabel})`,
+      sublabel: `Starts on ${fallbackDegree}`,
+      isCorrect: false,
+      arpeggioData: {
+        root: fallbackRoot,
+        accidental: target.rootAccidental,
+        quality: target.quality,
+        contour: fallbackContour,
+        startingDegree: fallbackDegree
+      }
     });
     fallbackIndex++;
   }
 
   return shuffle(options);
 }
+
