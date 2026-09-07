@@ -123,3 +123,23 @@ export interface MultipleChoiceOption {
   sublabel?: string;
   isCorrect: boolean;
 }
+
+export interface SlotDiffItem {
+  slot: 'root' | 'accidental' | 'quality' | 'inversion';
+  label: string;
+  userVal: string;
+  correctVal: string;
+  isMatch: boolean;
+}
+
+export interface TrialFeedback {
+  isCorrect: boolean;
+  userStr: string;
+  correctStr: string;
+  userChord?: ChordDefinition;
+  correctChord?: ChordDefinition;
+  userArpeggio?: ArpeggioDefinition;
+  correctArpeggio?: ArpeggioDefinition;
+  slotDiffs?: SlotDiffItem[];
+  message?: string;
+}

@@ -11,13 +11,17 @@ import {
   NoteLetter, 
   Accidental, 
   ChordQuality,
-  TrialLog
+  TrialLog,
+  TrialFeedback,
+  SlotDiffItem
 } from './types';
 import { loadAppState, saveAppState, recordTrialResultInState } from './storage/localStore';
 import { logTrial } from './storage/telemetryStore';
 import { PrecisionTimingEngine, FlashState } from './core/engines/timingEngine';
 import { selectNextChord, selectNextArpeggio, checkTierPromotion } from './core/engines/adaptiveEngine';
 import { generateChordMultipleChoiceOptions, generateArpeggioMultipleChoiceOptions } from './core/engines/distractorEngine';
+import { buildChord, CHORD_FORMULAS } from './core/theory/chords';
+import { formatNoteName } from './core/theory/notes';
 import { Navigation } from './components/Navigation';
 import { TrackHeader } from './components/TrackHeader';
 import { NotationStage } from './components/NotationStage';
@@ -40,7 +44,7 @@ export const App: React.FC = () => {
   const [currentArpeggio, setCurrentArpeggio] = useState<ArpeggioDefinition | null>(null);
   const [multipleChoiceOptions, setMultipleChoiceOptions] = useState<MultipleChoiceOption[]>([]);
   const [flashState, setFlashState] = useState<FlashState>('idle');
-  const [lastResult, setLastResult] = useState<{ isCorrect: boolean; message?: string } | null>(null);
+  const [lastResult, setLastResult] = useState<TrialFeedback | null>(null);
   const [lastPressedKey, setLastPressedKey] = useState<string | null>(null);
 
   // Modals
@@ -95,7 +99,12 @@ export const App: React.FC = () => {
   }, [activeTrack, trackSettings.clef, trackSettings.inputMode, trackProgress.currentTier, currentRoute, spawnNextProblem]);
 
   // Handle Trial Evaluation
-  const evaluateSubmission = useCallback((isCorrect: boolean, userInputStr: string, correctAnswerStr: string) => {
+  const evaluateSubmission = useCallback((
+    isCorrect: boolean, 
+    userInputStr: string, 
+    correctAnswerStr: string,
+    feedbackExtra?: Partial<TrialFeedback>
+  ) => {
     const engine = timingEngineRef.current;
     const { latencyMs, flashExposureMs } = engine.recordSubmission();
     setFlashState('feedback');
@@ -153,7 +162,10 @@ export const App: React.FC = () => {
 
     setLastResult({
       isCorrect,
-      message: isCorrect ? undefined : `Answer: ${correctAnswerStr}`
+      userStr: userInputStr,
+      correctStr: correctAnswerStr,
+      message: isCorrect ? undefined : `Answer: ${correctAnswerStr}`,
+      ...feedbackExtra
     });
 
     // Advance to next after comfortable feedback (1.1s for correct, 2.5s for incorrect to allow studying)
@@ -176,30 +188,84 @@ export const App: React.FC = () => {
   // Input Handlers
   const handleDirectEntrySubmit = (input: { root: NoteLetter; accidental: Accidental; quality: ChordQuality; inversion: Inversion }) => {
     if (!currentChord) return;
-    const isCorrect = 
-      input.root === currentChord.root &&
-      input.accidental === currentChord.rootAccidental &&
-      input.quality === currentChord.quality &&
-      input.inversion === currentChord.inversion;
 
-    const userStr = `${input.root}${input.accidental !== 'natural' ? input.accidental : ''} ${input.quality} (${input.inversion})`;
-    evaluateSubmission(isCorrect, userStr, currentChord.displayName);
+    const isRootMatch = input.root === currentChord.root;
+    const isAccMatch = input.accidental === currentChord.rootAccidental;
+    const isQualityMatch = input.quality === currentChord.quality;
+    const isInvMatch = input.inversion === currentChord.inversion;
+    const isCorrect = isRootMatch && isAccMatch && isQualityMatch && isInvMatch;
+
+    const userChord = buildChord(
+      input.root, 
+      input.accidental, 
+      input.quality, 
+      input.inversion, 
+      trackSettings.clef, 
+      trackProgress.currentTier
+    );
+
+    const slotDiffs: SlotDiffItem[] = [
+      {
+        slot: 'root',
+        label: 'Root',
+        userVal: input.root,
+        correctVal: currentChord.root,
+        isMatch: isRootMatch
+      },
+      {
+        slot: 'accidental',
+        label: 'Acc',
+        userVal: input.accidental === 'natural' ? '♮' : (input.accidental === 'sharp' ? '♯' : '♭'),
+        correctVal: currentChord.rootAccidental === 'natural' ? '♮' : (currentChord.rootAccidental === 'sharp' ? '♯' : '♭'),
+        isMatch: isAccMatch
+      },
+      {
+        slot: 'quality',
+        label: 'Quality',
+        userVal: CHORD_FORMULAS[input.quality].shortName,
+        correctVal: CHORD_FORMULAS[currentChord.quality].shortName,
+        isMatch: isQualityMatch
+      },
+      {
+        slot: 'inversion',
+        label: 'Inv',
+        userVal: input.inversion === 'root' ? 'Root' : input.inversion,
+        correctVal: currentChord.inversion === 'root' ? 'Root' : currentChord.inversion,
+        isMatch: isInvMatch
+      }
+    ];
+
+    const userStr = `${formatNoteName(input.root, input.accidental)}${CHORD_FORMULAS[input.quality].shortName} (${input.inversion === 'root' ? 'Root' : input.inversion})`;
+
+    evaluateSubmission(isCorrect, userStr, currentChord.displayName, {
+      userChord,
+      correctChord: currentChord,
+      slotDiffs
+    });
   };
 
   const handleMultipleChoiceSelect = (optionId: string) => {
     const selected = multipleChoiceOptions.find(o => o.id === optionId);
     if (!selected) return;
     const correctOption = multipleChoiceOptions.find(o => o.isCorrect);
-    evaluateSubmission(selected.isCorrect, selected.label, correctOption?.label || '');
+
+    evaluateSubmission(selected.isCorrect, selected.label, correctOption?.label || '', {
+      correctChord: currentChord || undefined,
+      correctArpeggio: currentArpeggio || undefined
+    });
   };
 
   const handleShapeReflexSelect = (value: Inversion | ArpeggioContour) => {
     if (activeTrack === 'chords' && currentChord) {
       const isCorrect = value === currentChord.inversion;
-      evaluateSubmission(isCorrect, String(value), currentChord.inversion);
+      evaluateSubmission(isCorrect, String(value), currentChord.inversion, {
+        correctChord: currentChord
+      });
     } else if (activeTrack === 'arpeggios' && currentArpeggio) {
       const isCorrect = value === currentArpeggio.contour;
-      evaluateSubmission(isCorrect, String(value), currentArpeggio.contour);
+      evaluateSubmission(isCorrect, String(value), currentArpeggio.contour, {
+        correctArpeggio: currentArpeggio
+      });
     }
   };
 

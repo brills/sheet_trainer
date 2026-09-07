@@ -6,6 +6,8 @@ export interface RenderOptions {
   width?: number;
   height?: number;
   darkMode?: boolean;
+  strokeColor?: string;
+  clef?: 'treble' | 'bass';
 }
 
 export function renderChordToSvg(
@@ -25,19 +27,20 @@ export function renderChordToSvg(
   renderer.resize(width, height);
   const context = renderer.getContext();
 
-  // Style colors: high contrast slate-100 for dark mode, slate-900 for light mode
-  const strokeColor = isDark ? '#f8fafc' : '#0f172a'; // slate-50 vs slate-900
+  // Style colors: high contrast slate-100 for dark mode, or explicit override
+  const strokeColor = options.strokeColor || (isDark ? '#f8fafc' : '#0f172a');
   context.setStrokeStyle(strokeColor);
   context.setFillStyle(strokeColor);
 
   // Position stave centered in box
-  const staveX = 20;
-  const staveY = 25;
-  const staveWidth = width - 40;
+  const staveX = 10;
+  const staveY = 20;
+  const staveWidth = width - 20;
   const stave = new Stave(staveX, staveY, staveWidth);
 
   // Set clef and styling for lines and ledger lines
-  stave.addClef(chord.clef === 'bass' ? 'bass' : 'treble');
+  const clef = options.clef || (chord.clef === 'bass' ? 'bass' : 'treble');
+  stave.addClef(clef);
   stave.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
   
   if (typeof (stave as any).setLedgerLineStyle === 'function') {
@@ -50,9 +53,9 @@ export function renderChordToSvg(
   const keys = chord.notes.map(n => `${n.letter.toLowerCase()}/${n.octave}`);
 
   const staveNote = new StaveNote({
-    clef: chord.clef === 'bass' ? 'bass' : 'treble',
+    clef: clef,
     keys: keys,
-    duration: 'w', // Whole note for blocked chord
+    duration: 'w',
     align_center: true
   });
 
@@ -77,7 +80,7 @@ export function renderChordToSvg(
   voice.setStrict(false);
   voice.addTickables([staveNote]);
 
-  new Formatter().joinVoices([voice]).format([voice], staveWidth - 70);
+  new Formatter().joinVoices([voice]).format([voice], staveWidth - 60);
   voice.draw(context, stave);
 }
 
@@ -96,16 +99,17 @@ export function renderArpeggioToSvg(
   renderer.resize(width, height);
   const context = renderer.getContext();
 
-  const strokeColor = isDark ? '#f8fafc' : '#0f172a';
+  const strokeColor = options.strokeColor || (isDark ? '#f8fafc' : '#0f172a');
   context.setStrokeStyle(strokeColor);
   context.setFillStyle(strokeColor);
 
-  const staveX = 20;
-  const staveY = 25;
-  const staveWidth = width - 40;
+  const staveX = 10;
+  const staveY = 20;
+  const staveWidth = width - 20;
   const stave = new Stave(staveX, staveY, staveWidth);
 
-  stave.addClef(arpeggio.clef === 'bass' ? 'bass' : 'treble');
+  const clef = options.clef || (arpeggio.clef === 'bass' ? 'bass' : 'treble');
+  stave.addClef(clef);
   stave.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
   
   if (typeof (stave as any).setLedgerLineStyle === 'function') {
@@ -119,7 +123,7 @@ export function renderArpeggioToSvg(
   const staveNotes = arpeggio.notes.map(note => {
     const key = `${note.letter.toLowerCase()}/${note.octave}`;
     const sn = new StaveNote({
-      clef: arpeggio.clef === 'bass' ? 'bass' : 'treble',
+      clef: clef,
       keys: [key],
       duration: duration
     });
@@ -142,7 +146,7 @@ export function renderArpeggioToSvg(
   voice.setStrict(false);
   voice.addTickables(staveNotes);
 
-  new Formatter().joinVoices([voice]).format([voice], staveWidth - 80);
+  new Formatter().joinVoices([voice]).format([voice], staveWidth - 70);
 
   voice.draw(context, stave);
 
