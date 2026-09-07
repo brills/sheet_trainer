@@ -136,7 +136,7 @@ export function checkTierPromotion(
   currentTier: number,
   recentTrials: { isCorrect: boolean; latencyMs: number }[]
 ): PromotionCheckResult {
-  if (recentTrials.length < 15) {
+  if (recentTrials.length < 20) {
     return {
       shouldPromote: false,
       currentTier,
@@ -146,13 +146,13 @@ export function checkTierPromotion(
     };
   }
 
-  const last15 = recentTrials.slice(0, 15);
-  const correctCount = last15.filter(t => t.isCorrect).length;
-  const accuracy = correctCount / last15.length;
-  const avgLatency = Math.round(last15.reduce((sum, t) => sum + t.latencyMs, 0) / last15.length);
+  const last20 = recentTrials.slice(0, 20);
+  const correctCount = last20.filter(t => t.isCorrect).length;
+  const accuracy = correctCount / last20.length;
+  const avgLatency = Math.round(last20.reduce((sum, t) => sum + t.latencyMs, 0) / last20.length);
 
-  // Criteria: >= 87% accuracy and < 700ms latency
-  const passed = accuracy >= 0.87 && avgLatency < 700;
+  // Criteria: >= 85% accuracy and <= 2000ms (2.0s) average latency
+  const passed = accuracy >= 0.85 && avgLatency <= 2000;
 
   const tiersList = track === 'chords' 
     ? Object.keys(CHORD_TIERS).map(Number).sort((a, b) => a - b)
@@ -188,7 +188,7 @@ export function checkKeyStagePromotion(
   currentStage: number,
   recentTrialsInStage: { isCorrect: boolean; latencyMs: number }[]
 ): KeyStagePromotionResult {
-  if (recentTrialsInStage.length < 15) {
+  if (recentTrialsInStage.length < 20) {
     return {
       shouldPromote: false,
       currentStage,
@@ -198,12 +198,13 @@ export function checkKeyStagePromotion(
     };
   }
 
-  const last15 = recentTrialsInStage.slice(0, 15);
-  const correctCount = last15.filter(t => t.isCorrect).length;
-  const accuracy = correctCount / last15.length;
-  const avgLatency = Math.round(last15.reduce((sum, t) => sum + t.latencyMs, 0) / last15.length);
+  const last20 = recentTrialsInStage.slice(0, 20);
+  const correctCount = last20.filter(t => t.isCorrect).length;
+  const accuracy = correctCount / last20.length;
+  const avgLatency = Math.round(last20.reduce((sum, t) => sum + t.latencyMs, 0) / last20.length);
 
-  const passed = accuracy >= 0.85 && avgLatency < 900;
+  // Criteria: >= 85% accuracy and <= 2000ms (2.0s) average latency
+  const passed = accuracy >= 0.85 && avgLatency <= 2000;
   const maxStage = KEY_STAGES.length - 1;
   const nextStage = currentStage < maxStage ? currentStage + 1 : null;
 

@@ -102,8 +102,14 @@ const weightUnseen = calculatePatternWeight({ totalSeen: 0, correctCount: 0, avg
 const weightWeak = calculatePatternWeight({ totalSeen: 10, correctCount: 4, avgLatencyMs: 900, lastAttemptTimestamp: 0 });
 assert(weightWeak > weightUnseen, 'Weak patterns (40% accuracy) have higher sampling weight than normal patterns');
 
-const promoCheck = checkTierPromotion('chords', 1.1, Array(20).fill({ isCorrect: true, latencyMs: 350 }));
-assert(promoCheck.shouldPromote && promoCheck.nextTier === 1.2, 'Mastery trials promote from Tier 1.1 to Tier 1.2');
+const promoCheckShort = checkTierPromotion('chords', 1.1, Array(19).fill({ isCorrect: true, latencyMs: 1500 }));
+assert(!promoCheckShort.shouldPromote, 'Tier promotion requires at least 20 trials (19 trials does not promote)');
+
+const promoCheckPass = checkTierPromotion('chords', 1.1, Array(20).fill({ isCorrect: true, latencyMs: 1800 }));
+assert(promoCheckPass.shouldPromote && promoCheckPass.nextTier === 1.2, 'Tier promotion succeeds with 20 trials at 1.8s avg latency (<= 2.0s)');
+
+const promoCheckSlow = checkTierPromotion('chords', 1.1, Array(20).fill({ isCorrect: true, latencyMs: 2200 }));
+assert(!promoCheckSlow.shouldPromote, 'Tier promotion fails if avg latency exceeds 2.0s (2200ms)');
 
 const distractors = generateChordMultipleChoiceOptions(cMajRoot);
 assert(distractors.length === 4, 'Multiple choice generates exactly 4 options');
@@ -134,17 +140,14 @@ assert(gDiatonic.some(c => c.root === 'G' && c.quality === 'major'), 'G Major tr
 assert(gDiatonic.some(c => c.root === 'D' && c.quality === 'major'), 'D Major triad (V) is diatonic in G Major');
 
 // Test Key Stage Promotion
-const stagePromo = checkKeyStagePromotion(0, Array(15).fill({ isCorrect: true, latencyMs: 400 }));
-assert(stagePromo.shouldPromote && stagePromo.nextStage === 1, 'Stage 0 promotes to Stage 1 after 15 successful trials');
+const stagePromoShort = checkKeyStagePromotion(0, Array(19).fill({ isCorrect: true, latencyMs: 1600 }));
+assert(!stagePromoShort.shouldPromote, 'Key stage promotion requires at least 20 trials');
 
-// 7. Auto-Advance & Feedback Delay Tests
-console.log('\n--- 7. Feedback & Reading Delays ---');
-import { getAutoAdvanceDelayMs } from '../src/core/engines/timingEngine';
+const stagePromoPass = checkKeyStagePromotion(0, Array(20).fill({ isCorrect: true, latencyMs: 1900 }));
+assert(stagePromoPass.shouldPromote && stagePromoPass.nextStage === 1, 'Stage 0 promotes to Stage 1 after 20 trials with <= 2.0s latency');
 
-assert(getAutoAdvanceDelayMs('multiple_choice') === 1400, 'Multiple choice delay is 1400ms');
-assert(getAutoAdvanceDelayMs('direct_entry') === 2600, 'Direct entry delay is 2600ms (sufficient to parse text notation)');
-assert(getAutoAdvanceDelayMs('direct_entry', 3500) === 3500, 'Custom relaxed delay is 3500ms');
-assert(getAutoAdvanceDelayMs('direct_entry', -1) === -1, 'Manual acknowledgment returns -1');
+const stagePromoSlow = checkKeyStagePromotion(0, Array(20).fill({ isCorrect: true, latencyMs: 2300 }));
+assert(!stagePromoSlow.shouldPromote, 'Key stage promotion fails if avg latency is > 2.0s');
 
 console.log(`\n================================`);
 console.log(`Suite finished: ${passedTests} Passed, ${failedTests} Failed.`);

@@ -269,21 +269,20 @@ export const NotationStage: React.FC<NotationStageProps> = ({
             )}
 
             {/* Acknowledgment Action */}
-            {isIncorrect ? (
-              <button
-                type="button"
-                onClick={onContinue}
-                className="mt-2.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
-              >
-                <span>Continue to Next Question</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-                <span className="text-[10px] opacity-75 font-normal ml-1">(Space / Enter)</span>
-              </button>
-            ) : (
-              <span className="text-[10px] text-slate-400 mt-1 font-sans">
-                Press <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono">Space</kbd> or <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono">Enter</kbd> to skip wait
-              </span>
-            )}
+            <button
+              type="button"
+              onClick={onContinue}
+              className={`
+                mt-2.5 px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition-all cursor-pointer
+                ${isIncorrect
+                  ? 'bg-rose-500 hover:bg-rose-400 text-slate-950 shadow-rose-500/20'
+                  : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/20'}
+              `}
+            >
+              <span>{isIncorrect ? 'Continue to Next Question' : 'Next Question'}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+              <span className="text-[10px] opacity-75 font-normal ml-1">(Space / Enter)</span>
+            </button>
           </div>
         )}
 

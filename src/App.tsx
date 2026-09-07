@@ -18,7 +18,7 @@ import {
 } from './types';
 import { loadAppState, saveAppState, recordTrialResultInState } from './storage/localStore';
 import { logTrial } from './storage/telemetryStore';
-import { PrecisionTimingEngine, FlashState, getAutoAdvanceDelayMs } from './core/engines/timingEngine';
+import { PrecisionTimingEngine, FlashState } from './core/engines/timingEngine';
 import { selectNextChord, selectNextArpeggio, checkTierPromotion, checkKeyStagePromotion } from './core/engines/adaptiveEngine';
 import { generateChordMultipleChoiceOptions, generateArpeggioMultipleChoiceOptions } from './core/engines/distractorEngine';
 import { buildChord, CHORD_FORMULAS } from './core/theory/chords';
@@ -66,6 +66,7 @@ export const App: React.FC = () => {
 
   // Engine instance & Timers
   const timingEngineRef = useRef<PrecisionTimingEngine>(new PrecisionTimingEngine());
+  const ackListenerRef = useRef<((e: KeyboardEvent) => void) | null>(null);
   const nextProblemTimeoutRef = useRef<number | null>(null);
 
   const trackSettings = appState.settings[activeTrack];
@@ -103,7 +104,11 @@ export const App: React.FC = () => {
 
   // Spawn next problem cleanly (single point of truth)
   const spawnNextProblem = useCallback(() => {
-    // Clear any pending timeout
+    // Clear any pending listener or timeout
+    if (ackListenerRef.current) {
+      window.removeEventListener('keydown', ackListenerRef.current);
+      ackListenerRef.current = null;
+    }
     if (nextProblemTimeoutRef.current !== null) {
       window.clearTimeout(nextProblemTimeoutRef.current);
       nextProblemTimeoutRef.current = null;
@@ -142,6 +147,20 @@ export const App: React.FC = () => {
       onMask: () => setFlashState('masked')
     });
   }, [activeTrack, getActiveKeyForSampling]);
+
+  // Cleanup timers & listeners on unmount
+  useEffect(() => {
+    return () => {
+      if (ackListenerRef.current) {
+        window.removeEventListener('keydown', ackListenerRef.current);
+        ackListenerRef.current = null;
+      }
+      if (nextProblemTimeoutRef.current !== null) {
+        window.clearTimeout(nextProblemTimeoutRef.current);
+        nextProblemTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   // Track initial mounting and explicit configuration changes ONLY
   const prevConfigRef = useRef<string>('');
@@ -255,49 +274,27 @@ export const App: React.FC = () => {
       ...feedbackExtra
     });
 
-    if (isCorrect) {
-      // Correct answer: Auto-advance after mode-dependent delay (or allow instant space/enter skip)
-      const autoAdvanceDelayMs = getAutoAdvanceDelayMs(trackSettings.inputMode, trackSettings.feedbackDelayMs);
-      
-      if (autoAdvanceDelayMs > 0) {
-        nextProblemTimeoutRef.current = window.setTimeout(() => {
-          spawnNextProblem();
-        }, autoAdvanceDelayMs);
-
-        const skipListener = (e: KeyboardEvent) => {
-          if (e.key === ' ' || e.key === 'Enter') {
-            if (nextProblemTimeoutRef.current !== null) {
-              window.clearTimeout(nextProblemTimeoutRef.current);
-              nextProblemTimeoutRef.current = null;
-            }
-            window.removeEventListener('keydown', skipListener);
-            spawnNextProblem();
-          }
-        };
-        window.addEventListener('keydown', skipListener, { once: true });
-      } else {
-        // Manual mode: Wait for explicit user acknowledgment
-        const ackListener = (e: KeyboardEvent) => {
-          if (e.key === ' ' || e.key === 'Enter') {
-            e.preventDefault();
-            window.removeEventListener('keydown', ackListener);
-            spawnNextProblem();
-          }
-        };
-        window.addEventListener('keydown', ackListener, { once: true });
-      }
-    } else {
-      // Incorrect answer: DO NOT auto-advance. Wait for explicit user acknowledgment (Space, Enter, or Click)
-      const ackListener = (e: KeyboardEvent) => {
-        if (e.key === ' ' || e.key === 'Enter') {
-          e.preventDefault();
-          window.removeEventListener('keydown', ackListener);
-          spawnNextProblem();
-        }
-      };
-      window.addEventListener('keydown', ackListener, { once: true });
+    // Clear any existing ack listener
+    if (ackListenerRef.current) {
+      window.removeEventListener('keydown', ackListenerRef.current);
+      ackListenerRef.current = null;
     }
-  }, [activeTrack, currentChord, currentArpeggio, recentTrials, recentStageTrials, trackProgress, trackSettings.clef, trackSettings.inputMode, trackSettings.feedbackDelayMs, trackSettings.keyMode, spawnNextProblem]);
+
+    // Both correct & incorrect answers: DO NOT auto-advance.
+    // Wait for explicit user acknowledgment (Space, Enter, or Click)
+    const ackListener = (e: KeyboardEvent) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        if (ackListenerRef.current) {
+          window.removeEventListener('keydown', ackListenerRef.current);
+          ackListenerRef.current = null;
+        }
+        spawnNextProblem();
+      }
+    };
+    ackListenerRef.current = ackListener;
+    window.addEventListener('keydown', ackListener, { once: true });
+  }, [activeTrack, currentChord, currentArpeggio, recentTrials, recentStageTrials, trackProgress, trackSettings.clef, trackSettings.inputMode, trackSettings.keyMode, spawnNextProblem]);
 
   // Input Handlers
   const handleDirectEntrySubmit = (input: { root: NoteLetter; accidental: Accidental; quality: ChordQuality; inversion: Inversion }) => {

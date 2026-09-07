@@ -119,50 +119,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
 
-        {/* 3. Reading / Feedback Delay Speed */}
-        <div className="flex flex-col gap-2 border-t border-slate-800 pt-2">
+        {/* 3. Mastery & Progression Info */}
+        <div className="flex flex-col gap-1.5 border-t border-slate-800 pt-2 text-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-200">Reading / Feedback Delay</span>
-            <span className="text-[10px] text-slate-400">Time to parse unmasked notation</span>
+            <span className="font-semibold text-slate-200">Progression & Mastery Gate</span>
+            <span className="text-[10px] text-emerald-400 font-mono">20 trials · ≤ 2.0s · ≥ 85%</span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-            {[
-              { val: 0, label: 'Optimal', sub: 'Mode-tuned' },
-              { val: 3500, label: 'Relaxed', sub: '3.5s' },
-              { val: 1200, label: 'Fast', sub: '1.2s' },
-              { val: -1, label: 'Manual', sub: 'Space/Enter' }
-            ].map(opt => {
-              const currentVal = state.settings.chords.feedbackDelayMs ?? 0;
-              const isActive = (opt.val === 0 && (currentVal === 0 || currentVal === undefined)) || currentVal === opt.val;
-              return (
-                <button
-                  key={opt.label}
-                  type="button"
-                  onClick={() => {
-                    onUpdateState({
-                      ...state,
-                      settings: {
-                        ...state.settings,
-                        chords: { ...state.settings.chords, feedbackDelayMs: opt.val },
-                        arpeggios: { ...state.settings.arpeggios, feedbackDelayMs: opt.val }
-                      }
-                    });
-                  }}
-                  className={`
-                    flex flex-col items-center justify-center p-2 rounded-xl text-xs font-semibold border transition-all
-                    ${isActive
-                      ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-sm'
-                      : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-750'}
-                  `}
-                >
-                  <span>{opt.label}</span>
-                  <span className={`text-[10px] font-normal ${isActive ? 'text-slate-900/80' : 'text-slate-400'}`}>
-                    {opt.sub}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <p className="text-[11px] text-slate-400 leading-relaxed">
+            Take as much time as needed on every problem. Promotion to the next Tier or Circle of Fifths stage unlocks when your rolling average latency across the recent 20 trials reaches ≤ 2.0s with ≥ 85% accuracy.
+          </p>
         </div>
 
         {/* 4. Key Signatures & Circle of Fifths */}
