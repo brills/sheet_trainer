@@ -89,6 +89,7 @@ export interface TrackSettings {
   inputMode: InputMode;
   flashMode: FlashMode;
   flashDurationMs: number;
+  feedbackDelayMs?: number;
   keyMode: KeyMode;
   activeKeyId: string;
 }

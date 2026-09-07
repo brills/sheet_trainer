@@ -19,7 +19,7 @@ import {
 } from './types';
 import { loadAppState, saveAppState, recordTrialResultInState } from './storage/localStore';
 import { logTrial } from './storage/telemetryStore';
-import { PrecisionTimingEngine, FlashState } from './core/engines/timingEngine';
+import { PrecisionTimingEngine, FlashState, getAutoAdvanceDelayMs } from './core/engines/timingEngine';
 import { selectNextChord, selectNextArpeggio, checkTierPromotion, checkKeyStagePromotion } from './core/engines/adaptiveEngine';
 import { generateChordMultipleChoiceOptions, generateArpeggioMultipleChoiceOptions } from './core/engines/distractorEngine';
 import { buildChord, CHORD_FORMULAS } from './core/theory/chords';
@@ -258,22 +258,36 @@ export const App: React.FC = () => {
     });
 
     if (isCorrect) {
-      // Correct answer: Auto-advance after 1.1s (or allow instant space/enter skip)
-      nextProblemTimeoutRef.current = window.setTimeout(() => {
-        spawnNextProblem();
-      }, 1100);
-
-      const skipListener = (e: KeyboardEvent) => {
-        if (e.key === ' ' || e.key === 'Enter') {
-          if (nextProblemTimeoutRef.current !== null) {
-            window.clearTimeout(nextProblemTimeoutRef.current);
-            nextProblemTimeoutRef.current = null;
-          }
-          window.removeEventListener('keydown', skipListener);
+      // Correct answer: Auto-advance after mode-dependent delay (or allow instant space/enter skip)
+      const autoAdvanceDelayMs = getAutoAdvanceDelayMs(trackSettings.inputMode, trackSettings.feedbackDelayMs);
+      
+      if (autoAdvanceDelayMs > 0) {
+        nextProblemTimeoutRef.current = window.setTimeout(() => {
           spawnNextProblem();
-        }
-      };
-      window.addEventListener('keydown', skipListener, { once: true });
+        }, autoAdvanceDelayMs);
+
+        const skipListener = (e: KeyboardEvent) => {
+          if (e.key === ' ' || e.key === 'Enter') {
+            if (nextProblemTimeoutRef.current !== null) {
+              window.clearTimeout(nextProblemTimeoutRef.current);
+              nextProblemTimeoutRef.current = null;
+            }
+            window.removeEventListener('keydown', skipListener);
+            spawnNextProblem();
+          }
+        };
+        window.addEventListener('keydown', skipListener, { once: true });
+      } else {
+        // Manual mode: Wait for explicit user acknowledgment
+        const ackListener = (e: KeyboardEvent) => {
+          if (e.key === ' ' || e.key === 'Enter') {
+            e.preventDefault();
+            window.removeEventListener('keydown', ackListener);
+            spawnNextProblem();
+          }
+        };
+        window.addEventListener('keydown', ackListener, { once: true });
+      }
     } else {
       // Incorrect answer: DO NOT auto-advance. Wait for explicit user acknowledgment (Space, Enter, or Click)
       const ackListener = (e: KeyboardEvent) => {
@@ -285,7 +299,7 @@ export const App: React.FC = () => {
       };
       window.addEventListener('keydown', ackListener, { once: true });
     }
-  }, [activeTrack, currentChord, currentArpeggio, recentTrials, recentStageTrials, trackProgress, trackSettings.clef, trackSettings.keyMode, spawnNextProblem]);
+  }, [activeTrack, currentChord, currentArpeggio, recentTrials, recentStageTrials, trackProgress, trackSettings.clef, trackSettings.inputMode, trackSettings.feedbackDelayMs, trackSettings.keyMode, spawnNextProblem]);
 
   // Input Handlers
   const handleDirectEntrySubmit = (input: { root: NoteLetter; accidental: Accidental; quality: ChordQuality; inversion: Inversion }) => {

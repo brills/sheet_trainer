@@ -137,6 +137,16 @@ assert(gDiatonic.some(c => c.root === 'D' && c.quality === 'major'), 'D Major tr
 const stagePromo = checkKeyStagePromotion(0, Array(15).fill({ isCorrect: true, latencyMs: 400 }));
 assert(stagePromo.shouldPromote && stagePromo.nextStage === 1, 'Stage 0 promotes to Stage 1 after 15 successful trials');
 
+// 7. Auto-Advance & Feedback Delay Tests
+console.log('\n--- 7. Feedback & Reading Delays ---');
+import { getAutoAdvanceDelayMs } from '../src/core/engines/timingEngine';
+
+assert(getAutoAdvanceDelayMs('multiple_choice') === 1400, 'Multiple choice delay is 1400ms');
+assert(getAutoAdvanceDelayMs('shape_only') === 1800, 'Shape reflex delay is 1800ms');
+assert(getAutoAdvanceDelayMs('direct_entry') === 2600, 'Direct entry delay is 2600ms (sufficient to parse text notation)');
+assert(getAutoAdvanceDelayMs('direct_entry', 3500) === 3500, 'Custom relaxed delay is 3500ms');
+assert(getAutoAdvanceDelayMs('direct_entry', -1) === -1, 'Manual acknowledgment returns -1');
+
 console.log(`\n================================`);
 console.log(`Suite finished: ${passedTests} Passed, ${failedTests} Failed.`);
 if (failedTests > 0) {

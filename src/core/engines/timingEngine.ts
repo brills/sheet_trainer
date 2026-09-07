@@ -1,4 +1,24 @@
+import { InputMode } from '../../types';
+
 export type FlashState = 'idle' | 'flashing' | 'masked' | 'feedback';
+
+export function getAutoAdvanceDelayMs(inputMode: InputMode, customDelayMs?: number): number {
+  if (customDelayMs === -1) {
+    return -1; // Manual acknowledgment required
+  }
+  if (customDelayMs && customDelayMs > 0) {
+    return customDelayMs;
+  }
+  switch (inputMode) {
+    case 'multiple_choice':
+      return 1400; // Shorter delay for multiple choice
+    case 'shape_only':
+      return 1800; // Moderate delay for shape recognition
+    case 'direct_entry':
+    default:
+      return 2600; // Generous delay for direct entry (reading text notation & slot breakdown)
+  }
+}
 
 export interface FlashTimingConfig {
   durationMs: number; // Flash exposure time (e.g. 300ms, or 0 for untimed)
