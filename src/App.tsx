@@ -187,24 +187,34 @@ export const App: React.FC = () => {
       ...feedbackExtra
     });
 
-    // Advance to next after comfortable feedback (1.1s for correct, 2.5s for incorrect to allow studying)
-    const delay = isCorrect ? 1100 : 2500;
-    nextProblemTimeoutRef.current = window.setTimeout(() => {
-      spawnNextProblem();
-    }, delay);
-
-    // Allow user to hit Space or Enter to skip the wait immediately
-    const skipListener = (e: KeyboardEvent) => {
-      if (e.key === ' ' || e.key === 'Enter') {
-        if (nextProblemTimeoutRef.current !== null) {
-          window.clearTimeout(nextProblemTimeoutRef.current);
-          nextProblemTimeoutRef.current = null;
-        }
-        window.removeEventListener('keydown', skipListener);
+    if (isCorrect) {
+      // Correct answer: Auto-advance after 1.1s (or allow instant space/enter skip)
+      nextProblemTimeoutRef.current = window.setTimeout(() => {
         spawnNextProblem();
-      }
-    };
-    window.addEventListener('keydown', skipListener, { once: true });
+      }, 1100);
+
+      const skipListener = (e: KeyboardEvent) => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          if (nextProblemTimeoutRef.current !== null) {
+            window.clearTimeout(nextProblemTimeoutRef.current);
+            nextProblemTimeoutRef.current = null;
+          }
+          window.removeEventListener('keydown', skipListener);
+          spawnNextProblem();
+        }
+      };
+      window.addEventListener('keydown', skipListener, { once: true });
+    } else {
+      // Incorrect answer: DO NOT auto-advance. Wait for explicit user acknowledgment (Space, Enter, or Click)
+      const ackListener = (e: KeyboardEvent) => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          window.removeEventListener('keydown', ackListener);
+          spawnNextProblem();
+        }
+      };
+      window.addEventListener('keydown', ackListener, { once: true });
+    }
   }, [activeTrack, currentChord, currentArpeggio, recentTrials, trackProgress, trackSettings.clef, spawnNextProblem]);
 
   // Input Handlers

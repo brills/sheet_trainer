@@ -3,7 +3,7 @@ import { ChordDefinition, ArpeggioDefinition, TrackType, TrialFeedback } from '.
 import { renderChordToSvg, renderArpeggioToSvg } from '../core/theory/vexflowAdapter';
 import { FlashState } from '../core/engines/timingEngine';
 import { formatNoteName } from '../core/theory/notes';
-import { Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
 
 interface NotationStageProps {
   track: TrackType;
@@ -13,6 +13,7 @@ interface NotationStageProps {
   lastResult?: TrialFeedback | null;
   flashDurationMs: number;
   darkMode?: boolean;
+  onContinue?: () => void;
 }
 
 export const NotationStage: React.FC<NotationStageProps> = ({
@@ -22,7 +23,8 @@ export const NotationStage: React.FC<NotationStageProps> = ({
   flashState,
   lastResult,
   flashDurationMs,
-  darkMode = true
+  darkMode = true,
+  onContinue
 }) => {
   const visibleRef = useRef<HTMLDivElement>(null);
   const offscreenRef = useRef<HTMLDivElement>(null);
@@ -186,10 +188,10 @@ export const NotationStage: React.FC<NotationStageProps> = ({
         {/* Feedback Bottom Solution Banner & Slot Mismatch Chips */}
         {isFeedback && (
           <div className={`
-            w-full mt-2 py-2 px-3 rounded-2xl border backdrop-blur-md flex flex-col items-center justify-center animate-in slide-in-from-bottom-2 duration-200
+            w-full mt-2 py-2.5 px-3 rounded-2xl border backdrop-blur-md flex flex-col items-center justify-center animate-in slide-in-from-bottom-2 duration-200
             ${lastResult?.isCorrect 
               ? 'bg-emerald-950/80 border-emerald-500/30 text-emerald-200' 
-              : 'bg-slate-950/80 border-rose-500/30 text-slate-200'}
+              : 'bg-slate-950/90 border-rose-500/40 text-slate-200 shadow-xl'}
           `}>
             {/* Slot Diff Chips (if in direct entry mode) */}
             {lastResult?.slotDiffs && lastResult.slotDiffs.length > 0 ? (
@@ -224,9 +226,22 @@ export const NotationStage: React.FC<NotationStageProps> = ({
               </span>
             )}
 
-            <span className="text-[10px] text-slate-400 mt-1 font-sans">
-              Press <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono">Space</kbd> or <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono">Enter</kbd> to continue
-            </span>
+            {/* Acknowledgment Action */}
+            {isIncorrect ? (
+              <button
+                type="button"
+                onClick={onContinue}
+                className="mt-2.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+              >
+                <span>Continue to Next Question</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+                <span className="text-[10px] opacity-75 font-normal ml-1">(Space / Enter)</span>
+              </button>
+            ) : (
+              <span className="text-[10px] text-slate-400 mt-1 font-sans">
+                Press <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono">Space</kbd> or <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono">Enter</kbd> to skip wait
+              </span>
+            )}
           </div>
         )}
 
