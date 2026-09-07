@@ -39,6 +39,10 @@ export const App: React.FC = () => {
   const [currentRoute, setCurrentRoute] = useState<AppRoute>('chords');
   const [activeTrack, setActiveTrack] = useState<TrackType>('chords');
 
+  // Ref to always access current appState without re-triggering effects
+  const appStateRef = useRef<AppState>(appState);
+  appStateRef.current = appState;
+
   // Question & State
   const [currentChord, setCurrentChord] = useState<ChordDefinition | null>(null);
   const [currentArpeggio, setCurrentArpeggio] = useState<ArpeggioDefinition | null>(null);
@@ -55,46 +59,61 @@ export const App: React.FC = () => {
   // Recent trial memory for rolling HUD stats & promotion checks
   const [recentTrials, setRecentTrials] = useState<{ isCorrect: boolean; latencyMs: number }[]>([]);
 
-  // Engine instance
+  // Engine instance & Timers
   const timingEngineRef = useRef<PrecisionTimingEngine>(new PrecisionTimingEngine());
+  const nextProblemTimeoutRef = useRef<number | null>(null);
 
   const trackSettings = appState.settings[activeTrack];
   const trackProgress = appState.progress[activeTrack];
 
-  // Spawn next problem
+  // Spawn next problem cleanly (single point of truth)
   const spawnNextProblem = useCallback(() => {
+    // Clear any pending timeout
+    if (nextProblemTimeoutRef.current !== null) {
+      window.clearTimeout(nextProblemTimeoutRef.current);
+      nextProblemTimeoutRef.current = null;
+    }
+
     setLastResult(null);
     const engine = timingEngineRef.current;
+    const currentState = appStateRef.current;
+    const currentTrack = currentState.progress[activeTrack];
+    const currentSettings = currentState.settings[activeTrack];
 
     if (activeTrack === 'chords') {
-      const chord = selectNextChord(trackProgress.currentTier, trackSettings.clef, trackProgress);
+      const chord = selectNextChord(currentTrack.currentTier, currentSettings.clef, currentTrack);
       setCurrentChord(chord);
       setCurrentArpeggio(null);
 
-      if (trackSettings.inputMode === 'multiple_choice') {
+      if (currentSettings.inputMode === 'multiple_choice') {
         setMultipleChoiceOptions(generateChordMultipleChoiceOptions(chord));
       }
     } else {
-      const arpeggio = selectNextArpeggio(trackProgress.currentTier, trackSettings.clef, trackProgress);
+      const arpeggio = selectNextArpeggio(currentTrack.currentTier, currentSettings.clef, currentTrack);
       setCurrentArpeggio(arpeggio);
       setCurrentChord(null);
 
-      if (trackSettings.inputMode === 'multiple_choice') {
+      if (currentSettings.inputMode === 'multiple_choice') {
         setMultipleChoiceOptions(generateArpeggioMultipleChoiceOptions(arpeggio));
       }
     }
 
     setFlashState('flashing');
     engine.startFlash({
-      durationMs: trackSettings.flashDurationMs,
+      durationMs: currentSettings.flashDurationMs,
       onMask: () => setFlashState('masked')
     });
-  }, [activeTrack, trackSettings, trackProgress]);
+  }, [activeTrack]);
 
-  // Initial problem mount
+  // Track initial mounting and explicit configuration changes ONLY
+  const prevConfigRef = useRef<string>('');
   useEffect(() => {
-    if (currentRoute === 'chords' || currentRoute === 'arpeggios') {
-      spawnNextProblem();
+    const configKey = `${activeTrack}-${trackSettings.clef}-${trackSettings.inputMode}-${trackProgress.currentTier}-${currentRoute}`;
+    if (prevConfigRef.current !== configKey) {
+      prevConfigRef.current = configKey;
+      if (currentRoute === 'chords' || currentRoute === 'arpeggios') {
+        spawnNextProblem();
+      }
     }
   }, [activeTrack, trackSettings.clef, trackSettings.inputMode, trackProgress.currentTier, currentRoute, spawnNextProblem]);
 
@@ -116,7 +135,7 @@ export const App: React.FC = () => {
         : 'unknown';
 
     // 1. Update State
-    const updatedState = recordTrialResultInState(appState, activeTrack, patternKey, isCorrect, latencyMs);
+    const updatedState = recordTrialResultInState(appStateRef.current, activeTrack, patternKey, isCorrect, latencyMs);
     setAppState(updatedState);
 
     // 2. Log Telemetry
@@ -170,20 +189,23 @@ export const App: React.FC = () => {
 
     // Advance to next after comfortable feedback (1.1s for correct, 2.5s for incorrect to allow studying)
     const delay = isCorrect ? 1100 : 2500;
-    const timeoutId = window.setTimeout(() => {
+    nextProblemTimeoutRef.current = window.setTimeout(() => {
       spawnNextProblem();
     }, delay);
 
     // Allow user to hit Space or Enter to skip the wait immediately
     const skipListener = (e: KeyboardEvent) => {
       if (e.key === ' ' || e.key === 'Enter') {
-        window.clearTimeout(timeoutId);
+        if (nextProblemTimeoutRef.current !== null) {
+          window.clearTimeout(nextProblemTimeoutRef.current);
+          nextProblemTimeoutRef.current = null;
+        }
         window.removeEventListener('keydown', skipListener);
         spawnNextProblem();
       }
     };
     window.addEventListener('keydown', skipListener, { once: true });
-  }, [activeTrack, appState, currentChord, currentArpeggio, recentTrials, trackProgress, trackSettings.clef, spawnNextProblem]);
+  }, [activeTrack, currentChord, currentArpeggio, recentTrials, trackProgress, trackSettings.clef, spawnNextProblem]);
 
   // Input Handlers
   const handleDirectEntrySubmit = (input: { root: NoteLetter; accidental: Accidental; quality: ChordQuality; inversion: Inversion }) => {
