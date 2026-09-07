@@ -22,10 +22,12 @@ When beginner musicians read sheet music, they decode **letter-by-letter** (e.g.
 ## ✨ Features
 
 * **🎼 Track A: Chords & Inversions (Vertical Chunking):**
-  * Tiers 1.1 – 1.4: Major & Minor Triads in Root, 1st ($\text{6/3}$), and 2nd ($\text{6/4}$) Inversions.
-  * Tiers 2.1 – 2.2: Altered Triads (Diminished, Augmented) and Suspensions ($\text{Sus4}, \text{Sus2}$).
-  * Tiers 3.1 – 3.3: 7th Chords (Dom7, Maj7, Min7, Half-Dim $ø7$, Dim7 $°7$) and 4 Inversions ($\text{6/5}, \text{4/3}, \text{4/2}$).
-  * Tiers 4.1 – 4.2: Extended & Altered Voicings ($\text{add9}, 6, \text{m6}, 9, 7\sharp9, 7\flat9$).
+  * **Tiers 1.1 – 1.4 (Triads):** Root Position ("snowmen"), 1st Inversion ($\text{6/3}$, top 4th gap), 2nd Inversion ($\text{6/4}$, bottom 4th gap), and Triad Mastery.
+  * **Tiers 2.1 – 2.2 (Altered & Suspended Triads):** Diminished ($°$), Augmented ($+$), $\text{Sus4}$, and $\text{Sus2}$.
+  * **Tiers 3.1 – 3.5 (7th Chords by Inversion):** Deconstructed by clash geometry—Root Position, 1st Inversion ($\text{6/5}$, top clash), 2nd Inversion ($\text{4/3}$, middle clash), 3rd Inversion ($\text{4/2}$, bottom clash), and 7th Inversion Mastery. Standardized across all 4 diatonic qualities ($\text{Dom7}, \text{Maj7}, \text{Min7}, \text{Half-Dim } ø7 / \text{m7}\flat5$).
+  * **Tiers 3.6 – 3.7 (Drop Voicings & Shell Voicings):** Open 4-part **Drop-2** (2nd voice from top dropped $8\text{va}$) and **Drop-3** (3rd voice from top dropped $8\text{va}$) voicings, blending in 3-note **5th omitted shell voicings** ($\text{Root} + \text{3rd} + \text{7th}$).
+  * **Tier 3.8 (Diminished 7ths):** Half-Diminished ($ø7$) and Fully Diminished ($°7$) chords.
+  * **Tiers 4.1 – 4.2 (Extensions & Alterations):** $\text{add9}, 6, \text{m6}, 9\text{th}, 7\sharp9, 7\flat9$.
 
 * **〰️ Track B: Arpeggios & Contours (Horizontal Chunking):**
   * Linear Ascending ($\nearrow$) and Descending ($\searrow$) sweeps.
@@ -33,26 +35,23 @@ When beginner musicians read sheet music, they decode **letter-by-letter** (e.g.
   * Arch Contours ($\Lambda$) and Alberti / Wave accompaniment figures ($\sim$).
   * Symmetrical Diminished 7th Cascades & Cross-beamed 16th-note groupings.
 
-* **⚡ Auto-Advancing 4-Slot Chord Entry (Zero Key Conflicts):**
+* **⭕ 15 Paired Key Signatures & Circle of Fifths Progression:**
+  * Master all 15 key signatures organized into 5 progressive Circle of Fifths stages (0 to 7 sharps/flats) with paired Major and Relative Minor naming ($C / \text{Am}$, $G / \text{Em}$, $F / \text{Dm}$, etc.).
+  * Practice with diatonic chord biasing and realistic implicit sheet music accidentals.
+
+* **⚡ Auto-Advancing 4-Slot Chord Entry & Drop Inversion Bypass:**
   * Type full chords in $<350\text{ms}$ with zero collision between note names and accidentals:
-  * `[1. Root (A-G)] ──► [2. Accidental (S/B or Auto-Skip)] ──► [3. Quality (m/M/d/a/7)] ──► [4. Inversion (0-3 Auto-Submit)]`
-  * *Example:* Type `c` $\rightarrow$ `m` $\rightarrow$ `1` $\rightarrow$ Evaluates $C\text{m 1st Inv}$ immediately.
+  * `[1. Root (A-G)] ──► [2. Accidental (S/B or Auto-Skip)] ──► [3. Quality (m/M/j/7/k/h)] ──► [4. Inversion (0-3)]`
+  * Fixed-inversion and Drop Voicing tiers automatically bypass Slot 4 to evaluate Root + Quality instantaneously.
+
+* **🔍 Side-by-Side Dual Stave Notation Diff:**
+  * Incorrect submissions immediately render a side-by-side visual diff:
+  * User's guessed chord (in red) reconstructed in the exact same octave register, voicing spread, and `omit5` structure alongside the correct target chord (in green), immediately highlighting pitch errors without visual distortion.
 
 * **🎴 Multiple Training Modes:**
   * **⌨️ Direct Entry:** Full chord keyboard type-in buffer.
-  * **🎴 Multiple Choice:** 4 rapid distractor cards featuring cognitive trap choices.
+  * **🎴 Multiple Choice:** 4 rapid distractor cards featuring intelligent quality, inversion, and drop voicing traps.
   * **⚡ Shape Reflex:** Sub-second pure inversion/contour classification.
-
-* **📊 Adaptive Analytics & Weakness Heatmap:**
-  * Dynamically weights problem generation based on historical error rates and reaction latency:
-    $$P(p) \propto 1.0 + 2.5 \times \text{ErrorRate}(p) + \left(\frac{\text{AvgLatencyMs}(p)}{1000}\right)$$
-  * Auto-promotion gates ($\ge 87\%$ accuracy, $<700\text{ms}$ latency over 15 trials) to unlock higher tiers.
-  * 1-Click JSON **Export Data Backup** and **Import Restore**.
-
-* **📱 Mobile & Desktop Friendly:**
-  * Ergonomic touch grids optimized for one-handed thumb reach on mobile.
-  * Persistent on-screen desktop keymap HUD with live keydown feedback.
-  * Progressive Web App (PWA) manifest and Service Worker for 100% offline home-screen installation.
 
 ---
 

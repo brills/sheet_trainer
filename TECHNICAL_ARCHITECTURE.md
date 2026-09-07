@@ -90,15 +90,18 @@ interface TrackSettings {
   inputMode: 'direct_entry' | 'multiple_choice' | 'shape_only';
   flashMode: 'fixed' | 'adaptive';
   flashDurationMs: number;              // e.g. 300ms
+  keyMode: 'progressive' | 'locked' | 'all_unlocked';
+  activeKeyId: string;                  // e.g. 'C', 'G', 'Am'
 }
 
 interface TrackProgress {
-  currentTier: number;                  // e.g. 1.1, 1.2, 2.1...
+  currentTier: number;                  // e.g. 1.1, 1.2, 3.1...
   highestStreak: number;
   currentStreak: number;
   totalTrialsCompleted: number;
   masteredTiers: number[];              // List of completed tier IDs
-  // Track-specific weakness analytics:
+  unlockedKeyStages: number[];          // Circle of Fifths stages (0 to 4)
+  masteredKeys: string[];               // Mastered key signature IDs
   weaknessMatrix: Record<string, PatternStats>;
 }
 
@@ -107,6 +110,23 @@ interface PatternStats {
   correctCount: number;
   avgLatencyMs: number;
   lastAttemptTimestamp: number;
+}
+
+export type VoicingType = 'close' | 'drop2' | 'drop3';
+
+export interface ChordDefinition {
+  id: string;
+  root: NoteLetter;
+  rootAccidental: Accidental;
+  quality: ChordQuality;
+  inversion: Inversion;
+  notes: NotePitch[];
+  clef: Clef;
+  tier: number;
+  displayName: string;
+  voicing?: VoicingType;
+  omit5?: boolean;
+  keySignature?: KeySignatureDefinition;
 }
 ```
 

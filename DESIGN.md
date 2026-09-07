@@ -83,11 +83,16 @@ A **Tier** is a curriculum milestone grouping a specific category of musical pat
 * **Tier 1.4 — Triad Mastery:** Mixed root, 1st, and 2nd inversion triads.
 * **Tier 2.1 — Altered Triads:** Diminished ($°$) and Augmented ($+$) in all inversions.
 * **Tier 2.2 — Suspended Chords:** $\text{Sus4}$ and $\text{Sus2}$ (spotting 2nd/4th step clashes replacing the 3rd).
-* **Tier 3.1 — 7th Chords (Root Position):** Dom7, Maj7, Min7 (4-tier towers).
-* **Tier 3.2 — 7th Chord Inversions:** $\text{6/5}$, $\text{4/3}$, and $\text{4/2}$ (spotting the adjacent 2nd clash).
-* **Tier 3.3 — Diminished 7ths:** Half-Diminished ($ø7$) and Fully Diminished ($°7$).
+* **Tier 3.1 — 7th Chords (Root Position):** Dom7, Maj7, Min7, and Half-Diminished ($ø7 / \text{m7}\flat5$) in root position (4-tier towers).
+* **Tier 3.2 — 7th Chords (1st Inversion):** $\text{6/5}$ inversions across Dom7, Maj7, Min7, and $ø7$ (spotting the **top 2nd clash** $\rightarrow$ top note of clash is root).
+* **Tier 3.3 — 7th Chords (2nd Inversion):** $\text{4/3}$ inversions (spotting the **middle 2nd clash** $\rightarrow$ top note of clash is root).
+* **Tier 3.4 — 7th Chords (3rd Inversion):** $\text{4/2}$ inversions (spotting the **bottom 2nd clash** $\rightarrow$ bottom note is root).
+* **Tier 3.5 — 7th Inversion Mastery:** Mixed close-position 7th chords across all 4 inversions.
+* **Tier 3.6 — Drop-2 Voicings:** Open 4-part voicings (2nd voice from top dropped $8\text{va}$), blending in 3-note **5th omitted shell voicings** ($\text{Root} + \text{3rd} + \text{7th}$).
+* **Tier 3.7 — Drop-3 Voicings:** Wide open voicings (3rd voice from top dropped $8\text{va}$), blending in 3-note **5th omitted shell voicings**.
+* **Tier 3.8 — Diminished 7ths:** Half-Diminished ($ø7$) and Fully Diminished ($°7$) across all inversions.
 * **Tier 4.1 — Added Tone & 6th Chords:** $\text{add9}$, $6$, $\text{m6}$.
-* **Tier 4.2 — Compound & Altered Chords:** $9\text{th}$, $11\text{th}$, $13\text{th}$, $7\sharp9$, $7\flat9$.
+* **Tier 4.2 — Compound & Altered Chords:** $9\text{th}$, $7\sharp9$, $7\flat9$.
 
 ### Track B: Arpeggios & Contours Tiers
 
@@ -120,23 +125,24 @@ For typing full chord answers with zero key conflicts:
 2. **Slot 2 (Accidental / Smart Skip):**
    * Press `S` or `#` for **Sharp (♯)**.
    * Press `B` or `-` for **Flat (♭)**.
-   * *Smart Skip:* If natural, typing a Quality key (e.g. `m` or `M`) **skips Slot 2 automatically** and fills Slot 3.
+   * *Smart Skip:* If natural, typing a Quality key (e.g. `m`, `M`, `j`, `k`, `h`) **skips Slot 2 automatically** and fills Slot 3.
 3. **Slot 3 (Quality):**
-   * Press `M` (Maj), `m` (Min), `d` (Dim), `a` (Aug), `7` (Dom7), `j` (Maj7), `k` (Min7), `4` (Sus4).
+   * Press `M` (Maj), `m` (Min), `7` (Dom7), `j` (Maj7), `k` (Min7), `h` (Half-Dim $ø7$), `d` (Dim), `a` (Aug), `4` (Sus4), `2` (Sus2).
 4. **Slot 4 (Inversion & Auto-Submit):**
    * Press `0` or `r` (Root Pos), `1` (1st Inv), `2` (2nd Inv), `3` (3rd Inv).
-   * *Instant Auto-Submit:* Evaluates immediately on inversion entry.
+   * *Fixed Inversion & Drop Voicing Auto-Bypass:* In fixed-inversion tiers (e.g. 1.1, 1.2, 3.2) and Drop Voicing tiers (3.6, 3.7), Slot 4 is auto-populated and bypassed, evaluating immediately once Root + Quality are entered.
 
 ### B. Persistent Desktop Keymap Legend HUD
-A slim cheat sheet stays permanently visible on desktop screens:
-```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ [A-G] Root | [S]♯ [B]♭ | [m]Min [M]Maj [d]Dim [a]Aug [7]Dom7 [j]Maj7 | [0-3] Inversion │
-└────────────────────────────────────────────────────────────────────────────────────────┘
-```
+A dynamic, tier-aware cheat sheet stays permanently visible on desktop screens, displaying only the qualities relevant to the active tier with uniform, compact dimensions (`[h] ø7`, `[j] Maj7`, `[k] m7`, etc.).
 
-### C. Multiple Choice & Shape Reflex Modes
-* **Multiple Choice:** 4 smart distractor cards (keys `1`, `2`, `3`, `4`).
+### C. Side-by-Side Dual Stave Notation Diff
+When a submission is incorrect, the feedback screen renders:
+1. **User Guessed Stave (Red `#f43f5e`):** Reconstructed in the exact same octave register, voicing spread (`drop2`/`drop3`), and `omit5` state as the target chord.
+2. **Target Stave (Green `#10b981`):** Shows the correct notation.
+3. **Slot Diff Chips:** Displays per-slot chips (`Root`, `Acc`, `Quality`, `Voicing / Inv`) to pinpoint exact error locations.
+
+### D. Multiple Choice & Shape Reflex Modes
+* **Multiple Choice:** 4 smart distractor cards (keys `1`, `2`, `3`, `4`) with uniform voicing sublabels (e.g., `Drop-2 (omit 5)`).
 * **Shape Reflex:** Inversion-only flash mode (keys `0`, `1`, `2`, `3`).
 
 ---
