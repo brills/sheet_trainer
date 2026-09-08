@@ -144,6 +144,16 @@ assert(reject3rdRes.updated === false && reject3rdRes.completed === false, 'Stat
 smMixed.handleKey('1'); // Auto-submits on inversion entry
 assert(mixedResult !== null && mixedResult.inversion === '1st', 'Mixed Mode - Typed "1": Auto-submitted 1st inversion');
 
+// Test hotkey 'r' for Root Inversion
+let rootHotKeyResult: any = null;
+const smRootKey = new ChordInputStateMachine((res) => {
+  rootHotKeyResult = res;
+}, null);
+smRootKey.handleKey('g');
+smRootKey.handleKey('M'); // Major
+const rKeyRes = smRootKey.handleKey('r'); // 'r' for Root
+assert(rKeyRes.completed === true && rootHotKeyResult !== null && rootHotKeyResult.inversion === 'root', 'Mixed Mode - Typed "r": Hotkey "r" submits Root Position inversion');
+
 // Verify buildChord triad safeguard
 const triadFallbackChord = buildChord('C', 'natural', 'major', '3rd', 'treble', 1.4);
 assert(triadFallbackChord.inversion === 'root', 'buildChord: Passing 3rd inversion to a triad safely falls back to Root Position');

@@ -123,7 +123,7 @@ export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
         ) : (
           <>
             {(!tierConfig || tierConfig.inversions.includes('root')) && (
-              <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('0') || isKeyActive('r') ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[0] Root</span>
+              <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('r') || isKeyActive('0') ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[r] Root</span>
             )}
             {(!tierConfig || tierConfig.inversions.includes('1st')) && (
               <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('1') ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[1] 1st</span>
