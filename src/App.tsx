@@ -432,39 +432,6 @@ export const App: React.FC = () => {
     });
   };
 
-  // State Updates from UI
-  const handleClefChange = (clef: any) => {
-    const next: AppState = {
-      ...appState,
-      settings: {
-        ...appState.settings,
-        [activeTrack]: {
-          ...appState.settings[activeTrack],
-          clef
-        }
-      }
-    };
-    saveAppState(next);
-    setAppState(next);
-    setRecentTrials([]);
-    setRecentKeyTrials([]);
-    setLastResult(null);
-  };
-
-  const handleInputModeChange = (inputMode: any) => {
-    const next: AppState = {
-      ...appState,
-      settings: {
-        ...appState.settings,
-        [activeTrack]: {
-          ...appState.settings[activeTrack],
-          inputMode
-        }
-      }
-    };
-    saveAppState(next);
-    setAppState(next);
-  };
 
   const handleKeyModeChange = (keyMode: KeyMode) => {
     const next: AppState = {
@@ -600,10 +567,6 @@ export const App: React.FC = () => {
             {/* Track Header & Tier Selector Bar */}
             <TrackHeader
               track={activeTrack}
-              clef={trackSettings.clef}
-              onClefChange={handleClefChange}
-              inputMode={trackSettings.inputMode}
-              onInputModeChange={handleInputModeChange}
               currentTier={trackProgress.currentTier}
               isMastered={isTierMastered}
               onOpenTierModal={() => setIsTierModalOpen(true)}
@@ -691,7 +654,15 @@ export const App: React.FC = () => {
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
         state={appState}
+        activeTrack={activeTrack}
         onUpdateState={(newState) => {
+          const oldClef = appState.settings[activeTrack]?.clef;
+          const newClef = newState.settings[activeTrack]?.clef;
+          if (oldClef !== newClef) {
+            setRecentTrials([]);
+            setRecentKeyTrials([]);
+            setLastResult(null);
+          }
           saveAppState(newState);
           setAppState(newState);
         }}

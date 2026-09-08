@@ -496,6 +496,30 @@ assert(!incorrectAttempt.didMaster && incorrectAttempt.masteryNotification === u
 const correctAttempt = simulateTrialMastery(true, passingTrials);
 assert(correctAttempt.didMaster && correctAttempt.masteryNotification !== undefined && correctAttempt.masteryNotification.includes('Tier 1.1 Mastered'), 'Correct answer meeting threshold triggers mastery notification for the Correct Answer screen');
 
+// 10. Device Detection & Responsive Default Input Mode
+console.log('\n--- 10. Device Detection & Responsive Input Mode ---');
+import { isMobileDevice, getDefaultInputMode } from '../src/storage/localStore';
+
+// In Node environment without window/navigator, isMobileDevice is false (desktop default)
+assert(isMobileDevice() === false, 'Default non-mobile/Node environment detected as desktop');
+assert(getDefaultInputMode() === 'direct_entry', 'Desktop environment defaults to direct_entry mode');
+
+// Mock mobile user-agent
+(global as any).window = { innerWidth: 390 };
+(global as any).navigator = { userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)', maxTouchPoints: 5 };
+assert(isMobileDevice() === true, 'iPhone user agent detected as mobile');
+assert(getDefaultInputMode() === 'multiple_choice', 'Mobile device defaults to multiple_choice mode');
+
+// Mock desktop browser with wide screen and mouse
+(global as any).window = { innerWidth: 1440 };
+(global as any).navigator = { userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)', maxTouchPoints: 0 };
+assert(isMobileDevice() === false, 'Desktop Mac user agent detected as desktop');
+assert(getDefaultInputMode() === 'direct_entry', 'Desktop environment defaults to direct_entry');
+
+// Clean up mocks
+delete (global as any).window;
+delete (global as any).navigator;
+
 console.log(`\n================================`);
 console.log(`Suite finished: ${passedTests} Passed, ${failedTests} Failed.`);
 if (failedTests > 0) {

@@ -1,15 +1,11 @@
 import React from 'react';
-import { Clef, InputMode, TrackType } from '../types';
+import { TrackType } from '../types';
 import { CHORD_TIERS } from '../core/theory/chords';
 import { ARPEGGIO_TIERS } from '../core/theory/arpeggios';
 import { Layers, CheckCircle2 } from 'lucide-react';
 
 interface TrackHeaderProps {
   track: TrackType;
-  clef: Clef;
-  onClefChange: (clef: Clef) => void;
-  inputMode: InputMode;
-  onInputModeChange: (mode: InputMode) => void;
   currentTier: number;
   isMastered?: boolean;
   onOpenTierModal: () => void;
@@ -17,10 +13,6 @@ interface TrackHeaderProps {
 
 export const TrackHeader: React.FC<TrackHeaderProps> = ({
   track,
-  clef,
-  onClefChange,
-  inputMode,
-  onInputModeChange,
   currentTier,
   isMastered = false,
   onOpenTierModal
@@ -30,12 +22,12 @@ export const TrackHeader: React.FC<TrackHeaderProps> = ({
     : ARPEGGIO_TIERS[currentTier] || ARPEGGIO_TIERS[1.1];
 
   return (
-    <div className="w-full max-w-md mx-auto flex flex-col gap-2.5 mb-3">
+    <div className="w-full max-w-md mx-auto mb-3">
       {/* Tier Selector Ribbon */}
       <button
         type="button"
         onClick={onOpenTierModal}
-        className="w-full flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-slate-900/90 to-slate-900/60 border border-slate-800 hover:border-emerald-500/50 transition-all shadow-md group text-left"
+        className="w-full flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-slate-900/90 to-slate-900/60 border border-slate-800 hover:border-emerald-500/50 transition-all shadow-md group text-left cursor-pointer"
       >
         <div className="flex items-center gap-2.5">
           <div className={`
@@ -68,47 +60,6 @@ export const TrackHeader: React.FC<TrackHeaderProps> = ({
           <span>Tiers</span>
         </div>
       </button>
-
-      {/* Control Bar: Clef Toggle + Input Mode Selector */}
-      <div className="grid grid-cols-2 gap-2">
-        {/* 1. Clef Toggle */}
-        <div className="flex p-1 rounded-xl bg-slate-900/80 border border-slate-800">
-          <button
-            type="button"
-            onClick={() => onClefChange('treble')}
-            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
-              clef === 'treble' 
-                ? 'bg-emerald-500 text-slate-950 shadow-sm' 
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            𝄞 Treble
-          </button>
-          <button
-            type="button"
-            onClick={() => onClefChange('bass')}
-            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
-              clef === 'bass' 
-                ? 'bg-emerald-500 text-slate-950 shadow-sm' 
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            𝄢 Bass
-          </button>
-        </div>
-
-        {/* 2. Input Mode Selector */}
-        <div className="flex p-1 rounded-xl bg-slate-900/80 border border-slate-800">
-          <select
-            value={inputMode}
-            onChange={e => onInputModeChange(e.target.value as InputMode)}
-            className="w-full bg-transparent text-xs font-semibold text-slate-300 focus:outline-none cursor-pointer px-2"
-          >
-            <option value="direct_entry" className="bg-slate-900 text-slate-200">⌨️ Direct Entry</option>
-            <option value="multiple_choice" className="bg-slate-900 text-slate-200">🎴 Multiple Choice</option>
-          </select>
-        </div>
-      </div>
     </div>
   );
 };

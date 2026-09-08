@@ -3,76 +3,95 @@ import { clearAllTrials } from './telemetryStore';
 
 const STORAGE_KEY = 'sheet_trainer_state_v1';
 
-export const DEFAULT_APP_STATE: AppState = {
-  version: 1,
-  settings: {
-    theme: 'dark',
-    showKeymapLegend: true,
-    chords: {
-      clef: 'treble',
-      inputMode: 'direct_entry',
-      flashMode: 'fixed',
-      flashDurationMs: 400,
-      keyMode: 'progressive',
-      activeKeyId: 'C'
+export function isMobileDevice(): boolean {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+  const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera || '';
+  const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
+  const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  const isSmallScreen = window.innerWidth <= 768;
+  return mobileRegex.test(userAgent) || (isTouch && isSmallScreen);
+}
+
+export function getDefaultInputMode(): 'direct_entry' | 'multiple_choice' {
+  return isMobileDevice() ? 'multiple_choice' : 'direct_entry';
+}
+
+export function getDefaultAppState(): AppState {
+  const defaultMode = getDefaultInputMode();
+  return {
+    version: 1,
+    settings: {
+      theme: 'dark',
+      showKeymapLegend: true,
+      chords: {
+        clef: 'treble',
+        inputMode: defaultMode,
+        flashMode: 'fixed',
+        flashDurationMs: 400,
+        keyMode: 'progressive',
+        activeKeyId: 'C'
+      },
+      arpeggios: {
+        clef: 'treble',
+        inputMode: defaultMode,
+        flashMode: 'fixed',
+        flashDurationMs: 500,
+        keyMode: 'progressive',
+        activeKeyId: 'C'
+      }
     },
-    arpeggios: {
-      clef: 'treble',
-      inputMode: 'multiple_choice',
-      flashMode: 'fixed',
-      flashDurationMs: 500,
-      keyMode: 'progressive',
-      activeKeyId: 'C'
+    progress: {
+      chords: {
+        currentTier: 1.1,
+        highestStreak: 0,
+        currentStreak: 0,
+        totalTrialsCompleted: 0,
+        masteredTiers: [],
+        unlockedKeyStages: [0],
+        masteredKeys: [],
+        weaknessMatrix: {}
+      },
+      arpeggios: {
+        currentTier: 1.1,
+        highestStreak: 0,
+        currentStreak: 0,
+        totalTrialsCompleted: 0,
+        masteredTiers: [],
+        unlockedKeyStages: [0],
+        masteredKeys: [],
+        weaknessMatrix: {}
+      }
     }
-  },
-  progress: {
-    chords: {
-      currentTier: 1.1,
-      highestStreak: 0,
-      currentStreak: 0,
-      totalTrialsCompleted: 0,
-      masteredTiers: [],
-      unlockedKeyStages: [0],
-      masteredKeys: [],
-      weaknessMatrix: {}
-    },
-    arpeggios: {
-      currentTier: 1.1,
-      highestStreak: 0,
-      currentStreak: 0,
-      totalTrialsCompleted: 0,
-      masteredTiers: [],
-      unlockedKeyStages: [0],
-      masteredKeys: [],
-      weaknessMatrix: {}
-    }
-  }
-};
+  };
+}
+
+export const DEFAULT_APP_STATE: AppState = getDefaultAppState();
 
 export function loadAppState(): AppState {
+  const defaultState = getDefaultAppState();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_APP_STATE;
+    if (!raw) return defaultState;
     const parsed = JSON.parse(raw);
     return {
-      ...DEFAULT_APP_STATE,
+      ...defaultState,
       ...parsed,
       settings: {
-        ...DEFAULT_APP_STATE.settings,
+        ...defaultState.settings,
         ...(parsed.settings || {}),
-        chords: { ...DEFAULT_APP_STATE.settings.chords, ...(parsed.settings?.chords || {}) },
-        arpeggios: { ...DEFAULT_APP_STATE.settings.arpeggios, ...(parsed.settings?.arpeggios || {}) }
+        chords: { ...defaultState.settings.chords, ...(parsed.settings?.chords || {}) },
+        arpeggios: { ...defaultState.settings.arpeggios, ...(parsed.settings?.arpeggios || {}) }
       },
       progress: {
-        ...DEFAULT_APP_STATE.progress,
+        ...defaultState.progress,
         ...(parsed.progress || {}),
-        chords: { ...DEFAULT_APP_STATE.progress.chords, ...(parsed.progress?.chords || {}) },
-        arpeggios: { ...DEFAULT_APP_STATE.progress.arpeggios, ...(parsed.progress?.arpeggios || {}) }
+        chords: { ...defaultState.progress.chords, ...(parsed.progress?.chords || {}) },
+        arpeggios: { ...defaultState.progress.arpeggios, ...(parsed.progress?.arpeggios || {}) }
       }
     };
   } catch (e) {
     console.error('Failed to load state from localStorage:', e);
-    return DEFAULT_APP_STATE;
+    return defaultState;
   }
 }
 
