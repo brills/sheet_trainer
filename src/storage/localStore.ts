@@ -4,36 +4,23 @@ import { clearAllTrials } from './telemetryStore';
 const STORAGE_KEY = 'sheet_trainer_state_v1';
 
 export function isMobileDevice(): boolean {
-  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
-
-  // 1. Pointer & Hover capabilities (Gold standard for modern browsers including Desktop Safari)
-  if (typeof window.matchMedia === 'function') {
-    const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
-    const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
-    const hasHover = window.matchMedia('(hover: hover)').matches;
-    const isMobileViewport = window.matchMedia('(max-width: 768px)').matches;
-
-    // Desktop/Laptop: has fine pointer (mouse/trackpad) and hover capability
-    if (hasHover && hasFinePointer && !isCoarsePointer) {
-      return false;
-    }
-
-    // Mobile phones: coarse touch pointer and narrow viewport
-    if (isCoarsePointer && isMobileViewport) {
-      return true;
-    }
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+    return false;
   }
 
-  // 2. User Agent fallback
-  const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera || '';
-  const mobileRegex = /android|webos|iphone|ipod|blackberry|iemobile|opera mini/i;
-  if (mobileRegex.test(userAgent)) {
-    return true;
+  // Pure CSS Media Queries (Pointer & Hover capability detection)
+  const hasHover = window.matchMedia('(hover: hover)').matches;
+  const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
+  const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+  const isSmallScreen = window.matchMedia('(max-width: 768px)').matches;
+
+  // Desktop / Laptop: has fine pointer (mouse / trackpad) and hover capability
+  if (hasHover && hasFinePointer) {
+    return false;
   }
 
-  // 3. iPad / iPadOS Safari fallback (which reports as Macintosh with multi-touch points)
-  const isIPad = /ipad/i.test(userAgent) || (userAgent.includes('Macintosh') && (navigator.maxTouchPoints || 0) > 1 && (window.innerWidth || 1024) <= 1024);
-  if (isIPad) {
+  // Mobile / Touch devices: coarse pointer (finger touch) or small touch viewport without hover
+  if (isCoarsePointer || isSmallScreen || !hasHover) {
     return true;
   }
 

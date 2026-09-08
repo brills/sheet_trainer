@@ -500,35 +500,30 @@ assert(correctAttempt.didMaster && correctAttempt.masteryNotification !== undefi
 console.log('\n--- 10. Device Detection & Responsive Input Mode ---');
 import { isMobileDevice, getDefaultInputMode } from '../src/storage/localStore';
 
-// In Node environment without window/navigator, isMobileDevice is false (desktop default)
-assert(isMobileDevice() === false, 'Default non-mobile/Node environment detected as desktop');
+// In Node environment without window/matchMedia, isMobileDevice is false (desktop default)
+assert(isMobileDevice() === false, 'Default non-browser/Node environment detected as desktop');
 assert(getDefaultInputMode() === 'direct_entry', 'Desktop environment defaults to direct_entry mode');
 
-// Mock mobile user-agent (iPhone)
+// Mock mobile touch device (coarse pointer, no hover, mobile viewport)
 (global as any).window = { 
-  innerWidth: 390,
   matchMedia: (q: string) => ({
     matches: q.includes('pointer: coarse') || q.includes('max-width: 768px')
   })
 };
-(global as any).navigator = { userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)', maxTouchPoints: 5 };
-assert(isMobileDevice() === true, 'iPhone user agent detected as mobile');
-assert(getDefaultInputMode() === 'multiple_choice', 'Mobile device defaults to multiple_choice mode');
+assert(isMobileDevice() === true, 'Mobile touch device (coarse pointer / no hover) detected as mobile');
+assert(getDefaultInputMode() === 'multiple_choice', 'Mobile touch device defaults to multiple_choice mode');
 
-// Mock desktop Safari browser on Mac (fine pointer + hover)
+// Mock desktop browser (fine pointer + hover)
 (global as any).window = { 
-  innerWidth: 1440,
   matchMedia: (q: string) => ({
     matches: q.includes('hover: hover') || q.includes('pointer: fine')
   })
 };
-(global as any).navigator = { userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15', maxTouchPoints: 0 };
-assert(isMobileDevice() === false, 'Desktop Safari on macOS detected as desktop');
-assert(getDefaultInputMode() === 'direct_entry', 'Desktop Safari environment defaults to direct_entry');
+assert(isMobileDevice() === false, 'Desktop environment (fine pointer + hover) detected as desktop');
+assert(getDefaultInputMode() === 'direct_entry', 'Desktop environment defaults to direct_entry');
 
 // Clean up mocks
 delete (global as any).window;
-delete (global as any).navigator;
 
 console.log(`\n================================`);
 console.log(`Suite finished: ${passedTests} Passed, ${failedTests} Failed.`);
