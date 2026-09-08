@@ -2,19 +2,17 @@ import React, { useEffect, useRef } from 'react';
 import { ChordDefinition, ArpeggioDefinition, TrackType, TrialFeedback, KeySignatureDefinition } from '../types';
 import { renderChordToSvg, renderArpeggioToSvg } from '../core/theory/vexflowAdapter';
 import { formatNoteName } from '../core/theory/notes';
-import { CheckCircle2, XCircle, ArrowRight, Compass, Award } from 'lucide-react';
+import { CheckCircle2, XCircle, ArrowRight, Award } from 'lucide-react';
 
 interface NotationStageProps {
   track: TrackType;
   chord?: ChordDefinition;
   arpeggio?: ArpeggioDefinition;
   keySignature?: KeySignatureDefinition;
-  isKeyMastered?: boolean;
   isFeedback: boolean;
   lastResult?: TrialFeedback | null;
   darkMode?: boolean;
   onContinue?: () => void;
-  onOpenKeyModal?: () => void;
 }
 
 export const NotationStage: React.FC<NotationStageProps> = ({
@@ -22,12 +20,10 @@ export const NotationStage: React.FC<NotationStageProps> = ({
   chord,
   arpeggio,
   keySignature,
-  isKeyMastered = false,
   isFeedback,
   lastResult,
   darkMode = true,
-  onContinue,
-  onOpenKeyModal
+  onContinue
 }) => {
   const visibleRef = useRef<HTMLDivElement>(null);
   const offscreenRef = useRef<HTMLDivElement>(null);
@@ -118,10 +114,6 @@ export const NotationStage: React.FC<NotationStageProps> = ({
       ? arpeggio.notes.map(n => formatNoteName(n.letter, n.accidental, true, n.octave)).join(' → ')
       : '';
 
-  const accBadge = activeKey 
-    ? (activeKey.sharpsCount > 0 ? `${activeKey.sharpsCount}♯` : (activeKey.flatsCount > 0 ? `${activeKey.flatsCount}♭` : '0♮'))
-    : null;
-
   return (
     <div className="relative w-full max-w-md mx-auto flex flex-col items-center">
       {/* Off-screen double buffer (hidden from DOM flow) */}
@@ -139,27 +131,6 @@ export const NotationStage: React.FC<NotationStageProps> = ({
         ${isFeedback && lastResult?.isCorrect ? 'border-emerald-500 ring-4 ring-emerald-500/20' : ''}
         ${isIncorrect ? 'border-rose-500/80 ring-4 ring-rose-500/20' : ''}
       `}>
-        {/* Key Badge in Top Left */}
-        {activeKey && (
-          <button
-            type="button"
-            onClick={onOpenKeyModal}
-            title="Click to view Circle of Fifths & change Key"
-            className="absolute top-2.5 left-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white transition-all text-xs font-semibold backdrop-blur-md cursor-pointer group shadow-sm"
-          >
-            <Compass className="w-3.5 h-3.5 text-emerald-400 group-hover:rotate-45 transition-transform" />
-            <span>Key: {activeKey.name}</span>
-            {isKeyMastered && (
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-            )}
-            {accBadge && (
-              <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-slate-950/80 border border-slate-700/80 text-emerald-300">
-                {accBadge}
-              </span>
-            )}
-          </button>
-        )}
-
         {/* Regular Single Stave (always visible while answering or on correct feedback) */}
         {!hasSideBySide && (
           <div 

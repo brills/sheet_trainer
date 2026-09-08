@@ -615,12 +615,10 @@ export const App: React.FC = () => {
               chord={currentChord || undefined}
               arpeggio={currentArpeggio || undefined}
               keySignature={currentKey}
-              isKeyMastered={isKeyMastered}
               isFeedback={isFeedback}
               lastResult={lastResult}
               darkMode={true}
               onContinue={spawnNextProblem}
-              onOpenKeyModal={() => setIsKeyModalOpen(true)}
             />
 
             {/* Real-Time Stats HUD */}

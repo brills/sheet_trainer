@@ -82,10 +82,11 @@ export const Navigation: React.FC<NavigationProps> = ({
               type="button"
               onClick={onOpenKeyModal}
               title="Open Circle of Fifths & Key Selector"
-              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-850 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-slate-100 text-xs font-semibold transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-850 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-slate-100 text-xs font-semibold transition-all cursor-pointer shadow-sm"
             >
               <Compass className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{activeKey.name}</span>
+              <span className="hidden sm:inline">{activeKey.name}</span>
+              <span className="sm:hidden">{activeKey.id}</span>
               {isKeyMastered && (
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
               )}
