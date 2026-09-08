@@ -151,7 +151,8 @@ export function renderArpeggioToSvg(
     const sn = new StaveNote({
       clef: clef,
       keys: [key],
-      duration: duration
+      duration: duration,
+      auto_stem: true
     });
 
     const requiredAcc = getRequiredAccidentalForNote(note, keySig);
@@ -171,21 +172,32 @@ export function renderArpeggioToSvg(
     return sn;
   });
 
+  // Instantiate Beam BEFORE voice.draw() so VexFlow suppresses standalone eighth-note flags
+  let beam: Beam | null = null;
+  if (arpeggio.isBeamed && staveNotes.length > 1) {
+    try {
+      beam = new Beam(staveNotes);
+      beam.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
+    } catch {
+      // Ignore beam layout exceptions on edge intervals
+    }
+  }
+
   const voice = new Voice({ num_beats: 4, beat_value: 4 });
   voice.setStrict(false);
   voice.addTickables(staveNotes);
 
-  new Formatter().joinVoices([voice]).format([voice], staveWidth - 70);
+  // In standard music engraving, arpeggios occupy a compact measure width (~36-40px per note) rather than stretching across the entire stave
+  const justifyWidth = Math.min(staveWidth * 0.55, Math.max(120, staveNotes.length * 38));
+  new Formatter().joinVoices([voice]).format([voice], justifyWidth);
 
   voice.draw(context, stave);
 
-  if (arpeggio.isBeamed && staveNotes.length > 1) {
+  if (beam) {
     try {
-      const beam = new Beam(staveNotes);
-      beam.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
       beam.setContext(context).draw();
     } catch {
-      // Ignore beam layout exceptions on edge intervals
+      // Ignore draw errors
     }
   }
 }
