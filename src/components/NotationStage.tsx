@@ -169,9 +169,9 @@ export const NotationStage: React.FC<NotationStageProps> = ({
               <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-500/40 px-2.5 py-0.5 rounded-full shadow-sm animate-in fade-in">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Correct!</span>
-                {lastResult.rollingAvgLatencyMs !== undefined && lastResult.rollingAvgLatencyMs > 0 && (
+                {lastResult.latencyMs !== undefined && lastResult.latencyMs > 0 && (
                   <span className="text-[10px] font-mono text-emerald-200/80 font-normal ml-0.5 pl-1 border-l border-emerald-700/60">
-                    {(lastResult.rollingAvgLatencyMs / 1000).toFixed(2)}s
+                    {(lastResult.latencyMs / 1000).toFixed(2)}s
                   </span>
                 )}
               </span>
@@ -254,14 +254,6 @@ export const NotationStage: React.FC<NotationStageProps> = ({
               {notesSummary && (
                 <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-mono text-slate-300 truncate max-w-full">
                   <span>Notes: {notesSummary}</span>
-                  {lastResult?.rollingAvgLatencyMs !== undefined && lastResult.rollingAvgLatencyMs > 0 && (
-                    <>
-                      <span className="text-slate-600">·</span>
-                      <span className="text-slate-400">
-                        Avg: <strong className={lastResult.rollingAvgLatencyMs <= 2000 ? 'text-emerald-400' : 'text-sky-300'}>{(lastResult.rollingAvgLatencyMs / 1000).toFixed(2)}s</strong>
-                      </span>
-                    </>
-                  )}
                 </div>
               )}
 
