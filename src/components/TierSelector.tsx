@@ -55,7 +55,7 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
         </div>
 
         {/* Tier List */}
-        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2.5">
+        <div className="flex-1 overflow-y-auto min-h-0 p-4 space-y-2.5">
           {tiers.map(t => {
             const isCurrent = t.tier === currentTier;
             const isMastered = masteredTiers.includes(t.tier);
@@ -66,7 +66,7 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
               <div
                 key={t.tier}
                 className={`
-                  rounded-2xl border transition-all overflow-hidden
+                  shrink-0 rounded-2xl border transition-all overflow-hidden
                   ${isCurrent 
                     ? 'bg-slate-900/90 border-emerald-500/80 ring-2 ring-emerald-500/20 shadow-lg shadow-emerald-500/10' 
                     : 'bg-slate-950/60 border-slate-800/80 hover:border-slate-700'}
