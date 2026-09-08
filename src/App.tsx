@@ -615,8 +615,8 @@ export const App: React.FC = () => {
               )}
             </div>
 
-            {/* Persistent Desktop Keymap Legend HUD */}
-            {appState.settings.showKeymapLegend && (
+            {/* Persistent Desktop Keymap Legend HUD (Direct Entry Only) */}
+            {appState.settings.showKeymapLegend && trackSettings.inputMode === 'direct_entry' && (
               <KeymapLegendHUD
                 lastPressedKey={lastPressedKey}
                 mode={trackSettings.inputMode}

@@ -180,7 +180,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <Keyboard className="w-4 h-4 text-emerald-400" />
             <div className="flex flex-col">
               <span className="text-xs font-semibold text-slate-200">Desktop Keymap Legend</span>
-              <span className="text-[10px] text-slate-400">Show keyboard cheat sheet HUD on screen</span>
+              <span className="text-[10px] text-slate-400">Show keyboard cheat sheet HUD during Direct Entry</span>
             </div>
           </div>
 
