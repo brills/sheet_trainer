@@ -123,12 +123,18 @@ const targetArp4 = buildArpeggio('A', 'natural', 'minor', 'ascending', 'root', '
 const alignedArp4 = alignArpeggioToTargetOctave('C', 'natural', 'major', 'ascending', 'root', 'treble', 1.1, targetArp4);
 assert(alignedArp4.notes[0].octave === 5, 'Aligning C Major arpeggio to A4 minor arpeggio (A4-A5) selects Octave 5 (C5-C6)');
 
-// Test Arpeggio VexFlow StaveNote Beaming & Flag Suppression
-import { StaveNote, Beam as VexBeam } from 'vexflow';
+// Test Arpeggio VexFlow StaveNote Beaming, Flag Suppression & Uniform Stem Directions
+import { StaveNote, Beam as VexBeam, Fraction } from 'vexflow';
 const testStaveNotes = gAsc.notes.map(n => new StaveNote({ clef: 'treble', keys: [`${n.letter.toLowerCase()}/${n.octave}`], duration: '8', auto_stem: true }));
 assert(testStaveNotes.every(n => (n as any).hasFlag() === true), 'Before beam creation: eighth notes have flags');
-const testBeam = new VexBeam(testStaveNotes);
-assert(testStaveNotes.every(n => (n as any).hasFlag() === false), 'After Beam instantiation: individual eighth-note flags are suppressed for unified beam rendering');
+const testBeams = VexBeam.generateBeams(testStaveNotes, { groups: [new Fraction(testStaveNotes.length, 8)] });
+assert(testStaveNotes.every(n => (n as any).hasFlag() === false), 'After Beam.generateBeams: individual eighth-note flags are suppressed');
+assert(testStaveNotes.every(n => n.getStemDirection() === testStaveNotes[0].getStemDirection()), 'All notes in beamed arpeggio strictly share uniform stem direction (no inverted/mixed stems)');
+
+// Test Descending Bbm Arpeggio (from screenshot: Bb4 -> F4 -> Db4 -> Bb3)
+const bbmDescNotes = ['bb/4', 'f/4', 'db/4', 'bb/3'].map(k => new StaveNote({ clef: 'treble', keys: [k], duration: '8', auto_stem: true }));
+const bbmBeams = VexBeam.generateBeams(bbmDescNotes, { groups: [new Fraction(bbmDescNotes.length, 8)] });
+assert(bbmDescNotes.every(n => n.getStemDirection() === 1), 'Descending Bbm arpeggio has uniform UP stems (direction=1) with beam sloping naturally downward from Bb4 to Bb3');
 
 // 4. Input State Machine Tests & Fixed Inversion Auto-Skip
 console.log('\n--- 4. Input State Machine & Fixed Inversions ---');

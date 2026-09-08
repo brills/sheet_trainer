@@ -1,4 +1,4 @@
-import { Renderer, Stave, StaveNote, Accidental as VexAccidental, Formatter, Beam, Voice } from 'vexflow';
+import { Renderer, Stave, StaveNote, Accidental as VexAccidental, Formatter, Beam, Voice, Fraction } from 'vexflow';
 import { ChordDefinition, ArpeggioDefinition, KeySignatureDefinition } from '../../types';
 import { accidentalToVexFlow } from './notes';
 import { getRequiredAccidentalForNote } from './keys';
@@ -172,14 +172,16 @@ export function renderArpeggioToSvg(
     return sn;
   });
 
-  // Instantiate Beam BEFORE voice.draw() so VexFlow suppresses standalone eighth-note flags
-  let beam: Beam | null = null;
+  // Generate unified beam with synchronized stem direction across the arpeggio group
+  let beams: Beam[] = [];
   if (arpeggio.isBeamed && staveNotes.length > 1) {
     try {
-      beam = new Beam(staveNotes);
-      beam.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor });
+      beams = Beam.generateBeams(staveNotes, {
+        groups: [new Fraction(staveNotes.length, 8)]
+      });
+      beams.forEach(b => b.setStyle({ fillStyle: strokeColor, strokeStyle: strokeColor }));
     } catch {
-      // Ignore beam layout exceptions on edge intervals
+      // Fallback
     }
   }
 
@@ -193,11 +195,11 @@ export function renderArpeggioToSvg(
 
   voice.draw(context, stave);
 
-  if (beam) {
+  beams.forEach(b => {
     try {
-      beam.setContext(context).draw();
+      b.setContext(context).draw();
     } catch {
       // Ignore draw errors
     }
-  }
+  });
 }
