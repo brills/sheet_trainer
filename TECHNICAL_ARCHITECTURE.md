@@ -87,9 +87,10 @@ interface AppState {
 
 interface TrackSettings {
   clef: 'treble' | 'bass' | 'grand';    // Default: 'treble'
-  inputMode: 'direct_entry' | 'multiple_choice' | 'shape_only';
-  flashMode: 'fixed' | 'adaptive';
-  flashDurationMs: number;              // e.g. 300ms
+  inputMode: 'direct_entry' | 'multiple_choice';
+  flashMode?: 'fixed' | 'adaptive';
+  flashDurationMs?: number;
+  feedbackDelayMs?: number;
   keyMode: 'progressive' | 'locked' | 'all_unlocked';
   activeKeyId: string;                  // e.g. 'C', 'G', 'Am'
 }
@@ -138,16 +139,17 @@ interface TrialLog {
   id: string;              // UUID
   timestamp: number;       // Epoch ms
   track: 'chords' | 'arpeggios';
-  clef: 'treble' | 'bass';
+  clef: 'treble' | 'bass' | 'grand';
   patternId: string;       // e.g., "C#_MIN_1ST_INV" or "G_MAJ_ASC_ROOT"
   root: string;            // "C#"
   quality: string;         // "minor"
   inversionOrShape: string;// "1st" or "ascending"
-  flashDurationMs: number; // Exposure duration
+  flashDurationMs: number; // Exposure duration (0 for untimed)
   latencyMs: number;       // Response time from reveal
   isCorrect: boolean;
   userInput: string;
   correctAnswer: string;
+  keySignature?: string;
 }
 ```
 
@@ -173,83 +175,83 @@ To eliminate key collisions (such as the letter `F` meaning Note **F** vs. **Fla
 2. **Slot 2 — Accidental (Optional / Auto-Skip):**
    * Press `S` or `#` for **Sharp (♯)**.
    * Press `B` or `-` for **Flat (♭)**. (Since Root is already chosen, `B` safely maps to Flat).
-   * *Smart Skip:* If the note is natural, the user **does not need to press anything**—typing a Quality key (like `m` or `M`) fills natural by default and jumps directly to Slot 3!
+   * *Smart Skip:* If the note is natural, typing a Quality key (like `m` or `M`) fills natural by default and jumps directly to Slot 3!
 3. **Slot 3 — Quality / Type:**
-   * Press `M` for **Major**, `m` for **Minor**, `d` for **Dim**, `a` for **Aug**, `7` for **Dom7**, `j` for **Maj7**, `k` for **Min7**, `4` for **Sus4**.
-   * *Slot 3 fills.* State advances to Slot 4.
+   * Press `M` for **Major**, `m` for **Minor**, `d` for **Dim**, `a` for **Aug**, `7` for **Dom7**, `j` for **Maj7**, `k` for **Min7**, `h` for **Half-Dim**, `4` for **Sus4**, `2` for **Sus2**, `9` for **9**, `6` for **6**.
+   * *Slot 3 fills.* State advances to Slot 4 (or auto-submits in fixed-inversion / drop tiers).
 4. **Slot 4 — Inversion (Auto-Submit):**
    * Press `0` or `r` for **Root Pos**, `1` for **1st Inv**, `2` for **2nd Inv**, `3` for **3rd Inv**.
-   * *Immediate Auto-Submit:* The moment the inversion key is pressed, the answer is checked instantly (no `Enter` required).
+   * *Immediate Auto-Submit:* The moment the inversion key is pressed, the answer is evaluated instantly.
 
 > **Real-World Typing Examples:**
 > * $C\text{ minor 1st inv} \rightarrow$ Type: `c` $\rightarrow$ `m` $\rightarrow$ `1` (3 keystrokes, $\approx 300\text{ms}$)
-> * $F\sharp\text{ Maj root pos} \rightarrow$ Type: `f` $\rightarrow$ `s` $\rightarrow$ `M` $\rightarrow$ `0` (4 keystrokes, $\approx 400\text{ms}$)
+> * $F\sharp\text{ Maj root pos} \rightarrow$ Type: `f` $\rightarrow$ `s` $\rightarrow$ `M` (3 keystrokes in Tier 1.1 due to fixed inversion auto-skip)
 > * $B\flat\text{ dim 2nd inv} \rightarrow$ Type: `b` $\rightarrow$ `b` $\rightarrow$ `d` $\rightarrow$ `2` (4 keystrokes)
 
 ---
 
 ## 5. Input Modes & Desktop Keymap Legend
 
-The user can configure different input modes independently for Chords and Arpeggios:
+The user can configure input modes independently for Chords and Arpeggios:
 
 ```
-┌────────────────────────────────────────────────────────────────────────┐
-│                          AVAILABLE INPUT MODES                         │
-├──────────────────────────┬─────────────────────────┬───────────────────┤
-│ 1. Direct Entry Buffer   │ 2. Rapid Multiple Choice│ 3. Shape Reflex   │
-│ (Type full chord in 3-4  │ (Pick from 4 smart      │ (Inversion/contour│
-│  instant strokes)        │  distractor cards: 1-4) │  only: keys 0-3)  │
-└──────────────────────────┴─────────────────────────┴───────────────────┘
+┌────────────────────────────────────────────────────────┐
+│                  AVAILABLE INPUT MODES                 │
+├──────────────────────────┬─────────────────────────────┤
+│ 1. Direct Entry Buffer   │ 2. Rapid Multiple Choice    │
+│ (Type full chord in 3-4  │ (Pick from 4 smart          │
+│  instant strokes)        │  distractor cards: 1-4)     │
+└──────────────────────────┴─────────────────────────────┘
 ```
 
 ### Persistent Desktop Keymap Legend HUD
-On desktop, a slim cheat sheet stays visible at the bottom of the screen:
+On desktop, a slim cheat sheet stays visible during direct entry:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ [A-G] Root | [S]♯ [B]♭ | [m]Min [M]Maj [d]Dim [a]Aug [7]Dom7 [j]Maj7 | [0-3] Inversion │
+│ [A-G] Root | [S]♯ [B]♭ [Space]♮ | [m]Min [M]Maj [d]Dim [a]Aug [7]Dom7 [j]Maj7 | [0-3] Inv│
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 6. Precision Flash Timing & Double-Buffering
+## 6. Precision Latency Timing & Double-Buffering
 
-Sub-second visual training (150ms–500ms) requires strict frame-budget management to avoid visual jitter or inaccurate flash durations.
+The trainer provides smooth, instantaneous visual transitions without cumulative layout shifts (CLS) or visual jitter.
 
 ```mermaid
 sequenceDiagram
     participant Generator as Problem Generator
     participant Offscreen as Off-Screen SVG Buffer
-    participant Stage as Visible Flash Stage
+    participant Stage as Visible Notation Stage
     participant User as User Input
     participant Engine as Timing Engine
 
     Generator->>Offscreen: 1. Pre-render next chord/arpeggio SVG off-screen
-    Note over Stage: Ready state (idle / countdown)
     Engine->>Stage: 2. Swap pre-rendered SVG to visible (t0 = performance.now())
-    Note over Stage: Visible for Duration (e.g. 300ms)
-    Engine->>Stage: 3. Mask / Blank the SVG (t1 = performance.now())
-    User->>Engine: 4. Single-stroke keypress / Touch input (t2 = performance.now())
-    Engine->>Engine: 5. Calculate Latency = (t2 - t0)
-    Engine->>Generator: 6. Trigger next off-screen pre-render
+    Note over Stage: Visible continuously while user evaluates pattern
+    User->>Engine: 3. Keypress / Touch input submission (t1 = performance.now())
+    Engine->>Engine: 4. Calculate Latency = (t1 - t0)
+    Engine->>Stage: 5. Display Feedback (or Dual Diff if incorrect)
+    User->>Generator: 6. Acknowledge (Space/Enter/Click) to trigger next trial
 ```
 
 1. **Pre-rendering (Double-Buffering):** Notation SVGs are generated ahead of time in an off-screen container. Swapping them into view takes $<1\text{ms}$ with zero DOM recalculation lag.
 2. **High-Resolution Timers:** All timestamps use `performance.now()` (monotonic sub-millisecond precision) rather than `Date.now()`.
-3. **Fixed Stage Dimensions:** The notation stage has a locked aspect ratio and height, eliminating Cumulative Layout Shift (CLS).
+3. **Fixed Stage Dimensions:** The notation stage has a locked height ($295\text{px}$ mobile / $350\text{px}$ desktop), eliminating Cumulative Layout Shift (CLS).
 
 ---
 
 ## 7. Adaptive Problem Generation Algorithm
 
-The generator selects the next pattern using a weighted probability distribution derived from the user's historical error rates and reaction latency within the **active track**:
+The generator selects the next pattern using a weighted probability distribution derived from historical error rates and reaction latency within the **active track**:
 
-$$\text{Weight}(p) = 1.0 + \left(2.5 \times \text{ErrorRate}(p)\right) + \left(\frac{\text{AvgLatencyMs}(p)}{1000}\right) + \text{RecencyDecay}(p)$$
+$$\text{Weight}(p) = 1.0 + \left(2.5 \times \text{ErrorRate}(p)\right) + \min\left(\frac{\text{AvgLatencyMs}(p)}{1000}, 2.0\right)$$
+*(Unseen patterns receive a baseline weight of $1.5$)*
 
-* **Weakness Amplification:** A chord inversion or arpeggio contour with a $40\%$ error rate is generated $\approx 3\times$ more frequently than a mastered one.
-* **Speed Adaptation:** If the user maintains $>90\%$ accuracy with latency $<400\text{ms}$ over the last 15 trials in a tier, flash duration decreases automatically ($500\text{ms} \rightarrow 350\text{ms} \rightarrow 200\text{ms}$).
-* **Tier Promotion Gate:** Achieving $\ge 90\%$ accuracy and $<600\text{ms}$ average latency over 20 consecutive trials unlocks the next curriculum tier.
+* **Weakness Amplification:** Patterns with higher error rates and latencies receive higher sampling probability ($40\%$ bias toward current tier weaknesses).
+* **Diatonic Key Sampling:** When a key signature is active, $80\%$ of problems sample diatonic scale degrees for that key.
+* **Tier Mastery Criteria:** Achieving $\ge 85\%$ accuracy and $\le 2000\text{ms}$ ($2.0\text{s}$) average latency over 20 consecutive trials unlocks Tier and Key Mastery.
 
 ---
 
@@ -258,36 +260,46 @@ $$\text{Weight}(p) = 1.0 + \left(2.5 \times \text{ErrorRate}(p)\right) + \left(\
 ```
 sheet_trainer/
 ├── public/
-│   ├── favicon.ico
-│   └── manifest.webmanifest
+│   ├── favicon.svg
+│   ├── manifest.webmanifest
+│   └── sw.js
 ├── src/
 │   ├── components/
-│   │   ├── Navigation.tsx         # Top-level route switch (Chords / Arpeggios / Analytics)
-│   │   ├── TrackHeader.tsx        # Track-specific settings bar (clef, input mode, flash duration)
-│   │   ├── NotationStage.tsx      # VexFlow SVG renderer with double-buffer
-│   │   ├── SlotBufferInput.tsx    # 4-slot visual buffer & touch/keyboard handler
-│   │   ├── MultipleChoicePad.tsx  # 4-card rapid distractor pad
-│   │   ├── ShapeReflexPad.tsx     # Inversion/contour speed reflex pad
-│   │   ├── KeymapLegendHUD.tsx    # Persistent on-screen desktop keymap cheat sheet
-│   │   ├── StatsHUD.tsx           # Real-time latency, streak, accuracy
-│   │   ├── AnalyticsView.tsx      # Track-specific weakness heatmap & progress charts
-│   │   └── TierSelector.tsx       # Curriculum roadmap & progress tracker
+│   │   ├── Navigation.tsx           # Top-level navigation bar & route switcher
+│   │   ├── TrackHeader.tsx          # Active tier ribbon & curriculum modal button
+│   │   ├── NotationStage.tsx        # VexFlow SVG renderer with double-buffer & diff pane
+│   │   ├── SlotBufferInput.tsx      # 4-slot direct entry visual display & touch matrix
+│   │   ├── MultipleChoicePad.tsx    # 4-card rapid distractor pad
+│   │   ├── KeymapLegendHUD.tsx      # Persistent desktop keymap cheat sheet HUD
+│   │   ├── StatsHUD.tsx             # Real-time streak, accuracy & latency HUD
+│   │   ├── AnalyticsView.tsx        # Weakness breakdown, trial telemetry & JSON backup
+│   │   ├── TierSelector.tsx         # Curriculum roadmap modal with theory hints
+│   │   ├── CircleOfFifthsModal.tsx  # 15 paired key signatures modal
+│   │   └── SettingsModal.tsx        # Clef, input mode, key legend & storage settings
 │   ├── core/
 │   │   ├── theory/
-│   │   │   ├── notes.ts           # Pitch, clef, and accidental definitions
-│   │   │   ├── chords.ts          # Triads, 7ths, inversions, and voicings
-│   │   │   ├── arpeggios.ts       # Contour patterns, beams, Alberti figures
-│   │   │   └── vexflowAdapter.ts  # Converts theory models into VexFlow SVG primitives
-│   │   ├── stateMachine.ts        # 4-slot buffer input state machine
-│   │   ├── adaptiveEngine.ts      # Track-isolated weakness weighting & spaced repetition
-│   │   ├── distractorEngine.ts    # Cognitive trap distractor generator
-│   │   └── timingEngine.ts        # Sub-millisecond flash & latency timers
+│   │   │   ├── notes.ts             # Pitch, clef bounds, accidentals & MIDI
+│   │   │   ├── keys.ts              # 15 key signatures, Circle of Fifths & diatonic degrees
+│   │   │   ├── chords.ts            # Triads, 7ths, inversions, voicings & octave bounds
+│   │   │   ├── arpeggios.ts         # Contours, starting degrees, beaming & ranges
+│   │   │   ├── tierHints.ts         # Visual cues, recognition cheat codes & formulas
+│   │   │   └── vexflowAdapter.ts    # VexFlow SVG chord & arpeggio rendering adapter
+│   │   └── engines/
+│   │       ├── stateMachine.ts      # 4-slot buffer input state machine
+│   │       ├── adaptiveEngine.ts    # Weakness weighting, key sampling & mastery evaluation
+│   │       ├── distractorEngine.ts  # Context-aware multiple-choice trap generator
+│   │       └── timingEngine.ts      # Sub-millisecond latency stopwatch
 │   ├── storage/
-│   │   ├── localStore.ts          # LocalStorage state management (chords/arpeggios)
-│   │   ├── telemetryStore.ts      # IndexedDB trial logging
-│   │   └── exportImport.ts        # JSON backup and restore utilities
-│   ├── App.tsx                    # Main router & app container
-│   └── main.tsx                   # React root mount
+│   │   ├── localStore.ts            # LocalStorage state management & device detection
+│   │   ├── telemetryStore.ts        # IndexedDB trial logging (idb-keyval)
+│   │   └── exportImport.ts          # JSON backup export and restore utilities
+│   ├── types/
+│   │   └── index.ts                 # Full TypeScript domain models
+│   ├── App.tsx                      # Root application controller & game loop
+│   ├── main.tsx                     # React DOM entrypoint
+│   └── index.css                    # Tailwind CSS directives & VexFlow dark-mode styles
+├── scripts/
+│   └── verify.ts                    # 115-test automated verification suite
 ├── package.json
 ├── tsconfig.json
 ├── tailwind.config.js

@@ -15,7 +15,7 @@
 
 When beginner musicians read sheet music, they decode **letter-by-letter** (e.g. counting lines and naming *C... E... G*). Proficient sight-readers do not read this way—they recognize **gestalt shapes (chunks)** such as vertical triad stacks ("snowmen"), inversion interval gaps, adjacent 2nd clashes in 7th chords, and horizontal arpeggio contours ($\nearrow, \searrow, \Lambda, \sim$).
 
-**Sheet Trainer** uses **tachistoscopic sub-second flash exposure (150ms – 800ms)** to disable sequential note-scanning, forcing the visual cortex to capture entire patterns into iconic working memory.
+**Sheet Trainer** trains instant visual pattern recognition to develop rapid musical reflex, allowing musicians to process entire chord structures and melodic contours as unified cognitive units with sub-second response times.
 
 ---
 
@@ -40,7 +40,7 @@ When beginner musicians read sheet music, they decode **letter-by-letter** (e.g.
   * Practice with diatonic chord biasing and realistic implicit sheet music accidentals.
 
 * **⚡ Auto-Advancing 4-Slot Chord Entry & Drop Inversion Bypass:**
-  * Type full chords in $<350\text{ms}$ with zero collision between note names and accidentals:
+  * Type full chords with zero collision between note names and accidentals:
   * `[1. Root (A-G)] ──► [2. Accidental (S/B or Auto-Skip)] ──► [3. Quality (m/M/j/7/k/h)] ──► [4. Inversion (0-3)]`
   * Fixed-inversion and Drop Voicing tiers automatically bypass Slot 4 to evaluate Root + Quality instantaneously.
 
@@ -49,17 +49,16 @@ When beginner musicians read sheet music, they decode **letter-by-letter** (e.g.
   * User's guessed chord (in red) reconstructed in the exact same octave register, voicing spread, and `omit5` structure alongside the correct target chord (in green), immediately highlighting pitch errors without visual distortion.
 
 * **🎴 Multiple Training Modes:**
-  * **⌨️ Direct Entry:** Full chord keyboard type-in buffer.
-  * **🎴 Multiple Choice:** 4 rapid distractor cards featuring intelligent quality, inversion, and drop voicing traps.
-  * **⚡ Shape Reflex:** Sub-second pure inversion/contour classification.
+  * **⌨️ Direct Entry:** Full chord keyboard type-in buffer with live slot indicators.
+  * **🎴 Multiple Choice:** 4 rapid distractor cards featuring intelligent quality, inversion, contour, and drop voicing traps.
 
 ---
 
-## ⌨️ Desktop Keybindings Cheat Sheet
+## ⌨️ Desktop Direct Entry Keymap
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                              UNIFIED SINGLE-STROKE KEYMAP                              │
+│                              DIRECT ENTRY KEYBOARD MAP                                 │
 ├───────────────────┬───────────────────┬───────────────────────┬────────────────────────┤
 │ 1. ROOT NOTES     │ 2. ACCIDENTALS    │ 3. QUALITY / TYPE     │ 4. INVERSIONS / NUMS   │
 ├───────────────────┼───────────────────┼───────────────────────┼────────────────────────┤
@@ -67,12 +66,12 @@ When beginner musicians read sheet music, they decode **letter-by-letter** (e.g.
 │ D : Key [ D ]     │ Sharp ♯ : [ S ]   │ Minor     : [ m ]     │ 1st Inv   : [ 1 ]      │
 │ E : Key [ E ]     │ Flat ♭  : [ B ]   │ Diminished: [ d ]     │ 2nd Inv   : [ 2 ]      │
 │ F : Key [ F ]     │ (or smart skip)   │ Augmented : [ a ]     │ 3rd Inv   : [ 3 ]      │
-│ G : Key [ G ]     │                   │ Dom 7th   : [ 7 ]     │                        │
-│ A : Key [ A ]     │                   │ Maj 7th   : [ j ]     │ 5. ARPEGGIO CONTOURS   │
-│ B : Key [ B ]     │                   │ Min 7th   : [ k ]     │ Ascending : [ ↑ ] / [ u ]│
-│                   │                   │ Half-Dim ø: [ h ]     │ Descending: [ ↓ ] / [ n ]│
-│                   │                   │ Sus4      : [ 4 ]     │ Arch (Λ)  : [ a ]      │
-│                   │                   │ Sus2      : [ 2 ]     │ Alberti(~) : [ w ]      │
+│ G : Key [ G ]     │                   │ Dom 7th   : [ 7 ]     │ (auto-bypassed in      │
+│ A : Key [ A ]     │                   │ Maj 7th   : [ j ]     │  fixed/drop tiers)     │
+│ B : Key [ B ]     │                   │ Min 7th   : [ k ]     │                        │
+│                   │                   │ Half-Dim ø: [ h ]     │ Multiple Choice Keys:  │
+│                   │                   │ Sus4      : [ 4 ]     │ [ 1 ], [ 2 ], [ 3 ], [ 4 ]│
+│                   │                   │ Sus2      : [ 2 ]     │ or [ A ], [ S ], [ D ], [ F ]│
 └───────────────────┴───────────────────┴───────────────────────┴────────────────────────┘
 ```
 
@@ -110,19 +109,9 @@ The production bundle is generated in the **`dist/`** directory.
 
 ---
 
-## 🌐 Deploying to GitHub Pages
+## 🌐 Deployment
 
-This repository includes an automated GitHub Actions deployment workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
-
-1. Push the repository to GitHub:
-   ```bash
-   git remote add origin https://github.com/<your-username>/sheet_trainer.git
-   git push -u origin main
-   ```
-2. In your GitHub repository:
-   * Go to **Settings** $\rightarrow$ **Pages**.
-   * Under **Build and deployment $\rightarrow$ Source**, select **GitHub Actions**.
-3. Your site will automatically build and deploy to `https://<your-username>.github.io/sheet_trainer/`.
+Sheet Trainer builds to a completely static Single Page Application (SPA) located in the `dist/` folder with relative base paths (`./`) enabled in `vite.config.ts`, making it directly hostable on any static hosting provider (e.g. GitHub Pages, Vercel, Netlify, or Cloudflare Pages).
 
 ---
 

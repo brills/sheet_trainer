@@ -31,12 +31,12 @@
 * [x] **2.2 Chord Theory & Inversion Calculator (`src/core/theory/chords.ts`):**
   * Triad formulas: Major, Minor, Diminished ($°$), Augmented ($+$), $\text{Sus4}$, $\text{Sus2}$.
   * 7th chord formulas: Dom7, Maj7, Min7, Half-Dim ($ø7$), Dim7 ($°7$).
-  * Extension formulas: $\text{add9}, 6, \text{m6}, 9\text{th}, 11\text{th}, 13\text{th}, 7\sharp9, 7\flat9$.
+  * Extension formulas: $\text{add9}, 6, \text{m6}, 9\text{th}, 7\sharp9, 7\flat9$.
   * Inversion voice-leading calculator: Compute exact pitch octave offsets for Root, 1st, 2nd, and 3rd inversions.
 * [x] **2.3 Arpeggio Theory & Contour Models (`src/core/theory/arpeggios.ts`):**
   * Contour generators: Linear Ascending ($\nearrow$), Linear Descending ($\searrow$), Arch ($\Lambda$), Alberti/Wave ($\sim$).
   * Inversion starting anchors ($1\text{-}3\text{-}5$, $3\text{-}5\text{-}1$, $5\text{-}1\text{-}3$).
-  * Metric beam groupings (triplets vs. 16th-note 4-packs).
+  * Metric beam groupings and uniform stem directions.
 * [x] **2.4 VexFlow SVG Adapter (`src/core/theory/vexflowAdapter.ts`):**
   * Translate chord notes into `Vex.Flow.StaveNote` with proper accidentals and stem directions.
   * Translate arpeggio sequences into beamed `Vex.Flow.Beam` groups.
@@ -47,12 +47,11 @@
 ## Phase 3: Precision Timing Engine & Double-Buffered Stage
 * [x] **3.1 Timing Engine (`src/core/engines/timingEngine.ts`):**
   * Implement monotonic high-resolution timer using `performance.now()`.
-  * Flash controller supporting sub-second durations (**150ms – 800ms**) and untimed study mode.
-  * Reaction latency tracker (time from reveal to user submission).
+  * Untimed latency stopwatch (recording reaction time from question reveal to user submission).
 * [x] **3.2 Double-Buffered Notation Stage (`src/components/NotationStage.tsx`):**
   * Off-screen SVG rendering container: Pre-render the upcoming problem before revealing.
-  * Instantaneous swap ($<1\text{ms}$) into view when flash starts.
-  * Fixed-dimension masking stage to guarantee zero Cumulative Layout Shift (CLS).
+  * Instantaneous swap ($<1\text{ms}$) into view when new problem starts.
+  * Fixed-dimension card container to guarantee zero Cumulative Layout Shift (CLS).
 
 ---
 
@@ -60,14 +59,13 @@
 * [x] **4.1 Auto-Advancing Input State Machine (`src/core/engines/stateMachine.ts`):**
   * Implement slot transitions: `[1. Root] ──► [2. Accidental / Auto-Skip] ──► [3. Quality] ──► [4. Inversion / Auto-Submit]`.
   * Smart-skip natural accidentals when quality key is typed.
-  * Auto-submit immediately upon typing the inversion digit (`0`–`3`).
+  * Auto-submit immediately upon typing the inversion digit (`0`–`3`) or quality in fixed-inversion tiers.
 * [x] **4.2 Slot Buffer Component (`src/components/SlotBufferInput.tsx`):**
   * Render the 4 visual slots with active focus indicator.
   * Desktop keyboard event listener with `event.repeat` protection.
   * Mobile touch buttons for single-tap slot input.
-* [x] **4.3 Alternative Input Modes:**
-  * `MultipleChoicePad.tsx`: 4-card rapid distractor selector (`1`–`4`).
-  * `ShapeReflexPad.tsx`: Inversion-only speed reflex selector (`0`–`3`).
+* [x] **4.3 Multiple Choice Pad (`src/components/MultipleChoicePad.tsx`):**
+  * 4-card rapid distractor selector (`1`–`4` or `A`/`S`/`D`/`F`).
 * [x] **4.4 Persistent Desktop Keymap Legend HUD (`src/components/KeymapLegendHUD.tsx`):**
   * Dynamic tier-aware cheat sheet bar.
   * Highlight keys in real-time as the user types.
@@ -84,8 +82,7 @@
   * 1-click **Export Progress (JSON)** and **Restore Backup** utilities.
 * [x] **5.4 Adaptive Problem Generator (`src/core/engines/adaptiveEngine.ts`):**
   * Implement formula-driven weakness weighting:
-    $$P(p) \propto 1.0 + 2.5 \times \text{ErrorRate}(p) + \left(\frac{\text{AvgLatencyMs}(p)}{1000}\right)$$
-  * Dynamic flash duration scaling ($800\text{ms} \rightarrow 400\text{ms} \rightarrow 250\text{ms} \rightarrow 150\text{ms}$).
+    $$P(p) \propto 1.0 + 2.5 \times \text{ErrorRate}(p) + \min\left(\frac{\text{AvgLatencyMs}(p)}{1000}, 2.0\right)$$
   * Tier promotion gate evaluation ($\ge 85\%$ accuracy, $\le 2000\text{ms}$ average latency over 20 trials).
 * [x] **5.5 Cognitive Distractor Engine (`src/core/engines/distractorEngine.ts`):**
   * Generates 3 intelligent trap distractors (Inversion Trap, Visual Shape Trap, Quality Trap) respecting tier constraints.
@@ -94,22 +91,22 @@
 
 ## Phase 6: Navigation, Dashboards & Curriculum Views
 * [x] **6.1 Top-Level Navigation (`src/components/Navigation.tsx`):**
-  * Route switches for **🎼 Chords**, **〰️ Arpeggios**, and **📊 Analytics**.
-* [x] **6.2 Track Header & Config Bar (`src/components/TrackHeader.tsx`):**
-  * Track-specific clef selector (`Treble` / `Bass`), input mode selector, and flash speed slider.
+  * Route switches for **🎼 Chords**, **〰️ Arpeggios**, **📊 Analytics**, and active key signature badge.
+* [x] **6.2 Track Header Ribbon (`src/components/TrackHeader.tsx`):**
+  * Track-specific tier ribbon displaying current milestone and opening curriculum modal.
 * [x] **6.3 Real-Time Stats HUD (`src/components/StatsHUD.tsx`):**
   * Display current streak, best streak, rolling accuracy percentage, and average latency.
 * [x] **6.4 Curriculum Roadmap & Tier Selector (`src/components/TierSelector.tsx`):**
-  * Visual tier selector showing unlocked and mastered tiers (Tiers 1.1 to 4.2).
+  * Visual tier selector showing unlocked and mastered tiers (Tiers 1.1 to 4.2) with visual cues, cheat codes, and formulas.
 * [x] **6.5 Analytics Dashboard (`src/components/AnalyticsView.tsx`):**
-  * Weakness heatmaps by Inversion, Quality, and Clef.
-  * Reaction time distribution and accuracy trend charts.
+  * Weakness matrices by Inversion, Quality, and Clef.
+  * Recent trial logs table and scorecard metrics.
 
 ---
 
 ## Phase 7: Verification, Polish & PWA Manifest
 * [x] **7.1 Unit & Logic Tests:**
-  * Comprehensive automated test suite in `scripts/verify.ts` (99 tests covering music theory, state machine, adaptive engine, timing, storage, keys, and drop voicings).
+  * Comprehensive automated test suite in `scripts/verify.ts` (115 tests covering music theory, state machine, adaptive engine, timing, storage, keys, and drop voicings).
 * [x] **7.2 Offline PWA Setup:**
   * Configured `manifest.webmanifest` and Service Worker for full home-screen offline installation.
 * [x] **7.3 Cross-Device Verification:**
