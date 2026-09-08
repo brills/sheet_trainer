@@ -562,6 +562,16 @@ assert(getDefaultInputMode() === 'direct_entry', 'Desktop environment defaults t
 // Clean up mocks
 delete (global as any).window;
 
+// 11. Tier Hints Dataset Completeness
+console.log('\n--- 11. Tier Hints & Theory Cues Dataset ---');
+import { ARPEGGIO_TIER_HINTS, CHORD_TIER_HINTS } from '../src/core/theory/tierHints';
+
+const arpTierKeys = Object.keys(ARPEGGIO_TIERS).map(Number);
+assert(arpTierKeys.every(t => ARPEGGIO_TIER_HINTS[t] && ARPEGGIO_TIER_HINTS[t].visualCue && ARPEGGIO_TIER_HINTS[t].cheatCode && ARPEGGIO_TIER_HINTS[t].formula), 'Every Arpeggio Tier has complete visualCue, cheatCode, and formula hints');
+
+const chordTierKeys = Object.keys(CHORD_TIERS).map(Number);
+assert(chordTierKeys.every(t => CHORD_TIER_HINTS[t] && CHORD_TIER_HINTS[t].visualCue && CHORD_TIER_HINTS[t].cheatCode && CHORD_TIER_HINTS[t].formula), 'Every Chord Tier has complete visualCue, cheatCode, and formula hints');
+
 console.log(`\n================================`);
 console.log(`Suite finished: ${passedTests} Passed, ${failedTests} Failed.`);
 if (failedTests > 0) {
