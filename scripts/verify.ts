@@ -483,7 +483,7 @@ const simulateTrialMastery = (isCorrect: boolean, recent: Array<{ isCorrect: boo
   if (promo.shouldPromote && promo.nextTier) {
     return {
       didMaster: true,
-      masteryNotification: `🎉 Tier 1.1 Mastered! Tier ${promo.nextTier} is now unlocked.`
+      masteryNotification: `🎉 Tier 1.1 Mastered!`
     };
   }
   return { didMaster: false, masteryNotification: undefined };

@@ -13,7 +13,6 @@ import {
   TrialLog,
   TrialFeedback,
   SlotDiffItem,
-  KeyMode,
   KeySignatureDefinition
 } from './types';
 import { loadAppState, saveAppState, recordTrialResultInState, clearAllAppStorage, DEFAULT_APP_STATE } from './storage/localStore';
@@ -24,7 +23,7 @@ import { generateChordMultipleChoiceOptions, generateArpeggioMultipleChoiceOptio
 import { CHORD_FORMULAS, formatInversionName, alignChordToTargetOctave } from './core/theory/chords';
 import { alignArpeggioToTargetOctave } from './core/theory/arpeggios';
 import { formatNoteName } from './core/theory/notes';
-import { KEY_SIGNATURES, KEY_STAGES } from './core/theory/keys';
+import { KEY_SIGNATURES } from './core/theory/keys';
 import { Navigation } from './components/Navigation';
 import { TrackHeader } from './components/TrackHeader';
 import { NotationStage } from './components/NotationStage';
@@ -226,11 +225,11 @@ export const App: React.FC = () => {
               }
             }
           };
-          masteryParts.push(`🎉 Tier ${trackProgress.currentTier} Mastered! Tier ${promotion.nextTier} is now unlocked.`);
+          masteryParts.push(`🎉 Tier ${trackProgress.currentTier} Mastered!`);
         }
       }
 
-      // Check Key Stage Progression & Mastery (NO auto-promotion)
+      // Check Key Mastery (NO auto-promotion)
       if (newKeyRecent.length >= 20) {
         const correctCount = newKeyRecent.filter(t => t.isCorrect).length;
         const keyAccuracy = correctCount / newKeyRecent.length;
@@ -241,39 +240,17 @@ export const App: React.FC = () => {
           const currentMasteredKeys = trackProgress.masteredKeys || [];
           if (!currentMasteredKeys.includes(currentKeyId)) {
             const updatedMasteredKeys = [...currentMasteredKeys, currentKeyId];
-            const unlockedStages = trackProgress.unlockedKeyStages || [0];
-            const currentStage = currentKey.stage;
-            const nextStage = currentStage < KEY_STAGES.length - 1 ? currentStage + 1 : null;
-
-            let updatedUnlockedStages = unlockedStages;
-            let unlockedNewStage = false;
-
-            if (nextStage !== null && !unlockedStages.includes(nextStage)) {
-              const currentStageKeys = KEY_STAGES[currentStage]?.keys || [];
-              const allStageKeysMastered = currentStageKeys.every(k => updatedMasteredKeys.includes(k));
-              if (allStageKeysMastered || currentStageKeys.length <= 1) {
-                updatedUnlockedStages = Array.from(new Set([...unlockedStages, nextStage]));
-                unlockedNewStage = true;
-              }
-            }
-
             nextProgState = {
               ...nextProgState,
               progress: {
                 ...nextProgState.progress,
                 [activeTrack]: {
                   ...nextProgState.progress[activeTrack],
-                  masteredKeys: updatedMasteredKeys,
-                  unlockedKeyStages: updatedUnlockedStages
+                  masteredKeys: updatedMasteredKeys
                 }
               }
             };
-
-            if (unlockedNewStage && nextStage !== null) {
-              masteryParts.push(`🎉 Key Mastered: ${currentKey.name}! Unlocked ${KEY_STAGES[nextStage].title} in Circle of Fifths.`);
-            } else {
-              masteryParts.push(`🎉 Key Mastered: ${currentKey.name}!`);
-            }
+            masteryParts.push(`🎉 Key Mastered: ${currentKey.name}!`);
           }
         }
       }
@@ -433,24 +410,6 @@ export const App: React.FC = () => {
   };
 
 
-  const handleKeyModeChange = (keyMode: KeyMode) => {
-    const next: AppState = {
-      ...appState,
-      settings: {
-        ...appState.settings,
-        [activeTrack]: {
-          ...appState.settings[activeTrack],
-          keyMode
-        }
-      }
-    };
-    saveAppState(next);
-    setAppState(next);
-    setRecentTrials([]);
-    setRecentKeyTrials([]);
-    setLastResult(null);
-    spawnNextProblem();
-  };
 
   const handleSelectKey = (keyId: string) => {
     const next: AppState = {
@@ -641,11 +600,8 @@ export const App: React.FC = () => {
       <CircleOfFifthsModal
         isOpen={isKeyModalOpen}
         onClose={() => setIsKeyModalOpen(false)}
-        keyMode={trackSettings.keyMode || 'progressive'}
-        onKeyModeChange={handleKeyModeChange}
         activeKeyId={currentKey.id}
         onSelectKey={handleSelectKey}
-        unlockedStages={trackProgress.unlockedKeyStages || [0]}
         masteredKeys={trackProgress.masteredKeys || []}
       />
 

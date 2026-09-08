@@ -192,7 +192,7 @@ export function checkTierPromotion(
     accuracy: Math.round(accuracy * 100),
     avgLatencyMs: avgLatency,
     message: passed && nextTier !== null 
-      ? `Mastery achieved! Tier ${nextTier} unlocked.` 
+      ? `🎉 Tier ${currentTier} Mastered!` 
       : undefined
   };
 }
@@ -237,7 +237,7 @@ export function checkKeyStagePromotion(
     accuracy: Math.round(accuracy * 100),
     avgLatencyMs: avgLatency,
     message: passed && nextStage !== null 
-      ? `🎉 Key Mastery Achieved! Unlocked Circle of Fifths ${KEY_STAGES[nextStage].title}`
+      ? `🎉 Key Mastery Achieved: ${KEY_STAGES[currentStage].title}`
       : undefined
   };
 }

@@ -1,27 +1,21 @@
 import React from 'react';
-import { X, Lock, CheckCircle2, Award, Zap, Compass } from 'lucide-react';
-import { KeyMode, KeySignatureDefinition } from '../types';
+import { X, CheckCircle2, Compass } from 'lucide-react';
+import { KeySignatureDefinition } from '../types';
 import { KEY_STAGES, KEY_SIGNATURES } from '../core/theory/keys';
 
 interface CircleOfFifthsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  keyMode: KeyMode;
-  onKeyModeChange: (mode: KeyMode) => void;
   activeKeyId: string;
   onSelectKey: (keyId: string) => void;
-  unlockedStages: number[];
   masteredKeys: string[];
 }
 
 export const CircleOfFifthsModal: React.FC<CircleOfFifthsModalProps> = ({
   isOpen,
   onClose,
-  keyMode,
-  onKeyModeChange,
   activeKeyId,
   onSelectKey,
-  unlockedStages,
   masteredKeys
 }) => {
   if (!isOpen) return null;
@@ -41,73 +35,39 @@ export const CircleOfFifthsModal: React.FC<CircleOfFifthsModalProps> = ({
             </div>
             <div>
               <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                Circle of Fifths & Key Progression
+                Circle of Fifths & Key Signatures
               </h2>
               <p className="text-xs text-slate-400">
-                Master sight-reading across all 15 key signatures with progressive stage gating
+                Select any key signature to practice. Master keys with 20 trials (≤ 2.0s latency, ≥ 85% accuracy).
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Mode Selector */}
-        <div className="mt-4 p-1.5 rounded-2xl bg-slate-950 border border-slate-800/80 flex items-center gap-1">
-          <button
-            onClick={() => onKeyModeChange('progressive')}
-            className={`
-              flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5
-              ${keyMode !== 'all_unlocked'
-                ? 'bg-emerald-500 text-slate-950 shadow-md'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'}
-            `}
-          >
-            <Zap className="w-3.5 h-3.5" />
-            <span>Circle of Fifths Progression</span>
-          </button>
-
-          <button
-            onClick={() => onKeyModeChange('all_unlocked')}
-            className={`
-              flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5
-              ${keyMode === 'all_unlocked'
-                ? 'bg-emerald-500 text-slate-950 shadow-md'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'}
-            `}
-          >
-            <Award className="w-3.5 h-3.5" />
-            <span>Unlock All 15 Keys</span>
           </button>
         </div>
 
         {/* Stages & Keys Grid */}
         <div className="mt-4 flex-1 overflow-y-auto pr-1 space-y-4">
           {KEY_STAGES.map((stage) => {
-            const isStageUnlocked = keyMode === 'all_unlocked' || unlockedStages.includes(stage.stage);
-            const isCurrentStage = unlockedStages.includes(stage.stage) && (!unlockedStages.includes(stage.stage + 1));
+            const stageMasteredCount = stage.keys.filter(k => masteredKeys.includes(k)).length;
+            const isAllStageMastered = stageMasteredCount === stage.keys.length;
 
             return (
               <div
                 key={stage.stage}
-                className={`
-                  p-4 rounded-2xl border transition-all
-                  ${isStageUnlocked
-                    ? 'bg-slate-950/60 border-slate-800'
-                    : 'bg-slate-950/20 border-slate-800/40 opacity-60'}
-                `}
+                className="p-4 rounded-2xl border bg-slate-950/60 border-slate-800 transition-all"
               >
                 <div className="flex items-center justify-between mb-2.5">
                   <div className="flex items-center gap-2">
                     <span className={`
                       text-xs font-bold px-2.5 py-0.5 rounded-full border
-                      ${isStageUnlocked
-                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                        : 'bg-slate-800/40 border-slate-700 text-slate-500'}
+                      ${isAllStageMastered
+                        ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+                        : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'}
                     `}>
                       {stage.title}
                     </span>
@@ -116,15 +76,9 @@ export const CircleOfFifthsModal: React.FC<CircleOfFifthsModalProps> = ({
                     </span>
                   </div>
 
-                  {!isStageUnlocked && (
-                    <div className="flex items-center gap-1 text-[11px] font-mono text-amber-400/80">
-                      <Lock className="w-3 h-3" />
-                      <span>Locked (Complete Stage {stage.stage - 1})</span>
-                    </div>
-                  )}
-                  {isCurrentStage && keyMode === 'progressive' && (
-                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider bg-emerald-950/80 border border-emerald-500/40 px-2 py-0.5 rounded-md">
-                      Current Focus
+                  {isAllStageMastered && (
+                    <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-800/80 px-2 py-0.5 rounded-full">
+                      <CheckCircle2 className="w-3 h-3" /> Mastered
                     </span>
                   )}
                 </div>
@@ -144,15 +98,12 @@ export const CircleOfFifthsModal: React.FC<CircleOfFifthsModalProps> = ({
                     return (
                       <button
                         key={keyId}
-                        disabled={!isStageUnlocked}
                         onClick={() => onSelectKey(keyId)}
                         className={`
-                          p-2.5 rounded-xl border text-left transition-all flex flex-col justify-between relative group
+                          p-2.5 rounded-xl border text-left transition-all flex flex-col justify-between relative cursor-pointer group
                           ${isSelected
-                            ? 'bg-emerald-500/20 border-emerald-500 shadow-md shadow-emerald-950/50'
-                            : isStageUnlocked
-                              ? 'bg-slate-900 hover:bg-slate-800/80 border-slate-800 text-slate-200'
-                              : 'bg-slate-900/40 border-slate-800/40 text-slate-600 cursor-not-allowed'}
+                            ? 'bg-emerald-500/20 border-emerald-500 shadow-md shadow-emerald-950/50 ring-2 ring-emerald-500/30'
+                            : 'bg-slate-900 hover:bg-slate-800/80 border-slate-800 text-slate-200'}
                         `}
                       >
                         <div className="flex items-center justify-between">
@@ -173,7 +124,9 @@ export const CircleOfFifthsModal: React.FC<CircleOfFifthsModalProps> = ({
                                   : `${keyDef.flatsCount} ${keyDef.flatsCount === 1 ? 'Flat' : 'Flats'}`)}
                           </span>
                           {isMastered && (
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                            <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-1.5 py-0.5 rounded-full">
+                              <CheckCircle2 className="w-3 h-3" /> Mastered
+                            </span>
                           )}
                           {isSelected && !isMastered && (
                             <span className="text-[10px] text-emerald-400 font-bold">Active</span>
@@ -193,7 +146,7 @@ export const CircleOfFifthsModal: React.FC<CircleOfFifthsModalProps> = ({
           <span>Active Key: <strong className="text-slate-200">{KEY_SIGNATURES[activeKeyId]?.name || activeKeyId}</strong></span>
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold transition-all"
+            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold transition-all cursor-pointer"
           >
             Done
           </button>

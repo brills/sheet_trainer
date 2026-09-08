@@ -206,7 +206,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <Compass className="w-4 h-4 text-emerald-400" />
               <div className="flex flex-col">
                 <span className="text-xs font-semibold text-slate-200">Circle of Fifths & Keys</span>
-                <span className="text-[10px] text-slate-400">Configure key progression & stage unlock</span>
+                <span className="text-[10px] text-slate-400">Select key signature & view mastery</span>
               </div>
             </div>
 
@@ -218,19 +218,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               }}
               className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition-all border border-slate-700 cursor-pointer"
             >
-              Configure
+              Select Key
             </button>
           </div>
         )}
 
-        {/* 5. Mastery & Progression Info */}
+        {/* 5. Mastery Criteria Info */}
         <div className="flex flex-col gap-1.5 border-t border-slate-800 pt-3 text-xs">
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-slate-200">Progression & Mastery Gate</span>
+            <span className="font-semibold text-slate-200">Mastery Criteria</span>
             <span className="text-[10px] text-emerald-400 font-mono">20 trials · ≤ 2.0s · ≥ 85%</span>
           </div>
           <p className="text-[11px] text-slate-400 leading-relaxed">
-            Take as much time as needed on every problem. Promotion to the next Tier or Circle of Fifths stage unlocks when your rolling average latency across the recent 20 trials reaches ≤ 2.0s with ≥ 85% accuracy.
+            Take as much time as needed on every problem. Tier and Key mastery is achieved when your rolling average latency across 20 consecutive trials reaches ≤ 2.0s with ≥ 85% accuracy.
           </p>
         </div>
 

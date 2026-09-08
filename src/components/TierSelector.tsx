@@ -2,7 +2,7 @@ import React from 'react';
 import { TrackType } from '../types';
 import { CHORD_TIERS } from '../core/theory/chords';
 import { ARPEGGIO_TIERS } from '../core/theory/arpeggios';
-import { X, CheckCircle2, Lock, Play } from 'lucide-react';
+import { X, CheckCircle2, Play, ChevronRight } from 'lucide-react';
 
 interface TierSelectorProps {
   isOpen: boolean;
@@ -37,13 +37,13 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
               {track === 'chords' ? '🎼 Chords Curriculum' : '〰️ Arpeggios Curriculum'}
             </h2>
             <p className="text-xs text-slate-400">
-              Select a tier to drill or review
+              Select any tier to practice or review
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-all"
+            className="p-1.5 rounded-full text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-all cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -64,7 +64,7 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
                   onClose();
                 }}
                 className={`
-                  flex items-center justify-between p-3.5 rounded-2xl border text-left transition-all
+                  flex items-center justify-between p-3.5 rounded-2xl border text-left transition-all cursor-pointer
                   ${isCurrent 
                     ? 'bg-emerald-950/40 border-emerald-500/80 ring-2 ring-emerald-500/20 shadow-lg shadow-emerald-500/10' 
                     : 'bg-slate-950/60 border-slate-800/80 hover:border-slate-700 hover:bg-slate-850'}
@@ -103,7 +103,7 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
                     </span>
                   ) : (
                     <span className="p-1.5 text-slate-600">
-                      <Lock className="w-4 h-4 opacity-50" />
+                      <ChevronRight className="w-4 h-4 text-slate-500" />
                     </span>
                   )}
                 </div>
