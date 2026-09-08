@@ -237,19 +237,24 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
           {(['root', '1st', '2nd', '3rd'] as Inversion[]).map(inv => {
             const isThisFixed = isFixedInversion && fixedInversion === inv;
             const isAllowedInTier = !tierConfig || tierConfig.inversions.includes(inv);
+            const isDisallowedForQuality = inv === '3rd' && (
+              (slotState.quality && CHORD_FORMULAS[slotState.quality]?.maxInversion !== '3rd') ||
+              (tierConfig && !tierConfig.inversions.includes('3rd'))
+            );
+            const isAllowed = isAllowedInTier && !isDisallowedForQuality;
             const label = inv === 'root' ? 'Root' : inv;
 
             return (
               <button
                 key={inv}
                 type="button"
-                disabled={disabled || isFixedInversion || !isAllowedInTier || isDropVoicing}
+                disabled={disabled || isFixedInversion || !isAllowed || isDropVoicing}
                 onClick={() => onSelectInversion(inv)}
                 className={`
                   h-10 rounded-xl font-mono text-xs font-bold border active:scale-95 transition-all
                   ${isThisFixed || isDropVoicing
                     ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                    : isAllowedInTier
+                    : isAllowed
                       ? (slotState.inversion === inv
                           ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold'
                           : 'bg-slate-800/90 text-emerald-400 border-slate-700 hover:bg-slate-750')

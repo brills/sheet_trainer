@@ -122,10 +122,18 @@ export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
           </span>
         ) : (
           <>
-            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('0') || isKeyActive('r') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[0] Root</span>
-            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('1') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[1] 1st</span>
-            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('2') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[2] 2nd</span>
-            <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('3') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[3] 3rd</span>
+            {(!tierConfig || tierConfig.inversions.includes('root')) && (
+              <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('0') || isKeyActive('r') ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[0] Root</span>
+            )}
+            {(!tierConfig || tierConfig.inversions.includes('1st')) && (
+              <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('1') ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[1] 1st</span>
+            )}
+            {(!tierConfig || tierConfig.inversions.includes('2nd')) && (
+              <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('2') ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[2] 2nd</span>
+            )}
+            {(!tierConfig || tierConfig.inversions.includes('3rd')) && (
+              <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('3') ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[3] 3rd</span>
+            )}
           </>
         )}
       </div>

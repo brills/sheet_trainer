@@ -136,8 +136,17 @@ smMixed.handleKey('c');
 assert(smMixed.getActiveSlot() === 1 && smMixed.getState().root === 'C', 'Mixed Mode - Typed "c": Root set to C');
 smMixed.handleKey('m'); // Auto-skips accidental slot to quality
 assert(smMixed.getActiveSlot() === 3 && smMixed.getState().quality === 'minor', 'Mixed Mode - Typed "m": Quality set to minor, waiting for Inversion at Slot 3');
+
+// Verify 3rd Inversion Rejection on Triads
+const reject3rdRes = smMixed.handleKey('3');
+assert(reject3rdRes.updated === false && reject3rdRes.completed === false, 'State Machine: Pressing "3" (3rd Inversion) is strictly rejected for minor triad');
+
 smMixed.handleKey('1'); // Auto-submits on inversion entry
 assert(mixedResult !== null && mixedResult.inversion === '1st', 'Mixed Mode - Typed "1": Auto-submitted 1st inversion');
+
+// Verify buildChord triad safeguard
+const triadFallbackChord = buildChord('C', 'natural', 'major', '3rd', 'treble', 1.4);
+assert(triadFallbackChord.inversion === 'root', 'buildChord: Passing 3rd inversion to a triad safely falls back to Root Position');
 
 // Test Tier 1.1 (Root Position Fixed): typing C -> m auto-submits Cm Root without needing inversion key!
 let rootResult: any = null;
@@ -201,6 +210,11 @@ assert(t12Distractors.every(d => d.sublabel === '1st Inversion'), 'Tier 1.2 (1st
 const t13Chord = buildChord('E', 'natural', 'minor', '2nd', 'treble', 1.3, 4);
 const t13Distractors = generateChordMultipleChoiceOptions(t13Chord);
 assert(t13Distractors.every(d => d.sublabel === '2nd Inversion'), 'Tier 1.3 (2nd Inversion): ALL 4 options strictly have "2nd Inversion"');
+
+// Tier 1.4 (Triad Mastery): ALL distractors must have Root, 1st, or 2nd Inversion, NEVER 3rd
+const t14Chord = buildChord('C', 'natural', 'major', 'root', 'treble', 1.4, 4);
+const t14Distractors = generateChordMultipleChoiceOptions(t14Chord);
+assert(t14Distractors.every(d => d.sublabel !== '3rd Inversion' && d.chordData?.inversion !== '3rd'), 'Tier 1.4 (Triad Mastery): NO distractors ever generate 3rd Inversion for triads');
 
 // Tier 3.2 (7th 1st Inversion): all options strictly 1st Inversion
 const t32Chord = buildChord('G', 'natural', 'dom7', '1st', 'treble', 3.2, 4);

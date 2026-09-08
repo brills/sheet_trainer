@@ -1,4 +1,5 @@
 import { NoteLetter, Accidental, ChordQuality, Inversion } from '../../types';
+import { CHORD_FORMULAS } from '../theory/chords';
 
 export interface ChordSlotState {
   root: NoteLetter | null;
@@ -148,7 +149,11 @@ export class ChordInputStateMachine {
       // Smart-skip: If user typed a quality key directly, auto-fill natural
       if (QUALITY_KEY_MAP[key] !== undefined) {
         this.state.accidental = 'natural';
-        this.state.quality = QUALITY_KEY_MAP[key];
+        const q = QUALITY_KEY_MAP[key];
+        this.state.quality = q;
+        if (this.state.inversion === '3rd' && CHORD_FORMULAS[q]?.maxInversion !== '3rd') {
+          this.state.inversion = null;
+        }
         
         if (this.fixedInversion) {
           this.state.inversion = this.fixedInversion;
@@ -164,7 +169,11 @@ export class ChordInputStateMachine {
     // Slot 2: Quality
     if (this.activeSlot === 2) {
       if (QUALITY_KEY_MAP[key] !== undefined) {
-        this.state.quality = QUALITY_KEY_MAP[key];
+        const q = QUALITY_KEY_MAP[key];
+        this.state.quality = q;
+        if (this.state.inversion === '3rd' && CHORD_FORMULAS[q]?.maxInversion !== '3rd') {
+          this.state.inversion = null;
+        }
 
         if (this.fixedInversion) {
           this.state.inversion = this.fixedInversion;
@@ -180,7 +189,12 @@ export class ChordInputStateMachine {
     // Slot 3: Inversion (Auto-submits on entry)
     if (this.activeSlot === 3) {
       if (INVERSION_KEY_MAP[key] !== undefined) {
-        this.state.inversion = INVERSION_KEY_MAP[key];
+        const inv = INVERSION_KEY_MAP[key];
+        // 3rd inversion is strictly disallowed for triads (maxInversion !== '3rd')
+        if (inv === '3rd' && this.state.quality && CHORD_FORMULAS[this.state.quality]?.maxInversion !== '3rd') {
+          return { updated: false, completed: false };
+        }
+        this.state.inversion = inv;
         this.onCompleteCallback?.(this.state);
         return { updated: true, completed: true };
       }
@@ -198,6 +212,9 @@ export class ChordInputStateMachine {
       this.activeSlot = 2;
     } else if (slot === 2) {
       this.state.quality = value;
+      if (this.state.inversion === '3rd' && CHORD_FORMULAS[value as ChordQuality]?.maxInversion !== '3rd') {
+        this.state.inversion = null;
+      }
       if (this.fixedInversion && this.state.root) {
         if (!this.state.accidental) this.state.accidental = 'natural';
         this.state.inversion = this.fixedInversion;
@@ -207,6 +224,9 @@ export class ChordInputStateMachine {
         this.activeSlot = 3;
       }
     } else if (slot === 3) {
+      if (value === '3rd' && this.state.quality && CHORD_FORMULAS[this.state.quality]?.maxInversion !== '3rd') {
+        return false;
+      }
       this.state.inversion = value;
       if (this.state.root && this.state.quality && this.state.inversion) {
         if (!this.state.accidental) this.state.accidental = 'natural';

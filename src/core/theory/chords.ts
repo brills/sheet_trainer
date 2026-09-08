@@ -323,8 +323,8 @@ export function buildChord(
   rootAccidental: Accidental,
   quality: ChordQuality,
   inversion: Inversion,
-  clef: Clef,
-  tier: number,
+  clef: Clef = 'treble',
+  tier: number = 1.1,
   octave?: number,
   voicing?: VoicingType,
   omit5?: boolean
@@ -334,12 +334,17 @@ export function buildChord(
   const effectiveVoicing: VoicingType = voicing || tierConfig?.voicing || 'close';
   const effectiveOmit5 = omit5 !== undefined ? omit5 : false;
 
-  const validOctaves = getValidOctavesForChord(root, rootAccidental, quality, inversion, clef, effectiveVoicing, effectiveOmit5);
+  // Safeguard: Triads cannot have 3rd inversion (fallback to root)
+  const effectiveInversion: Inversion = (inversion === '3rd' && formula.maxInversion !== '3rd')
+    ? 'root'
+    : inversion;
+
+  const validOctaves = getValidOctavesForChord(root, rootAccidental, quality, effectiveInversion, clef, effectiveVoicing, effectiveOmit5);
   const chosenOctave = octave !== undefined
     ? octave
     : validOctaves[Math.floor(Math.random() * validOctaves.length)];
 
-  const invertedNotes = constructChordNotes(root, rootAccidental, quality, inversion, chosenOctave, effectiveVoicing, effectiveOmit5);
+  const invertedNotes = constructChordNotes(root, rootAccidental, quality, effectiveInversion, chosenOctave, effectiveVoicing, effectiveOmit5);
 
   const rootName = formatNoteName(root, rootAccidental);
   let displayName: string;
@@ -352,20 +357,20 @@ export function buildChord(
       ? `${rootName}${formula.shortName} (Drop-3, omit 5)`
       : `${rootName}${formula.shortName} (Drop-3)`;
   } else {
-    const invStr = formatInversionName(inversion, 'short');
+    const invStr = formatInversionName(effectiveInversion, 'short');
     displayName = effectiveOmit5
       ? `${rootName}${formula.shortName} (${invStr}, omit 5)`
       : `${rootName}${formula.shortName} (${invStr})`;
   }
 
-  const id = `${rootName}_${quality.toUpperCase()}_${inversion.toUpperCase()}_${effectiveVoicing.toUpperCase()}${effectiveOmit5 ? '_OMIT5' : ''}_${clef.toUpperCase()}`;
+  const id = `${rootName}_${quality.toUpperCase()}_${effectiveInversion.toUpperCase()}_${effectiveVoicing.toUpperCase()}${effectiveOmit5 ? '_OMIT5' : ''}_${clef.toUpperCase()}`;
 
   return {
     id,
     root,
     rootAccidental,
     quality,
-    inversion,
+    inversion: effectiveInversion,
     notes: invertedNotes,
     clef,
     tier,

@@ -102,10 +102,13 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
   for (const trapRoot of shuffledRoots) {
     if (options.length >= 4) break;
     const trapRootStr = formatNoteName(trapRoot, target.rootAccidental);
-    const trapInv = isDropVoicing ? target.inversion : allowedInversions[Math.floor(Math.random() * allowedInversions.length)];
-    const trapInvStr = isDropVoicing ? invStr : formatInversionName(trapInv, 'full');
     const trapQual = allowedQualities[Math.floor(Math.random() * allowedQualities.length)];
     const trapQualStr = CHORD_FORMULAS[trapQual]?.shortName || 'Maj';
+    const allowedForQuality = allowedInversions.filter(inv => 
+      inv !== '3rd' || CHORD_FORMULAS[trapQual]?.maxInversion === '3rd'
+    );
+    const trapInv = isDropVoicing ? target.inversion : allowedForQuality[Math.floor(Math.random() * allowedForQuality.length)];
+    const trapInvStr = isDropVoicing ? invStr : formatInversionName(trapInv, 'full');
     const sig = `${trapRootStr}:${trapQual}:${trapInv}`;
     if (!seen.has(sig)) {
       seen.add(sig);
@@ -133,7 +136,10 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
     const fallbackRootStr = formatNoteName(fallbackRoot, target.rootAccidental);
     const fallbackQual = allowedQualities[fallbackIndex % allowedQualities.length];
     const fallbackQualStr = CHORD_FORMULAS[fallbackQual]?.shortName || 'Maj';
-    const fallbackInv = isDropVoicing ? target.inversion : allowedInversions[fallbackIndex % allowedInversions.length];
+    const allowedForFallback = allowedInversions.filter(inv => 
+      inv !== '3rd' || CHORD_FORMULAS[fallbackQual]?.maxInversion === '3rd'
+    );
+    const fallbackInv = isDropVoicing ? target.inversion : allowedForFallback[fallbackIndex % allowedForFallback.length];
     const fallbackInvStr = isDropVoicing ? invStr : formatInversionName(fallbackInv, 'full');
     const sig = `${fallbackRootStr}:${fallbackQual}:${fallbackInv}`;
     if (!seen.has(sig)) {
