@@ -5,11 +5,39 @@ const STORAGE_KEY = 'sheet_trainer_state_v1';
 
 export function isMobileDevice(): boolean {
   if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+
+  // 1. Pointer & Hover capabilities (Gold standard for modern browsers including Desktop Safari)
+  if (typeof window.matchMedia === 'function') {
+    const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+    const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
+    const hasHover = window.matchMedia('(hover: hover)').matches;
+    const isMobileViewport = window.matchMedia('(max-width: 768px)').matches;
+
+    // Desktop/Laptop: has fine pointer (mouse/trackpad) and hover capability
+    if (hasHover && hasFinePointer && !isCoarsePointer) {
+      return false;
+    }
+
+    // Mobile phones: coarse touch pointer and narrow viewport
+    if (isCoarsePointer && isMobileViewport) {
+      return true;
+    }
+  }
+
+  // 2. User Agent fallback
   const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera || '';
-  const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
-  const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-  const isSmallScreen = window.innerWidth <= 768;
-  return mobileRegex.test(userAgent) || (isTouch && isSmallScreen);
+  const mobileRegex = /android|webos|iphone|ipod|blackberry|iemobile|opera mini/i;
+  if (mobileRegex.test(userAgent)) {
+    return true;
+  }
+
+  // 3. iPad / iPadOS Safari fallback (which reports as Macintosh with multi-touch points)
+  const isIPad = /ipad/i.test(userAgent) || (userAgent.includes('Macintosh') && (navigator.maxTouchPoints || 0) > 1 && (window.innerWidth || 1024) <= 1024);
+  if (isIPad) {
+    return true;
+  }
+
+  return false;
 }
 
 export function getDefaultInputMode(): 'direct_entry' | 'multiple_choice' {
