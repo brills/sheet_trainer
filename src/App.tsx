@@ -166,6 +166,27 @@ export const App: React.FC = () => {
     }
   }, [activeTrack, trackSettings.clef, trackSettings.inputMode, trackSettings.keyMode, trackSettings.activeKeyId, trackSettings.onlyDiatonic, trackProgress.currentTier, currentRoute, spawnNextProblem]);
 
+  // Active Question Keydown Listener (allows advancing with Space, Enter, or ArrowRight without submitting)
+  useEffect(() => {
+    if (isFeedback) return; // ackListener handles isFeedback state
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is inside a modal or non-trainer route or typing in a text field
+      if (isSettingsModalOpen || isTierModalOpen || isKeyModalOpen) return;
+      if (currentRoute !== 'chords' && currentRoute !== 'arpeggios') return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+
+      if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        spawnNextProblem();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isFeedback, isSettingsModalOpen, isTierModalOpen, isKeyModalOpen, currentRoute, spawnNextProblem]);
+
   // Handle Trial Evaluation
   const evaluateSubmission = useCallback((
     isCorrect: boolean, 

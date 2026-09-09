@@ -236,11 +236,17 @@ export const NotationStage: React.FC<NotationStageProps> = ({
                 Identify the pattern on the staff
               </span>
               <span className="text-[10px] sm:text-xs text-slate-400">
-                Take as much time as needed · Input submission stops timer
+                Take as much time as needed · Play along or submit answer
               </span>
-              <span className="text-[9px] sm:text-[10px] font-mono text-emerald-400/90 bg-emerald-950/40 border border-emerald-800/50 px-2 py-0.5 rounded-md mt-0.5">
-                Target: ≤ 2.0s average for tier mastery
-              </span>
+              <button
+                type="button"
+                onClick={onContinue}
+                className="mt-0.5 px-4 py-1.5 sm:py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 shadow-md active:scale-95 transition-all cursor-pointer"
+              >
+                <span>Next Question</span>
+                <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-[10px] text-slate-400 font-normal ml-0.5">(Space / Enter)</span>
+              </button>
             </div>
           )}
 
