@@ -177,7 +177,8 @@ export const App: React.FC = () => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
 
-      if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowRight') {
+      // Use Enter or ArrowRight (avoid Space so it does not conflict with [Space] ♮ in Direct Entry)
+      if (e.key === 'Enter' || e.key === 'ArrowRight') {
         e.preventDefault();
         spawnNextProblem();
       }

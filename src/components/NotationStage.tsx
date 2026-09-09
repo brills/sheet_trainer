@@ -245,7 +245,7 @@ export const NotationStage: React.FC<NotationStageProps> = ({
               >
                 <span>Next Question</span>
                 <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-[10px] text-slate-400 font-normal ml-0.5">(Space / Enter)</span>
+                <span className="text-[10px] text-slate-400 font-normal ml-0.5">(Enter / ➔)</span>
               </button>
             </div>
           )}
