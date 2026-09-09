@@ -6,7 +6,8 @@ import {
   Clef, 
   ChordDefinition, 
   ArpeggioDefinition,
-  ChordQuality
+  ChordQuality,
+  TrackType
 } from '../../types';
 
 export type { KeySignatureDefinition };
@@ -359,4 +360,38 @@ export function getDiatonicArpeggiosForKey(
   }
 
   return arpeggios;
+}
+
+/**
+ * Checks if every note in a chord is strictly diatonic to the specified key signature.
+ */
+export function isDiatonicChord(chord: ChordDefinition, keySignature?: KeySignatureDefinition): boolean {
+  if (!keySignature) return true;
+  return chord.notes.every(note => getRequiredAccidentalForNote(note, keySignature) === null);
+}
+
+/**
+ * Checks if every note in an arpeggio is strictly diatonic to the specified key signature.
+ */
+export function isDiatonicArpeggio(arp: ArpeggioDefinition, keySignature?: KeySignatureDefinition): boolean {
+  if (!keySignature) return true;
+  return arp.notes.every(note => getRequiredAccidentalForNote(note, keySignature) === null);
+}
+
+/**
+ * Checks whether a given tier supports diatonic question generation for the active key.
+ */
+export function tierSupportsDiatonic(
+  track: TrackType,
+  tier: number,
+  keySignature: KeySignatureDefinition,
+  clef: Clef = 'treble'
+): boolean {
+  if (track === 'chords') {
+    const diatonic = getDiatonicChordsForKey(keySignature, tier, clef);
+    return diatonic.length > 0;
+  } else {
+    const diatonic = getDiatonicArpeggiosForKey(keySignature, tier, clef);
+    return diatonic.length > 0;
+  }
 }

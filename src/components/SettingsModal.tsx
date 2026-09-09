@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppState, Clef, InputMode, TrackType } from '../types';
-import { X, Keyboard, RotateCcw, Compass, Trash2, Music2, Layers } from 'lucide-react';
+import { X, Keyboard, RotateCcw, Compass, Trash2, Music2, Layers, Sparkles } from 'lucide-react';
 import { DEFAULT_APP_STATE } from '../storage/localStore';
 
 interface SettingsModalProps {
@@ -47,6 +47,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         [activeTrack]: {
           ...currentSettings,
           inputMode
+        }
+      }
+    });
+  };
+
+  const onToggleOnlyDiatonic = () => {
+    onUpdateState({
+      ...state,
+      settings: {
+        ...state.settings,
+        [activeTrack]: {
+          ...currentSettings,
+          onlyDiatonic: !currentSettings.onlyDiatonic
         }
       }
     });
@@ -174,7 +187,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
         </div>
 
-        {/* 3. Desktop Keymap HUD Toggle */}
+        {/* 3. Only Diatonic Questions Toggle */}
+        <div className="flex items-center justify-between py-2 border-t border-slate-800">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+            <div className="flex flex-col">
+              <span className="text-xs font-semibold text-slate-200">Only Diatonic Questions</span>
+              <span className="text-[10px] text-slate-400">Strictly sample from the active key signature (in applicable tiers)</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={onToggleOnlyDiatonic}
+            className={`
+              w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer shrink-0
+              ${currentSettings.onlyDiatonic ? 'bg-emerald-500' : 'bg-slate-700'}
+            `}
+          >
+            <div className={`
+              bg-white w-4 h-4 rounded-full shadow-md transform transition-transform
+              ${currentSettings.onlyDiatonic ? 'translate-x-5' : 'translate-x-0'}
+            `} />
+          </button>
+        </div>
+
+        {/* 4. Desktop Keymap HUD Toggle */}
         <div className="flex items-center justify-between py-2 border-t border-slate-800">
           <div className="flex items-center gap-2">
             <Keyboard className="w-4 h-4 text-emerald-400" />

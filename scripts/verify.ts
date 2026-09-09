@@ -2,9 +2,9 @@ import { NOTE_LETTERS, noteToMidi, transposePitch, formatNoteName } from '../src
 import { buildChord, CHORD_TIERS, CHORD_FORMULAS, getValidOctavesForChord, alignChordToTargetOctave, generateRandomChordForTier } from '../src/core/theory/chords';
 import { buildArpeggio, ARPEGGIO_TIERS, getValidOctavesForArpeggio, alignArpeggioToTargetOctave } from '../src/core/theory/arpeggios';
 import { ChordInputStateMachine } from '../src/core/engines/stateMachine';
-import { calculatePatternWeight, checkTierPromotion, selectNextChord } from '../src/core/engines/adaptiveEngine';
+import { calculatePatternWeight, checkTierPromotion, selectNextChord, selectNextArpeggio } from '../src/core/engines/adaptiveEngine';
 import { generateChordMultipleChoiceOptions, generateArpeggioMultipleChoiceOptions } from '../src/core/engines/distractorEngine';
-import { KEY_SIGNATURES, KEY_STAGES, getRequiredAccidentalForNote, getDiatonicChordsForKey } from '../src/core/theory/keys';
+import { KEY_SIGNATURES, KEY_STAGES, getRequiredAccidentalForNote, getDiatonicChordsForKey, getDiatonicArpeggiosForKey, isDiatonicChord, isDiatonicArpeggio, tierSupportsDiatonic } from '../src/core/theory/keys';
 import { checkKeyStagePromotion } from '../src/core/engines/adaptiveEngine';
 import { PrecisionTimingEngine } from '../src/core/engines/timingEngine';
 
@@ -389,6 +389,50 @@ assert(gDiatonic.some(c => c.root === 'G' && c.quality === 'major'), 'G Major tr
 assert(gDiatonic.some(c => c.root === 'D' && c.quality === 'major'), 'D Major triad (V) is diatonic in G / Em');
 assert(gDiatonic.some(c => c.root === 'E' && c.quality === 'minor'), 'E Minor triad (vi / i) is diatonic in G / Em');
 
+// Test isDiatonicChord and isDiatonicArpeggio helpers
+const gMajChord = buildChord('G', 'natural', 'major', 'root', 'treble', 1.1);
+const fMajChord = buildChord('F', 'natural', 'major', 'root', 'treble', 1.1);
+assert(isDiatonicChord(gMajChord, keyG) === true, 'G Maj is strictly diatonic to G / Em');
+assert(isDiatonicChord(fMajChord, keyG) === false, 'F Maj (with F natural) is non-diatonic to G / Em');
+
+const gMajArp = buildArpeggio('G', 'natural', 'major', 'ascending', 'root', 'treble', 1.1);
+const fMajArp = buildArpeggio('F', 'natural', 'major', 'ascending', 'root', 'treble', 1.1);
+assert(isDiatonicArpeggio(gMajArp, keyG) === true, 'G Maj arpeggio is strictly diatonic to G / Em');
+assert(isDiatonicArpeggio(fMajArp, keyG) === false, 'F Maj arpeggio is non-diatonic to G / Em');
+
+// Test tierSupportsDiatonic
+assert(tierSupportsDiatonic('chords', 1.1, keyG) === true, 'Chord Tier 1.1 supports diatonic sampling in G / Em');
+assert(tierSupportsDiatonic('chords', 3.1, keyG) === true, 'Chord Tier 3.1 (7ths) supports diatonic sampling in G / Em');
+assert(tierSupportsDiatonic('chords', 2.2, keyG) === false, 'Chord Tier 2.2 (Sus) has no diatonic chords');
+assert(tierSupportsDiatonic('arpeggios', 1.1, keyG) === true, 'Arpeggio Tier 1.1 supports diatonic sampling in G / Em');
+assert(tierSupportsDiatonic('arpeggios', 3.3, keyG) === false, 'Arpeggio Tier 3.3 (Dim7 cascades) has no diatonic arpeggios');
+
+// Test strictly onlyDiatonic = true generation in selectNextChord (50 trials)
+let strictlyDiatonicChords = true;
+for (let i = 0; i < 50; i++) {
+  const chord = selectNextChord(1.1, 'treble', mockProgress, keyG, true);
+  if (!isDiatonicChord(chord, keyG)) {
+    strictlyDiatonicChords = false;
+    break;
+  }
+}
+assert(strictlyDiatonicChords, 'When onlyDiatonic=true, selectNextChord strictly produces 100% diatonic chords in G / Em');
+
+// Test strictly onlyDiatonic = true generation in selectNextArpeggio (50 trials)
+let strictlyDiatonicArps = true;
+for (let i = 0; i < 50; i++) {
+  const arp = selectNextArpeggio(1.1, 'treble', mockProgress, keyG, true);
+  if (!isDiatonicArpeggio(arp, keyG)) {
+    strictlyDiatonicArps = false;
+    break;
+  }
+}
+assert(strictlyDiatonicArps, 'When onlyDiatonic=true, selectNextArpeggio strictly produces 100% diatonic arpeggios in G / Em');
+
+// Test non-diatonic tier fallback when onlyDiatonic=true
+const susChord = selectNextChord(2.2, 'treble', mockProgress, keyG, true);
+assert(susChord && (susChord.quality === 'sus4' || susChord.quality === 'sus2'), 'When tier has no diatonic options, selectNextChord safely falls back to tier chords');
+
 // Test Key Context Stability: chords stay firmly in the active key context
 let allKeyGChords = true;
 for (let i = 0; i < 30; i++) {
@@ -437,6 +481,7 @@ import { DEFAULT_APP_STATE, loadAppState, saveAppState, clearAllAppStorage, reco
 const initialLoaded = loadAppState();
 assert(initialLoaded.progress.chords.currentTier === 1.1, 'Default state loads Tier 1.1');
 assert(initialLoaded.settings.chords.keyMode === 'progressive', 'Default state uses progressive key mode');
+assert(initialLoaded.settings.chords.onlyDiatonic === false, 'Default state sets onlyDiatonic to false');
 
 const modifiedState = {
   ...initialLoaded,

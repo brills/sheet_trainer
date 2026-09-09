@@ -96,6 +96,7 @@ export interface TrackSettings {
   feedbackDelayMs?: number;
   keyMode: KeyMode;
   activeKeyId: string;
+  onlyDiatonic?: boolean;
 }
 
 export interface TrackProgress {

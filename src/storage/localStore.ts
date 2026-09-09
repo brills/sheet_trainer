@@ -44,7 +44,8 @@ export function getDefaultAppState(): AppState {
         flashMode: 'fixed',
         flashDurationMs: 400,
         keyMode: 'progressive',
-        activeKeyId: 'C'
+        activeKeyId: 'C',
+        onlyDiatonic: false
       },
       arpeggios: {
         clef: 'treble',
@@ -52,7 +53,8 @@ export function getDefaultAppState(): AppState {
         flashMode: 'fixed',
         flashDurationMs: 500,
         keyMode: 'progressive',
-        activeKeyId: 'C'
+        activeKeyId: 'C',
+        onlyDiatonic: false
       }
     },
     progress: {

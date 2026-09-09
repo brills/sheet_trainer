@@ -101,7 +101,13 @@ export const App: React.FC = () => {
     setCurrentKey(activeKeyDef);
 
     if (activeTrack === 'chords') {
-      const chord = selectNextChord(currentTrack.currentTier, currentSettings.clef, currentTrack, activeKeyDef);
+      const chord = selectNextChord(
+        currentTrack.currentTier,
+        currentSettings.clef,
+        currentTrack,
+        activeKeyDef,
+        currentSettings.onlyDiatonic
+      );
       setCurrentChord(chord);
       setCurrentArpeggio(null);
 
@@ -109,7 +115,13 @@ export const App: React.FC = () => {
         setMultipleChoiceOptions(generateChordMultipleChoiceOptions(chord));
       }
     } else {
-      const arpeggio = selectNextArpeggio(currentTrack.currentTier, currentSettings.clef, currentTrack, activeKeyDef);
+      const arpeggio = selectNextArpeggio(
+        currentTrack.currentTier,
+        currentSettings.clef,
+        currentTrack,
+        activeKeyDef,
+        currentSettings.onlyDiatonic
+      );
       setCurrentArpeggio(arpeggio);
       setCurrentChord(null);
 
@@ -145,14 +157,14 @@ export const App: React.FC = () => {
   // Track initial mounting and explicit configuration changes ONLY
   const prevConfigRef = useRef<string>('');
   useEffect(() => {
-    const configKey = `${activeTrack}-${trackSettings.clef}-${trackSettings.inputMode}-${trackSettings.keyMode}-${trackSettings.activeKeyId}-${trackProgress.currentTier}-${currentRoute}`;
+    const configKey = `${activeTrack}-${trackSettings.clef}-${trackSettings.inputMode}-${trackSettings.keyMode}-${trackSettings.activeKeyId}-${trackSettings.onlyDiatonic}-${trackProgress.currentTier}-${currentRoute}`;
     if (prevConfigRef.current !== configKey) {
       prevConfigRef.current = configKey;
       if (currentRoute === 'chords' || currentRoute === 'arpeggios') {
         spawnNextProblem();
       }
     }
-  }, [activeTrack, trackSettings.clef, trackSettings.inputMode, trackSettings.keyMode, trackSettings.activeKeyId, trackProgress.currentTier, currentRoute, spawnNextProblem]);
+  }, [activeTrack, trackSettings.clef, trackSettings.inputMode, trackSettings.keyMode, trackSettings.activeKeyId, trackSettings.onlyDiatonic, trackProgress.currentTier, currentRoute, spawnNextProblem]);
 
   // Handle Trial Evaluation
   const evaluateSubmission = useCallback((

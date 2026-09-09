@@ -41,12 +41,38 @@ export function selectNextChord(
   tier: number,
   clef: Clef,
   progress: TrackProgress,
-  keySignature?: KeySignatureDefinition
+  keySignature?: KeySignatureDefinition,
+  onlyDiatonic: boolean = false
 ): ChordDefinition {
   const config = CHORD_TIERS[tier] || CHORD_TIERS[1.1];
   const matrix = progress.weaknessMatrix;
 
-  // If a key signature is active, 80% chance to sample diatonic chords in this key
+  // 1. If onlyDiatonic is enabled and key signature is present, strictly sample from diatonic chords (if available)
+  if (onlyDiatonic && keySignature) {
+    const diatonicChords = getDiatonicChordsForKey(keySignature, tier, clef);
+    if (diatonicChords.length > 0) {
+      const weightedCandidates = diatonicChords.map(chord => {
+        const patternKey = `${clef}:${chord.quality}:${chord.inversion}`;
+        const stats = matrix[patternKey];
+        const weight = calculatePatternWeight(stats);
+        return { chord, weight };
+      });
+      const totalWeight = weightedCandidates.reduce((sum, c) => sum + c.weight, 0);
+      let random = Math.random() * totalWeight;
+      for (const item of weightedCandidates) {
+        random -= item.weight;
+        if (random <= 0) {
+          item.chord.keySignature = keySignature;
+          return item.chord;
+        }
+      }
+      const picked = diatonicChords[Math.floor(Math.random() * diatonicChords.length)];
+      picked.keySignature = keySignature;
+      return picked;
+    }
+  }
+
+  // 2. Default: If a key signature is active, 80% chance to sample diatonic chords in this key
   if (keySignature && Math.random() < 0.8) {
     const diatonicChords = getDiatonicChordsForKey(keySignature, tier, clef);
     if (diatonicChords.length > 0) {
@@ -96,12 +122,38 @@ export function selectNextArpeggio(
   tier: number,
   clef: Clef,
   progress: TrackProgress,
-  keySignature?: KeySignatureDefinition
+  keySignature?: KeySignatureDefinition,
+  onlyDiatonic: boolean = false
 ): ArpeggioDefinition {
   const config = ARPEGGIO_TIERS[tier] || ARPEGGIO_TIERS[1.1];
   const matrix = progress.weaknessMatrix;
 
-  // 80% chance to sample diatonic arpeggios in the active key
+  // 1. If onlyDiatonic is enabled and key signature is present, strictly sample from diatonic arpeggios (if available)
+  if (onlyDiatonic && keySignature) {
+    const diatonicArps = getDiatonicArpeggiosForKey(keySignature, tier, clef);
+    if (diatonicArps.length > 0) {
+      const weightedCandidates = diatonicArps.map(arp => {
+        const patternKey = `${clef}:${arp.quality}:${arp.contour}`;
+        const stats = matrix[patternKey];
+        const weight = calculatePatternWeight(stats);
+        return { arp, weight };
+      });
+      const totalWeight = weightedCandidates.reduce((sum, c) => sum + c.weight, 0);
+      let random = Math.random() * totalWeight;
+      for (const item of weightedCandidates) {
+        random -= item.weight;
+        if (random <= 0) {
+          item.arp.keySignature = keySignature;
+          return item.arp;
+        }
+      }
+      const picked = diatonicArps[Math.floor(Math.random() * diatonicArps.length)];
+      picked.keySignature = keySignature;
+      return picked;
+    }
+  }
+
+  // 2. Default: 80% chance to sample diatonic arpeggios in the active key
   if (keySignature && Math.random() < 0.8) {
     const diatonicArps = getDiatonicArpeggiosForKey(keySignature, tier, clef);
     if (diatonicArps.length > 0) {
