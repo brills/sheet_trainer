@@ -69,8 +69,8 @@ export const ARPEGGIO_TIERS: Record<number, ArpeggioTierConfig> = {
   3.1: {
     tier: 3.1,
     title: '7th Chord Sweeps',
-    description: '4-note Dom7, Maj7, and Min7 sweeps across the staff',
-    qualities: ['dom7', 'maj7', 'min7'],
+    description: '4-note 7th chord sweeps (Dom7, Maj7, Min7, ø7, °7) across the staff',
+    qualities: ['dom7', 'maj7', 'min7', 'half_dim7', 'dim7'],
     contours: ['ascending', 'descending', 'arch'],
     startingDegrees: ['root'],
     accidentals: ['natural', 'sharp', 'flat']
@@ -78,8 +78,8 @@ export const ARPEGGIO_TIERS: Record<number, ArpeggioTierConfig> = {
   3.2: {
     tier: 3.2,
     title: '7th Inversion Sweeps',
-    description: '7th chord arpeggios starting on 3rd, 5th, or 7th degrees',
-    qualities: ['dom7', 'maj7', 'min7'],
+    description: '7th chord arpeggios starting on 3rd, 5th, or 7th degrees across all 7th qualities',
+    qualities: ['dom7', 'maj7', 'min7', 'half_dim7', 'dim7'],
     contours: ['ascending', 'descending'],
     startingDegrees: ['3rd', '5th'],
     accidentals: ['natural', 'sharp', 'flat']

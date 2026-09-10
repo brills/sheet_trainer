@@ -77,33 +77,29 @@ A **Tier** is a curriculum milestone grouping a specific category of musical pat
 
 ### Track A: Chords & Inversions Tiers
 
-* **Tier 1.1 — Triads (Root Position):** Major & Minor triads in root position (uniform "snowman" shape).
-* **Tier 1.2 — Triads (1st Inversion):** Major & Minor in 1st inversion ($\text{6/3}$) (top 4th gap $\rightarrow$ root is on top).
-* **Tier 1.3 — Triads (2nd Inversion):** Major & Minor in 2nd inversion ($\text{6/4}$) (bottom 4th gap $\rightarrow$ root is in middle).
-* **Tier 1.4 — Triad Mastery:** Mixed root, 1st, and 2nd inversion triads.
-* **Tier 2.1 — Altered Triads:** Diminished ($°$) and Augmented ($+$) in all inversions.
-* **Tier 2.2 — Suspended Chords:** $\text{Sus4}$ and $\text{Sus2}$ (spotting 2nd/4th step clashes replacing the 3rd).
-* **Tier 3.1 — 7th Chords (Root Position):** Dom7, Maj7, Min7, and Half-Diminished ($ø7 / \text{m7}\flat5$) in root position (4-tier towers).
-* **Tier 3.2 — 7th Chords (1st Inversion):** $\text{6/5}$ inversions across Dom7, Maj7, Min7, and $ø7$ (spotting the **top 2nd clash** $\rightarrow$ top note of clash is root).
+* **Tier 1.1 — Triads (Root Position):** Major, Minor, Diminished ($°$), and Augmented ($+$) triads in root position (uniform "snowman" shape).
+* **Tier 1.2 — Triads (1st Inversion):** Major, Minor, Diminished, and Augmented in 1st inversion ($\text{6/3}$) (top 4th gap $\rightarrow$ root is on top).
+* **Tier 1.3 — Triads (2nd Inversion):** Major, Minor, Diminished, and Augmented in 2nd inversion ($\text{6/4}$) (bottom 4th gap $\rightarrow$ root is in middle).
+* **Tier 1.4 — Triad Mastery:** Mixed root, 1st, and 2nd inversion triads across all qualities.
+* **Tier 2.1 — Suspended Chords:** $\text{Sus4}$ and $\text{Sus2}$ (spotting 2nd/4th step clashes replacing the 3rd).
+* **Tier 3.1 — 7th Chords (Root Position):** Dom7, Maj7, Min7, Half-Diminished ($ø7$), and Fully Diminished ($°7$) in root position (4-tier towers).
+* **Tier 3.2 — 7th Chords (1st Inversion):** $\text{6/5}$ inversions across Dom7, Maj7, Min7, $ø7$, and $°7$ (spotting the **top 2nd clash** $\rightarrow$ top note of clash is root).
 * **Tier 3.3 — 7th Chords (2nd Inversion):** $\text{4/3}$ inversions (spotting the **middle 2nd clash** $\rightarrow$ top note of clash is root).
 * **Tier 3.4 — 7th Chords (3rd Inversion):** $\text{4/2}$ inversions (spotting the **bottom 2nd clash** $\rightarrow$ top note of clash is root).
-* **Tier 3.5 — 7th Inversion Mastery:** Mixed close-position 7th chords across all 4 inversions.
+* **Tier 3.5 — 7th Inversion Mastery:** Mixed close-position 7th chords across all 4 inversions and all 5 qualities.
 * **Tier 3.6 — Drop-2 Voicings:** Open 4-part voicings (2nd voice from top dropped $8\text{va}$), blending in 3-note **5th omitted shell voicings** ($\text{Root} + \text{3rd} + \text{7th}$).
 * **Tier 3.7 — Drop-3 Voicings:** Wide open voicings (3rd voice from top dropped $8\text{va}$), blending in 3-note **5th omitted shell voicings**.
-* **Tier 3.8 — Diminished 7ths:** Half-Diminished ($ø7$) and Fully Diminished ($°7$) across all inversions.
 * **Tier 4.1 — Added Tone & 6th Chords:** $\text{add9}$, $6$, $\text{m6}$.
 * **Tier 4.2 — Compound & Altered Chords:** $9\text{th}$, $7\sharp9$, $7\flat9$.
 
 ### Track B: Arpeggios & Contours Tiers
 
-* **Tier 1.1 — Linear Sweeps:** Ascending ($\nearrow$) and Descending ($\searrow$) 4-note triad runs.
+* **Tier 1.1 — Linear Sweeps:** Ascending ($\nearrow$) and Descending ($\searrow$) 4-note triad runs across all triad qualities (Maj, Min, Dim, Aug).
 * **Tier 1.2 — Inversion Anchors:** Arpeggios starting on 3rd ($3\text{-}5\text{-}1\text{-}3$) or 5th ($5\text{-}1\text{-}3\text{-}5$).
 * **Tier 1.3 — Arches & Alberti Figures:** Arches ($1\text{-}3\text{-}5\text{-}3$) and Alberti bass figures ($1\text{-}5\text{-}3\text{-}5$).
-* **Tier 2.1 — Altered Sweeps:** Diminished & Augmented sweeps.
-* **Tier 2.2 — Cross-Beaming Patterns:** 3-note patterns grouped into 4-note beam envelopes.
-* **Tier 3.1 — 7th Chord Sweeps:** 4-note Dom7, Maj7, Min7 sweeps.
-* **Tier 3.2 — 7th Inversion Sweeps:** 7th chord arpeggios starting on 3rd or 5th degrees.
-* **Tier 3.3 — Diminished 7th Cascades:** Symmetrical multi-octave ladders.
+* **Tier 2.1 — Cross-Beaming Patterns:** 3-note patterns grouped into 4-note beam envelopes.
+* **Tier 3.1 — 7th Chord Sweeps:** 4-note 7th sweeps across all 7th qualities (Dom7, Maj7, Min7, ø7, °7).
+* **Tier 3.2 — 7th Inversion Sweeps:** 7th chord arpeggios starting on 3rd, 5th, or 7th degrees.
 
 ---
 

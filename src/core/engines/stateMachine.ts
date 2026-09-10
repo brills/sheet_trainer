@@ -13,19 +13,13 @@ export type SlotIndex = 0 | 1 | 2 | 3;
 export const QUALITY_KEY_MAP: Record<string, ChordQuality> = {
   'm': 'minor',
   'M': 'major',
-  'j': 'maj7',
-  'J': 'maj7',
   'd': 'diminished',
   'D': 'dim7',
   'a': 'augmented',
   'A': 'augmented',
   '7': 'dom7',
-  'k': 'min7',
-  'K': 'min7',
   'h': 'half_dim7',
   'H': 'half_dim7',
-  'o': 'half_dim7',
-  'O': 'dim7',
   '4': 'sus4',
   '2': 'sus2',
   '9': '9',
@@ -35,20 +29,11 @@ export const QUALITY_KEY_MAP: Record<string, ChordQuality> = {
 export function resolveQualityKey(key: string, tier?: number | null): ChordQuality | undefined {
   if (tier !== null && tier !== undefined) {
     if (tier >= 3.0 && tier < 4.0) {
-      if (tier === 3.8) {
-        if (key === 'd' || key === 'D' || key === 'o' || key === 'O') return 'dim7';
-        if (key === 'h' || key === 'H') return 'half_dim7';
-        if (key === 'm' || key === 'k' || key === 'K') return 'min7';
-        if (key === 'M' || key === 'j' || key === 'J') return 'maj7';
-        if (key === '7') return 'dom7';
-      } else {
-        // Tiers 3.1 - 3.7 (7th chords close, Drop-2, Drop-3)
-        if (key === 'm' || key === 'k' || key === 'K') return 'min7';
-        if (key === 'M' || key === 'j' || key === 'J') return 'maj7';
-        if (key === '7') return 'dom7';
-        if (key === 'h' || key === 'H' || key === 'o' || key === 'O') return 'half_dim7';
-        if (key === 'd' || key === 'D') return 'dim7';
-      }
+      if (key === 'm') return 'min7';
+      if (key === 'M') return 'maj7';
+      if (key === '7') return 'dom7';
+      if (key === 'h' || key === 'H') return 'half_dim7';
+      if (key === 'd' || key === 'D') return 'dim7';
     } else if (tier >= 2.0 && tier < 3.0) {
       if (key === '4') return 'sus4';
       if (key === '2') return 'sus2';
@@ -72,10 +57,6 @@ export function resolveQualityKey(key: string, tier?: number | null): ChordQuali
       if (key === 'M') return 'major';
       if (key === 'd' || key === 'D') return 'diminished';
       if (key === 'a' || key === 'A') return 'augmented';
-      if (key === 'j' || key === 'J') return 'major';
-      if (key === 'k' || key === 'K') return 'minor';
-      if (key === '7') return 'dom7';
-      if (key === 'h' || key === 'H' || key === 'o' || key === 'O') return 'half_dim7';
     }
   }
   return QUALITY_KEY_MAP[key];

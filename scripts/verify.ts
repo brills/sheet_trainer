@@ -262,16 +262,10 @@ sm31.handleKey('c');
 const t31_h_res = sm31.handleKey('h');
 assert(t31_h_res.completed === true && t31Result.quality === 'half_dim7' && t31Result.inversion === 'root', 'Tier 3.1 - Typed "c" then "h": Smart shortcut maps "h" directly to half_dim7 (ø7)');
 
-// Test Backward Compatibility Aliases in Tier 3.1: 'j' for maj7 and 'k' for min7
-sm31.reset();
-sm31.handleKey('c');
-sm31.handleKey('j');
-assert(t31Result.quality === 'maj7', 'Tier 3.1 - Backward compatible alias "j" resolves to maj7');
-
-sm31.reset();
-sm31.handleKey('c');
-sm31.handleKey('k');
-assert(t31Result.quality === 'min7', 'Tier 3.1 - Backward compatible alias "k" resolves to min7');
+// Verify No Backward Compatibility Shortcuts / Aliases in Tier 3.1:
+assert(resolveQualityKey('j', 3.1) === undefined, 'Tier 3.1 - Legacy alias "j" is not recognized');
+assert(resolveQualityKey('k', 3.1) === undefined, 'Tier 3.1 - Legacy alias "k" is not recognized');
+assert(resolveQualityKey('o', 3.1) === undefined, 'Tier 3.1 - Legacy alias "o" is not recognized');
 
 // Test Tier 3.5 (7th Inversion Mastery - Mixed Inversions):
 let t35Result: any = null;
@@ -294,24 +288,18 @@ sm35.handleKey('m'); // min7
 sm35.handleKey('1'); // 1st inv
 assert(t35Result.root === 'B' && t35Result.accidental === 'flat' && t35Result.quality === 'min7' && t35Result.inversion === '1st', 'Tier 3.5 (7th Mastery) - Typed "b" -> "b" -> "m" -> "1": Auto-submitted Bb min7 1st Inversion');
 
-// Test Tier 3.8 (Diminished 7ths):
-let t38Result: any = null;
-const sm38 = new ChordInputStateMachine((res) => {
-  t38Result = res;
-}, null, 3.8);
+// Test Tier 3.1 with Folded Diminished 7ths (°7):
+sm31.reset();
+sm31.handleKey('c');
+const t31_d_res = sm31.handleKey('d');
+assert(t31_d_res.completed === true && t31Result.root === 'C' && t31Result.quality === 'dim7' && t31Result.inversion === 'root', 'Tier 3.1 (Folded °7) - Typed "c" then "d": Smart shortcut "d" maps to dim7 (°7) in root position');
 
-// Test B + d + 0 -> B dim7 Root
-sm38.handleKey('b');
-sm38.handleKey('d'); // dim7
-sm38.handleKey('0'); // root
-assert(t38Result.root === 'B' && t38Result.quality === 'dim7' && t38Result.inversion === 'root', 'Tier 3.8 (Dim 7ths) - Typed "b" -> "d" -> "0": Smart shortcut "d" maps to dim7 (°7)');
-
-// Test B + h + 1 -> B half_dim7 1st
-sm38.reset();
-sm38.handleKey('b');
-sm38.handleKey('h'); // half_dim7
-sm38.handleKey('1'); // 1st
-assert(t38Result.root === 'B' && t38Result.quality === 'half_dim7' && t38Result.inversion === '1st', 'Tier 3.8 (Dim 7ths) - Typed "b" -> "h" -> "1": Smart shortcut "h" maps to half_dim7 (ø7)');
+// Test Tier 3.5 (7th Inversion Mastery with °7):
+sm35.reset();
+sm35.handleKey('b');
+sm35.handleKey('d'); // dim7
+sm35.handleKey('1'); // 1st inv
+assert(t35Result.root === 'B' && t35Result.quality === 'dim7' && t35Result.inversion === '1st', 'Tier 3.5 (7th Mastery) - Typed "b" -> "d" -> "1": Auto-submitted B dim7 1st Inversion');
 
 // Test getQualityLegendInfo dynamic HUD keys
 const leg31Maj7 = getQualityLegendInfo('maj7', 3.1);
@@ -326,8 +314,8 @@ assert(leg31Dom7.key === '7' && leg31Dom7.label === '7th', 'HUD Legend (Tier 3.1
 const leg31HalfDim7 = getQualityLegendInfo('half_dim7', 3.1);
 assert(leg31HalfDim7.key === 'h' && leg31HalfDim7.label === 'ø7', 'HUD Legend (Tier 3.1): half_dim7 displays [h] ø7');
 
-const leg38Dim7 = getQualityLegendInfo('dim7', 3.8);
-assert(leg38Dim7.key === 'd' && leg38Dim7.label === '°7', 'HUD Legend (Tier 3.8): dim7 displays [d] °7');
+const leg31Dim7 = getQualityLegendInfo('dim7', 3.1);
+assert(leg31Dim7.key === 'd' && leg31Dim7.label === '°7', 'HUD Legend (Tier 3.1): dim7 displays [d] °7');
 
 const leg11Major = getQualityLegendInfo('major', 1.1);
 assert(leg11Major.key === 'M' && leg11Major.label === 'Maj', 'HUD Legend (Tier 1.1): major displays [M] Maj');

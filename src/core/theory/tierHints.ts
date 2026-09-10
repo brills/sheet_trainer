@@ -70,43 +70,38 @@ export const CHORD_TIER_HINTS: Record<number, TierHint> = {
   },
   3.1: {
     visualCue: '4-note snowman stack (all lines or all spaces).',
-    cheatCode: 'Lowest note is Root. Check 7th: Maj7 (half-step below octave), Dom7 (whole-step below), ø7 (♭5 + ♭7).',
-    formula: 'Root Position 7ths (7): 1 - 3 - 5 - 7'
+    cheatCode: 'Lowest note is Root. Check 7th: Maj7 (half-step below 8), Dom7 (whole-step below), ø7 (♭5+♭7), °7 (♭5+𝄫7).',
+    formula: 'Root Position 7ths (7): 1 - 3 - 5 - 7 (Maj7, Dom7, Min7, ø7, °7)'
   },
   3.2: {
     visualCue: '2nd step clash at the top of the stack (6/5 inversion).',
-    cheatCode: 'The top note of the 2nd clash is the Root! Bass note is the 3rd.',
+    cheatCode: 'The top note of the 2nd clash is the Root! Bass note is the 3rd (Dom7, Maj7, Min7, ø7, °7).',
     formula: '1st Inversion 7th (6/5): 3 - 5 - 7 - 1'
   },
   3.3: {
     visualCue: '2nd step clash in the middle of the stack (4/3 inversion).',
-    cheatCode: 'The upper note of the middle 2nd clash is the Root! Bass note is the 5th.',
+    cheatCode: 'The upper note of the middle 2nd clash is the Root! Bass note is the 5th (Dom7, Maj7, Min7, ø7, °7).',
     formula: '2nd Inversion 7th (4/3): 5 - 7 - 1 - 3'
   },
   3.4: {
     visualCue: '2nd step clash at the bottom of the stack (4/2 inversion).',
-    cheatCode: 'The upper note of the bottom 2nd clash is the Root! Bass note is the 7th.',
+    cheatCode: 'The upper note of the bottom 2nd clash is the Root! Bass note is the 7th (Dom7, Maj7, Min7, ø7, °7).',
     formula: '3rd Inversion 7th (4/2): 7 - 1 - 3 - 5'
   },
   3.5: {
     visualCue: 'Spot the 2nd clash position: none (Root), top (6/5), middle (4/3), or bottom (4/2).',
-    cheatCode: 'The upper note of the 2nd clash is ALWAYS the Root in any 7th inversion!',
-    formula: 'Close 7ths: Root (7), 1st (6/5), 2nd (4/3), 3rd (4/2)'
+    cheatCode: 'The upper note of the 2nd clash is ALWAYS the Root in any 7th inversion! (°7 is graded by spelled stack/clash).',
+    formula: 'Close 7ths: Root (7), 1st (6/5), 2nd (4/3), 3rd (4/2) across Dom7, Maj7, Min7, ø7, °7'
   },
   3.6: {
     visualCue: 'Open 4-voice spacing with 2nd voice from top dropped an octave into the bass.',
-    cheatCode: 'Standard jazz guitar & piano drop-2 voicing. Wide spread with tight inner voicings.',
+    cheatCode: 'Standard jazz guitar & piano drop-2 voicing. Graded by spelled notation.',
     formula: 'Drop-2: [Drop 2nd voice down 1 octave]'
   },
   3.7: {
     visualCue: 'Wide open 4-voice spacing with 3rd voice from top dropped an octave into the bass.',
-    cheatCode: 'Deep bass note with tight 3-voice cluster above.',
+    cheatCode: 'Deep bass note with tight 3-voice cluster above. Graded by spelled notation.',
     formula: 'Drop-3: [Drop 3rd voice down 1 octave]'
-  },
-  3.8: {
-    visualCue: 'ø7 (Half-diminished) vs °7 (Fully diminished).',
-    cheatCode: 'ø7 has minor 7th (♭7). °7 has diminished 7th (𝄫7, symmetrical minor 3rds).',
-    formula: 'ø7: 1 - ♭3 - ♭5 - ♭7 | °7: 1 - ♭3 - ♭5 - 𝄫7'
   },
   4.1: {
     visualCue: 'Add9, Major 6th, and Minor 6th chords in root position.',

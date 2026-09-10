@@ -434,8 +434,8 @@ export const CHORD_TIERS: Record<number, TierConfig> = {
   3.1: {
     tier: 3.1,
     title: '7th Chords (Root Position)',
-    description: 'Dominant 7th, Major 7th, Minor 7th, and Half-Diminished (ø7 / m7♭5) in root position',
-    qualities: ['dom7', 'maj7', 'min7', 'half_dim7'],
+    description: 'Dominant 7th, Major 7th, Minor 7th, Half-Diminished (ø7), and Fully Diminished (°7) in root position',
+    qualities: ['dom7', 'maj7', 'min7', 'half_dim7', 'dim7'],
     inversions: ['root'],
     accidentals: ['natural', 'sharp', 'flat'],
     voicing: 'close'
@@ -444,7 +444,7 @@ export const CHORD_TIERS: Record<number, TierConfig> = {
     tier: 3.2,
     title: '7th Chords (1st Inversion)',
     description: '6/5 7th inversions (identifying top 2nd clash where top note is Root)',
-    qualities: ['dom7', 'maj7', 'min7', 'half_dim7'],
+    qualities: ['dom7', 'maj7', 'min7', 'half_dim7', 'dim7'],
     inversions: ['1st'],
     accidentals: ['natural', 'sharp', 'flat'],
     voicing: 'close'
@@ -453,7 +453,7 @@ export const CHORD_TIERS: Record<number, TierConfig> = {
     tier: 3.3,
     title: '7th Chords (2nd Inversion)',
     description: '4/3 7th inversions (identifying middle 2nd clash)',
-    qualities: ['dom7', 'maj7', 'min7', 'half_dim7'],
+    qualities: ['dom7', 'maj7', 'min7', 'half_dim7', 'dim7'],
     inversions: ['2nd'],
     accidentals: ['natural', 'sharp', 'flat'],
     voicing: 'close'
@@ -462,7 +462,7 @@ export const CHORD_TIERS: Record<number, TierConfig> = {
     tier: 3.4,
     title: '7th Chords (3rd Inversion)',
     description: '4/2 7th inversions (identifying bottom 2nd clash)',
-    qualities: ['dom7', 'maj7', 'min7', 'half_dim7'],
+    qualities: ['dom7', 'maj7', 'min7', 'half_dim7', 'dim7'],
     inversions: ['3rd'],
     accidentals: ['natural', 'sharp', 'flat'],
     voicing: 'close'
@@ -470,8 +470,8 @@ export const CHORD_TIERS: Record<number, TierConfig> = {
   3.5: {
     tier: 3.5,
     title: '7th Inversion Mastery',
-    description: 'Mixed Close 7th Chords across Root, 1st, 2nd, and 3rd Inversions',
-    qualities: ['dom7', 'maj7', 'min7', 'half_dim7'],
+    description: 'Mixed Close 7th Chords across Root, 1st, 2nd, and 3rd Inversions (Dom7, Maj7, Min7, ø7, °7)',
+    qualities: ['dom7', 'maj7', 'min7', 'half_dim7', 'dim7'],
     inversions: ['root', '1st', '2nd', '3rd'],
     accidentals: ['natural', 'sharp', 'flat'],
     voicing: 'close'
@@ -480,7 +480,7 @@ export const CHORD_TIERS: Record<number, TierConfig> = {
     tier: 3.6,
     title: 'Drop-2 Voicings',
     description: 'Open 4-part voicings (2nd voice from top dropped an octave)',
-    qualities: ['dom7', 'maj7', 'min7', 'half_dim7'],
+    qualities: ['dom7', 'maj7', 'min7', 'half_dim7', 'dim7'],
     inversions: ['root', '1st', '2nd', '3rd'],
     accidentals: ['natural', 'sharp', 'flat'],
     voicing: 'drop2'
@@ -489,18 +489,10 @@ export const CHORD_TIERS: Record<number, TierConfig> = {
     tier: 3.7,
     title: 'Drop-3 Voicings',
     description: 'Wide open voicings (3rd voice from top dropped an octave)',
-    qualities: ['dom7', 'maj7', 'min7', 'half_dim7'],
+    qualities: ['dom7', 'maj7', 'min7', 'half_dim7', 'dim7'],
     inversions: ['root', '1st', '2nd', '3rd'],
     accidentals: ['natural', 'sharp', 'flat'],
     voicing: 'drop3'
-  },
-  3.8: {
-    tier: 3.8,
-    title: 'Diminished 7ths (ø7 & °7)',
-    description: 'Half-Diminished and Fully Diminished 7th chords',
-    qualities: ['half_dim7', 'dim7'],
-    inversions: ['root', '1st', '2nd', '3rd'],
-    accidentals: ['natural', 'sharp', 'flat']
   },
   4.1: {
     tier: 4.1,

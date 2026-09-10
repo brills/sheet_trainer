@@ -312,10 +312,17 @@ export const NotationStage: React.FC<NotationStageProps> = ({
                 </span>
               )}
 
-              {notesSummary && (
-                <span className="text-[10px] sm:text-xs font-mono text-slate-300 truncate max-w-full">
-                  Correct Notes: {notesSummary}
-                </span>
+              {/* Fully Diminished 7th Grading Clarification Note */}
+              {((track === 'chords' && chord?.quality === 'dim7') || (track === 'arpeggios' && arpeggio?.quality === 'dim7')) ? (
+                <div className="flex items-center gap-1 text-[9px] sm:text-[10px] text-amber-300 bg-amber-950/60 border border-amber-500/30 px-2 py-0.5 rounded max-w-full truncate">
+                  <span>💡 <strong>°7 Grading:</strong> Graded by spelled notation (stack bottom = Root; 2nd clash top = Root).</span>
+                </div>
+              ) : (
+                notesSummary && (
+                  <span className="text-[10px] sm:text-xs font-mono text-slate-300 truncate max-w-full">
+                    Correct Notes: {notesSummary}
+                  </span>
+                )
               )}
 
               <button

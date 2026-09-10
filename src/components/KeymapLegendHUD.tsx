@@ -12,23 +12,18 @@ interface KeymapLegendHUDProps {
 export function getQualityLegendInfo(quality: ChordQuality, tier?: number): { key: string; label: string; activeKeys: string[] } {
   if (tier !== undefined && tier !== null) {
     if (tier >= 3.0 && tier < 4.0) {
-      if (tier === 3.8) {
-        if (quality === 'dim7') return { key: 'd', label: '°7', activeKeys: ['d', 'D', 'o', 'O'] };
-        if (quality === 'half_dim7') return { key: 'h', label: 'ø7', activeKeys: ['h', 'H'] };
-        if (quality === 'min7') return { key: 'm', label: 'm7', activeKeys: ['m', 'k', 'K'] };
-        if (quality === 'maj7') return { key: 'M', label: 'Maj7', activeKeys: ['M', 'j', 'J'] };
-        if (quality === 'dom7') return { key: '7', label: '7th', activeKeys: ['7'] };
-      } else {
-        // Tiers 3.1 - 3.7
-        if (quality === 'maj7') return { key: 'M', label: 'Maj7', activeKeys: ['M', 'j', 'J'] };
-        if (quality === 'min7') return { key: 'm', label: 'm7', activeKeys: ['m', 'k', 'K'] };
-        if (quality === 'dom7') return { key: '7', label: '7th', activeKeys: ['7'] };
-        if (quality === 'half_dim7') return { key: 'h', label: 'ø7', activeKeys: ['h', 'H', 'o', 'O'] };
-        if (quality === 'dim7') return { key: 'd', label: '°7', activeKeys: ['d', 'D', 'o', 'O'] };
-      }
+      if (quality === 'maj7') return { key: 'M', label: 'Maj7', activeKeys: ['M'] };
+      if (quality === 'min7') return { key: 'm', label: 'm7', activeKeys: ['m'] };
+      if (quality === 'dom7') return { key: '7', label: '7th', activeKeys: ['7'] };
+      if (quality === 'half_dim7') return { key: 'h', label: 'ø7', activeKeys: ['h', 'H'] };
+      if (quality === 'dim7') return { key: 'd', label: '°7', activeKeys: ['d', 'D'] };
     } else if (tier >= 2.0 && tier < 3.0) {
       if (quality === 'sus4') return { key: '4', label: 'Sus4', activeKeys: ['4'] };
       if (quality === 'sus2') return { key: '2', label: 'Sus2', activeKeys: ['2'] };
+      if (quality === 'minor') return { key: 'm', label: 'Min', activeKeys: ['m'] };
+      if (quality === 'major') return { key: 'M', label: 'Maj', activeKeys: ['M'] };
+      if (quality === 'diminished') return { key: 'd', label: 'Dim', activeKeys: ['d', 'D'] };
+      if (quality === 'augmented') return { key: 'a', label: 'Aug', activeKeys: ['a', 'A'] };
     } else if (tier >= 4.0 && tier < 4.2) {
       if (quality === 'add9') return { key: '9', label: 'Add9', activeKeys: ['9', 'a', 'A'] };
       if (quality === '6') return { key: '6', label: '6', activeKeys: ['6'] };
@@ -37,10 +32,12 @@ export function getQualityLegendInfo(quality: ChordQuality, tier?: number): { ke
       if (quality === '9') return { key: '9', label: '9', activeKeys: ['9'] };
       if (quality === '7s9') return { key: '7', label: '7♯9', activeKeys: ['7'] };
       if (quality === '7b9') return { key: '7', label: '7♭9', activeKeys: ['7'] };
+      if (quality === 'min7') return { key: 'm', label: 'm7', activeKeys: ['m'] };
+      if (quality === 'maj7') return { key: 'M', label: 'Maj7', activeKeys: ['M'] };
     } else {
       // Triad Tiers (1.1 - 1.4)
-      if (quality === 'major') return { key: 'M', label: 'Maj', activeKeys: ['M', 'j', 'J'] };
-      if (quality === 'minor') return { key: 'm', label: 'Min', activeKeys: ['m', 'k', 'K'] };
+      if (quality === 'major') return { key: 'M', label: 'Maj', activeKeys: ['M'] };
+      if (quality === 'minor') return { key: 'm', label: 'Min', activeKeys: ['m'] };
       if (quality === 'diminished') return { key: 'd', label: 'Dim', activeKeys: ['d', 'D'] };
       if (quality === 'augmented') return { key: 'a', label: 'Aug', activeKeys: ['a', 'A'] };
     }
@@ -48,17 +45,17 @@ export function getQualityLegendInfo(quality: ChordQuality, tier?: number): { ke
 
   // Fallback defaults
   const defaults: Record<string, { key: string; label: string; activeKeys: string[] }> = {
-    minor: { key: 'm', label: 'Min', activeKeys: ['m', 'k', 'K'] },
-    major: { key: 'M', label: 'Maj', activeKeys: ['M', 'j', 'J'] },
+    minor: { key: 'm', label: 'Min', activeKeys: ['m'] },
+    major: { key: 'M', label: 'Maj', activeKeys: ['M'] },
     dom7: { key: '7', label: '7th', activeKeys: ['7'] },
-    maj7: { key: 'j', label: 'Maj7', activeKeys: ['j', 'J', 'M'] },
-    min7: { key: 'k', label: 'm7', activeKeys: ['k', 'K', 'm'] },
-    half_dim7: { key: 'h', label: 'ø7', activeKeys: ['h', 'H', 'o', 'O'] },
+    maj7: { key: 'M', label: 'Maj7', activeKeys: ['M'] },
+    min7: { key: 'm', label: 'm7', activeKeys: ['m'] },
+    half_dim7: { key: 'h', label: 'ø7', activeKeys: ['h', 'H'] },
     diminished: { key: 'd', label: 'Dim', activeKeys: ['d', 'D'] },
     augmented: { key: 'a', label: 'Aug', activeKeys: ['a', 'A'] },
     sus4: { key: '4', label: 'Sus4', activeKeys: ['4'] },
     sus2: { key: '2', label: 'Sus2', activeKeys: ['2'] },
-    dim7: { key: 'o', label: '°7', activeKeys: ['o', 'O', 'd', 'D'] },
+    dim7: { key: 'd', label: '°7', activeKeys: ['d', 'D'] },
     add9: { key: '9', label: 'Add9', activeKeys: ['9', 'a', 'A'] },
     '6': { key: '6', label: '6', activeKeys: ['6'] },
     m6: { key: 'm', label: 'm6', activeKeys: ['m'] },
