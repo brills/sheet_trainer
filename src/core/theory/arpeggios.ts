@@ -33,8 +33,8 @@ export const ARPEGGIO_TIERS: Record<number, ArpeggioTierConfig> = {
   1.1: {
     tier: 1.1,
     title: 'Linear Sweeps (Triads)',
-    description: 'Straight ascending and descending 3-note and 4-note major and minor triad runs',
-    qualities: ['major', 'minor'],
+    description: 'Straight ascending and descending triad runs (Major, Minor, Diminished, Augmented)',
+    qualities: ['major', 'minor', 'diminished', 'augmented'],
     contours: ['ascending', 'descending'],
     startingDegrees: ['root'],
     accidentals: ['natural', 'sharp', 'flat']
@@ -42,8 +42,8 @@ export const ARPEGGIO_TIERS: Record<number, ArpeggioTierConfig> = {
   1.2: {
     tier: 1.2,
     title: 'Inversion Anchors',
-    description: 'Arpeggios starting on 3rd (3-5-1) or 5th (5-1-3)',
-    qualities: ['major', 'minor'],
+    description: 'Arpeggios starting on 3rd (3-5-1) or 5th (5-1-3) across all triad qualities',
+    qualities: ['major', 'minor', 'diminished', 'augmented'],
     contours: ['ascending', 'descending'],
     startingDegrees: ['3rd', '5th'],
     accidentals: ['natural', 'sharp', 'flat']
@@ -51,26 +51,17 @@ export const ARPEGGIO_TIERS: Record<number, ArpeggioTierConfig> = {
   1.3: {
     tier: 1.3,
     title: 'Arches & Alberti Figures',
-    description: 'Arch contours (1-3-5-3-1) and broken Alberti bass figures (1-5-3-5)',
-    qualities: ['major', 'minor'],
+    description: 'Arch contours (1-3-5-3-1) and broken Alberti bass figures (1-5-3-5) across all triad qualities',
+    qualities: ['major', 'minor', 'diminished', 'augmented'],
     contours: ['arch', 'alberti'],
     startingDegrees: ['root'],
     accidentals: ['natural', 'sharp', 'flat']
   },
   2.1: {
     tier: 2.1,
-    title: 'Altered Sweeps (Dim & Aug)',
-    description: 'Diminished and Augmented triad arpeggios',
-    qualities: ['diminished', 'augmented'],
-    contours: ['ascending', 'descending', 'arch'],
-    startingDegrees: ['root', '3rd'],
-    accidentals: ['natural', 'sharp', 'flat']
-  },
-  2.2: {
-    tier: 2.2,
     title: 'Cross-Beaming Patterns',
     description: '3-note triad figures grouped into 4-note beam envelopes',
-    qualities: ['major', 'minor'],
+    qualities: ['major', 'minor', 'diminished', 'augmented'],
     contours: ['ascending', 'descending'],
     startingDegrees: ['root', '3rd', '5th'],
     accidentals: ['natural', 'sharp', 'flat']

@@ -394,45 +394,37 @@ export const CHORD_TIERS: Record<number, TierConfig> = {
   1.1: {
     tier: 1.1,
     title: 'Triads (Root Position)',
-    description: 'Major and Minor triads in root position ("Snowman" shapes)',
-    qualities: ['major', 'minor'],
+    description: 'Major, Minor, Diminished, and Augmented triads in root position ("Snowman" shapes)',
+    qualities: ['major', 'minor', 'diminished', 'augmented'],
     inversions: ['root'],
     accidentals: ['natural', 'sharp', 'flat']
   },
   1.2: {
     tier: 1.2,
     title: 'Triads (1st Inversion)',
-    description: '1st Inversion (6/3) triads with top 4th gap',
-    qualities: ['major', 'minor'],
+    description: '1st Inversion (6/3) triads with top 4th gap (Major, Minor, Diminished, Augmented)',
+    qualities: ['major', 'minor', 'diminished', 'augmented'],
     inversions: ['1st'],
     accidentals: ['natural', 'sharp', 'flat']
   },
   1.3: {
     tier: 1.3,
     title: 'Triads (2nd Inversion)',
-    description: '2nd Inversion (6/4) triads with bottom 4th gap',
-    qualities: ['major', 'minor'],
+    description: '2nd Inversion (6/4) triads with bottom 4th gap (Major, Minor, Diminished, Augmented)',
+    qualities: ['major', 'minor', 'diminished', 'augmented'],
     inversions: ['2nd'],
     accidentals: ['natural', 'sharp', 'flat']
   },
   1.4: {
     tier: 1.4,
     title: 'Triad Mastery',
-    description: 'Mixed Root, 1st, and 2nd Inversion Major & Minor Triads',
-    qualities: ['major', 'minor'],
+    description: 'Mixed Root, 1st, and 2nd Inversions across Major, Minor, Diminished, and Augmented Triads',
+    qualities: ['major', 'minor', 'diminished', 'augmented'],
     inversions: ['root', '1st', '2nd'],
     accidentals: ['natural', 'sharp', 'flat']
   },
   2.1: {
     tier: 2.1,
-    title: 'Altered Triads (Dim & Aug)',
-    description: 'Diminished and Augmented triads across all inversions',
-    qualities: ['diminished', 'augmented'],
-    inversions: ['root', '1st', '2nd'],
-    accidentals: ['natural', 'sharp', 'flat']
-  },
-  2.2: {
-    tier: 2.2,
     title: 'Suspended Chords (Sus4 & Sus2)',
     description: 'Sus4 and Sus2 chords (spotting 2nd/4th step clashes)',
     qualities: ['sus4', 'sus2'],

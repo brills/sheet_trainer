@@ -7,7 +7,7 @@ export interface TierHint {
 export const ARPEGGIO_TIER_HINTS: Record<number, TierHint> = {
   1.1: {
     visualCue: 'Straight staircase slope. First 3 notes share line/space parity.',
-    cheatCode: 'Ascending: lowest note is Root. Descending: bottom/last note is Root.',
+    cheatCode: 'Ascending: lowest note is Root. Descending: bottom/last note is Root (Maj, Min, Dim, Aug).',
     formula: 'Ascending: 1 → 3 → 5 → 8 | Descending: 8 → 5 → 3 → 1'
   },
   1.2: {
@@ -21,11 +21,6 @@ export const ARPEGGIO_TIER_HINTS: Record<number, TierHint> = {
     formula: 'Arch: 1 → 3 → 5 → 3 | Alberti: 1 → 5 → 3 → 5'
   },
   2.1: {
-    visualCue: 'Diminished = narrow compressed span. Augmented = wide expanded span.',
-    cheatCode: 'Flat 5th (♭5) = Diminished. Sharp 5th (♯5) = Augmented.',
-    formula: 'Dim: 1 → ♭3 → ♭5 → 8 | Aug: 1 → 3 → ♯5 → 8'
-  },
-  2.2: {
     visualCue: '3-note triad figures grouped into a 4-note metric beam envelope.',
     cheatCode: 'Find the repeating pitch class at the boundaries to lock in the root cycle.',
     formula: 'Metric displacements: 1-3-5-1, 3-5-1-3, or 5-1-3-5'
@@ -50,30 +45,25 @@ export const ARPEGGIO_TIER_HINTS: Record<number, TierHint> = {
 export const CHORD_TIER_HINTS: Record<number, TierHint> = {
   1.1: {
     visualCue: 'Snowman shape (Line-Line-Line or Space-Space-Space) with equal 3rd intervals.',
-    cheatCode: 'Lowest note is the Root. Major = Major 3rd on bottom. Minor = Minor 3rd on bottom.',
+    cheatCode: 'Lowest note is Root. Maj (M3+m3), Min (m3+M3), Dim (compressed m3+m3 / ♭5), Aug (expanded M3+M3 / ♯5).',
     formula: 'Root Position (5/3): Root - 3rd - 5th'
   },
   1.2: {
     visualCue: 'Interval of a 4th at the top of the chord stack (6/3 inversion).',
-    cheatCode: 'The top note (above the 4th gap) is the Root! Bottom note is the 3rd.',
+    cheatCode: 'The top note (above the 4th gap) is the Root! Bottom note is the 3rd (Maj, Min, Dim, Aug).',
     formula: '1st Inversion (6/3): 3rd - 5th - Root'
   },
   1.3: {
     visualCue: 'Interval of a 4th at the bottom of the chord stack (6/4 inversion).',
-    cheatCode: 'The middle note (above the 4th gap) is the Root! Bottom note is the 5th.',
+    cheatCode: 'The middle note (above the 4th gap) is the Root! Bottom note is the 5th (Maj, Min, Dim, Aug).',
     formula: '2nd Inversion (6/4): 5th - Root - 3rd'
   },
   1.4: {
-    visualCue: 'Identify the 4th gap: none (Root), top gap (1st Inv), or bottom gap (2nd Inv).',
+    visualCue: 'Identify the 4th gap across all triad qualities: none (Root), top gap (1st Inv), or bottom gap (2nd Inv).',
     cheatCode: 'No gap = Root is at bottom. Top gap = Root is on top. Bottom gap = Root is in middle.',
-    formula: 'Mixed Triads: Root (5/3), 1st Inv (6/3), 2nd Inv (6/4)'
+    formula: 'Triad Mastery: Root (5/3), 1st Inv (6/3), 2nd Inv (6/4) across Maj, Min, Dim, Aug'
   },
   2.1: {
-    visualCue: 'Diminished = stacked minor 3rds (narrow). Augmented = stacked major 3rds (tall).',
-    cheatCode: 'Diminished has ♭5 (tritone outer span). Augmented has ♯5 (augmented 5th outer span).',
-    formula: 'Dim: Root - ♭3 - ♭5 | Aug: Root - 3 - ♯5'
-  },
-  2.2: {
     visualCue: 'Sus4 = 4th on bottom (Root-4th-5th). Sus2 = 2nd clash on bottom (Root-2nd-5th).',
     cheatCode: 'No 3rd present! Sus4 replaces 3rd with 4th; Sus2 replaces 3rd with 2nd.',
     formula: 'Sus4: 1 - 4 - 5 | Sus2: 1 - 2 - 5'

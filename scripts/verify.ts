@@ -182,7 +182,18 @@ const rootKeyRes = smRoot.handleKey('m');
 assert(rootKeyRes.completed === true, 'Tier 1.1 (Root Pos) - Typed "c" then "m": Immediately completed without typing inversion');
 assert(rootResult !== null && rootResult.root === 'C' && rootResult.quality === 'minor' && rootResult.inversion === 'root', 'Tier 1.1 - Auto-filled Root Inversion correctly');
 
-// Test Tier 1.2 (1st Inversion Fixed): typing A -> m auto-submits Am 1st Inv
+// Test Tier 1.1 with Altered Triads: C -> d auto-submits C dim Root, C -> a auto-submits C aug Root
+smRoot.reset();
+smRoot.handleKey('c');
+const dimKeyRes = smRoot.handleKey('d');
+assert(dimKeyRes.completed === true && rootResult.quality === 'diminished' && rootResult.inversion === 'root', 'Tier 1.1 - Typed "c" then "d": Auto-submitted C Diminished Root Position');
+
+smRoot.reset();
+smRoot.handleKey('c');
+const augKeyRes = smRoot.handleKey('a');
+assert(augKeyRes.completed === true && rootResult.quality === 'augmented' && rootResult.inversion === 'root', 'Tier 1.1 - Typed "c" then "a": Auto-submitted C Augmented Root Position');
+
+// Test Tier 1.2 (1st Inversion Fixed): typing A -> m auto-submits Am 1st Inv, and C -> d auto-submits C dim 1st Inv
 let inv1stResult: any = null;
 const sm1st = new ChordInputStateMachine((res) => {
   inv1stResult = res;
@@ -192,7 +203,12 @@ sm1st.handleKey('a');
 const inv1stKeyRes = sm1st.handleKey('m');
 assert(inv1stKeyRes.completed === true && inv1stResult.inversion === '1st', 'Tier 1.2 (1st Inv) - Typed "a" then "m": Auto-submitted 1st Inversion');
 
-// Test Tier 1.3 (2nd Inversion Fixed): typing E -> s (sharp) -> m auto-submits E#m 2nd Inv
+sm1st.reset();
+sm1st.handleKey('b');
+sm1st.handleKey('d');
+assert(inv1stResult.root === 'B' && inv1stResult.quality === 'diminished' && inv1stResult.inversion === '1st', 'Tier 1.2 (1st Inv) - Typed "b" then "d": Auto-submitted B Diminished 1st Inversion');
+
+// Test Tier 1.3 (2nd Inversion Fixed): typing E -> s (sharp) -> m auto-submits E#m 2nd Inv, and G -> a auto-submits G aug 2nd Inv
 let inv2ndResult: any = null;
 const sm2nd = new ChordInputStateMachine((res) => {
   inv2ndResult = res;
@@ -202,6 +218,18 @@ sm2nd.handleKey('e');
 sm2nd.handleKey('s'); // Sharp
 const inv2ndKeyRes = sm2nd.handleKey('m'); // Minor
 assert(inv2ndKeyRes.completed === true && inv2ndResult.accidental === 'sharp' && inv2ndResult.inversion === '2nd', 'Tier 1.3 (2nd Inv) - Typed "e" -> "s" -> "m": Auto-submitted E#m 2nd Inversion');
+
+sm2nd.reset();
+sm2nd.handleKey('g');
+sm2nd.handleKey('a');
+assert(inv2ndResult.root === 'G' && inv2ndResult.quality === 'augmented' && inv2ndResult.inversion === '2nd', 'Tier 1.3 (2nd Inv) - Typed "g" then "a": Auto-submitted G Augmented 2nd Inversion');
+
+// Test Tier 1.4 (Triad Mastery): Altered triads require inversion selection
+smMixed.reset();
+smMixed.handleKey('d');
+smMixed.handleKey('d'); // D dim
+smMixed.handleKey('2'); // 2nd inv
+assert(mixedResult.root === 'D' && mixedResult.quality === 'diminished' && mixedResult.inversion === '2nd', 'Tier 1.4 (Triad Mastery) - Typed "d" -> "d" -> "2": Auto-submitted D Diminished 2nd Inversion');
 
 // 5. Adaptive Weighting & Tier-Restricted Multiple-Choice Distractor Tests
 console.log('\n--- 5. Adaptive Engine & Distractor Constraints ---');
@@ -388,6 +416,7 @@ assert(gDiatonic.length > 0, 'Diatonic chords generated for G / Em');
 assert(gDiatonic.some(c => c.root === 'G' && c.quality === 'major'), 'G Major triad is diatonic in G / Em');
 assert(gDiatonic.some(c => c.root === 'D' && c.quality === 'major'), 'D Major triad (V) is diatonic in G / Em');
 assert(gDiatonic.some(c => c.root === 'E' && c.quality === 'minor'), 'E Minor triad (vi / i) is diatonic in G / Em');
+assert(gDiatonic.some(c => c.root === 'F' && c.rootAccidental === 'sharp' && c.quality === 'diminished'), 'F# Diminished triad (vii°) is diatonic in G / Em in Tier 1.1');
 
 // Test isDiatonicChord and isDiatonicArpeggio helpers
 const gMajChord = buildChord('G', 'natural', 'major', 'root', 'treble', 1.1);
@@ -403,7 +432,7 @@ assert(isDiatonicArpeggio(fMajArp, keyG) === false, 'F Maj arpeggio is non-diato
 // Test tierSupportsDiatonic
 assert(tierSupportsDiatonic('chords', 1.1, keyG) === true, 'Chord Tier 1.1 supports diatonic sampling in G / Em');
 assert(tierSupportsDiatonic('chords', 3.1, keyG) === true, 'Chord Tier 3.1 (7ths) supports diatonic sampling in G / Em');
-assert(tierSupportsDiatonic('chords', 2.2, keyG) === false, 'Chord Tier 2.2 (Sus) has no diatonic chords');
+assert(tierSupportsDiatonic('chords', 2.1, keyG) === false, 'Chord Tier 2.1 (Sus) has no diatonic chords');
 assert(tierSupportsDiatonic('arpeggios', 1.1, keyG) === true, 'Arpeggio Tier 1.1 supports diatonic sampling in G / Em');
 assert(tierSupportsDiatonic('arpeggios', 3.3, keyG) === false, 'Arpeggio Tier 3.3 (Dim7 cascades) has no diatonic arpeggios');
 
@@ -430,7 +459,7 @@ for (let i = 0; i < 50; i++) {
 assert(strictlyDiatonicArps, 'When onlyDiatonic=true, selectNextArpeggio strictly produces 100% diatonic arpeggios in G / Em');
 
 // Test non-diatonic tier fallback when onlyDiatonic=true
-const susChord = selectNextChord(2.2, 'treble', mockProgress, keyG, true);
+const susChord = selectNextChord(2.1, 'treble', mockProgress, keyG, true);
 assert(susChord && (susChord.quality === 'sus4' || susChord.quality === 'sus2'), 'When tier has no diatonic options, selectNextChord safely falls back to tier chords');
 
 // Test Key Context Stability: chords stay firmly in the active key context
