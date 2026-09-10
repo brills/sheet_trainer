@@ -1,12 +1,13 @@
 import { NOTE_LETTERS, noteToMidi, transposePitch, formatNoteName } from '../src/core/theory/notes';
 import { buildChord, CHORD_TIERS, CHORD_FORMULAS, getValidOctavesForChord, alignChordToTargetOctave, generateRandomChordForTier } from '../src/core/theory/chords';
 import { buildArpeggio, ARPEGGIO_TIERS, getValidOctavesForArpeggio, alignArpeggioToTargetOctave } from '../src/core/theory/arpeggios';
-import { ChordInputStateMachine } from '../src/core/engines/stateMachine';
+import { ChordInputStateMachine, resolveQualityKey } from '../src/core/engines/stateMachine';
 import { calculatePatternWeight, checkTierPromotion, selectNextChord, selectNextArpeggio } from '../src/core/engines/adaptiveEngine';
 import { generateChordMultipleChoiceOptions, generateArpeggioMultipleChoiceOptions } from '../src/core/engines/distractorEngine';
 import { KEY_SIGNATURES, KEY_STAGES, getRequiredAccidentalForNote, getDiatonicChordsForKey, getDiatonicArpeggiosForKey, isDiatonicChord, isDiatonicArpeggio, tierSupportsDiatonic } from '../src/core/theory/keys';
 import { checkKeyStagePromotion } from '../src/core/engines/adaptiveEngine';
 import { PrecisionTimingEngine } from '../src/core/engines/timingEngine';
+import { getQualityLegendInfo } from '../src/components/KeymapLegendHUD';
 
 console.log('🧪 Starting Sheet Trainer Verification Suite...\n');
 
@@ -230,6 +231,109 @@ smMixed.handleKey('d');
 smMixed.handleKey('d'); // D dim
 smMixed.handleKey('2'); // 2nd inv
 assert(mixedResult.root === 'D' && mixedResult.quality === 'diminished' && mixedResult.inversion === '2nd', 'Tier 1.4 (Triad Mastery) - Typed "d" -> "d" -> "2": Auto-submitted D Diminished 2nd Inversion');
+
+// Test Tier 3.1 (7th Chords Root Position Fixed):
+// In 7th chord tiers, 'm' maps directly to min7, 'M' maps to maj7, '7' maps to dom7, 'h' maps to half_dim7
+let t31Result: any = null;
+const sm31 = new ChordInputStateMachine((res) => {
+  t31Result = res;
+}, 'root', 3.1);
+
+// Test C + m -> C min7 Root
+sm31.handleKey('c');
+const t31_m_res = sm31.handleKey('m');
+assert(t31_m_res.completed === true && t31Result.root === 'C' && t31Result.quality === 'min7' && t31Result.inversion === 'root', 'Tier 3.1 - Typed "c" then "m": Smart shortcut maps "m" directly to min7 (Root Position)');
+
+// Test C + M -> C maj7 Root
+sm31.reset();
+sm31.handleKey('c');
+const t31_M_res = sm31.handleKey('M');
+assert(t31_M_res.completed === true && t31Result.quality === 'maj7' && t31Result.inversion === 'root', 'Tier 3.1 - Typed "c" then "M": Smart shortcut maps "M" directly to maj7 (Root Position)');
+
+// Test C + 7 -> C dom7 Root
+sm31.reset();
+sm31.handleKey('c');
+const t31_7_res = sm31.handleKey('7');
+assert(t31_7_res.completed === true && t31Result.quality === 'dom7' && t31Result.inversion === 'root', 'Tier 3.1 - Typed "c" then "7": Smart shortcut maps "7" directly to dom7 (Root Position)');
+
+// Test C + h -> C half_dim7 Root
+sm31.reset();
+sm31.handleKey('c');
+const t31_h_res = sm31.handleKey('h');
+assert(t31_h_res.completed === true && t31Result.quality === 'half_dim7' && t31Result.inversion === 'root', 'Tier 3.1 - Typed "c" then "h": Smart shortcut maps "h" directly to half_dim7 (ø7)');
+
+// Test Backward Compatibility Aliases in Tier 3.1: 'j' for maj7 and 'k' for min7
+sm31.reset();
+sm31.handleKey('c');
+sm31.handleKey('j');
+assert(t31Result.quality === 'maj7', 'Tier 3.1 - Backward compatible alias "j" resolves to maj7');
+
+sm31.reset();
+sm31.handleKey('c');
+sm31.handleKey('k');
+assert(t31Result.quality === 'min7', 'Tier 3.1 - Backward compatible alias "k" resolves to min7');
+
+// Test Tier 3.5 (7th Inversion Mastery - Mixed Inversions):
+let t35Result: any = null;
+const sm35 = new ChordInputStateMachine((res) => {
+  t35Result = res;
+}, null, 3.5);
+
+// Test F# + maj7 + 3rd inv: "f" -> "s" -> "M" -> "3"
+sm35.handleKey('f');
+sm35.handleKey('s'); // Sharp
+sm35.handleKey('M'); // Maj7
+const t35_3rd_res = sm35.handleKey('3'); // 3rd inv
+assert(t35_3rd_res.completed === true && t35Result.root === 'F' && t35Result.accidental === 'sharp' && t35Result.quality === 'maj7' && t35Result.inversion === '3rd', 'Tier 3.5 (7th Mastery) - Typed "f" -> "s" -> "M" -> "3": Auto-submitted F# maj7 3rd Inversion');
+
+// Test Bb + min7 + 1st inv: "b" -> "b" -> "m" -> "1"
+sm35.reset();
+sm35.handleKey('b');
+sm35.handleKey('b'); // Flat
+sm35.handleKey('m'); // min7
+sm35.handleKey('1'); // 1st inv
+assert(t35Result.root === 'B' && t35Result.accidental === 'flat' && t35Result.quality === 'min7' && t35Result.inversion === '1st', 'Tier 3.5 (7th Mastery) - Typed "b" -> "b" -> "m" -> "1": Auto-submitted Bb min7 1st Inversion');
+
+// Test Tier 3.8 (Diminished 7ths):
+let t38Result: any = null;
+const sm38 = new ChordInputStateMachine((res) => {
+  t38Result = res;
+}, null, 3.8);
+
+// Test B + d + 0 -> B dim7 Root
+sm38.handleKey('b');
+sm38.handleKey('d'); // dim7
+sm38.handleKey('0'); // root
+assert(t38Result.root === 'B' && t38Result.quality === 'dim7' && t38Result.inversion === 'root', 'Tier 3.8 (Dim 7ths) - Typed "b" -> "d" -> "0": Smart shortcut "d" maps to dim7 (°7)');
+
+// Test B + h + 1 -> B half_dim7 1st
+sm38.reset();
+sm38.handleKey('b');
+sm38.handleKey('h'); // half_dim7
+sm38.handleKey('1'); // 1st
+assert(t38Result.root === 'B' && t38Result.quality === 'half_dim7' && t38Result.inversion === '1st', 'Tier 3.8 (Dim 7ths) - Typed "b" -> "h" -> "1": Smart shortcut "h" maps to half_dim7 (ø7)');
+
+// Test getQualityLegendInfo dynamic HUD keys
+const leg31Maj7 = getQualityLegendInfo('maj7', 3.1);
+assert(leg31Maj7.key === 'M' && leg31Maj7.label === 'Maj7', 'HUD Legend (Tier 3.1): maj7 displays [M] Maj7');
+
+const leg31Min7 = getQualityLegendInfo('min7', 3.1);
+assert(leg31Min7.key === 'm' && leg31Min7.label === 'm7', 'HUD Legend (Tier 3.1): min7 displays [m] m7');
+
+const leg31Dom7 = getQualityLegendInfo('dom7', 3.1);
+assert(leg31Dom7.key === '7' && leg31Dom7.label === '7th', 'HUD Legend (Tier 3.1): dom7 displays [7] 7th');
+
+const leg31HalfDim7 = getQualityLegendInfo('half_dim7', 3.1);
+assert(leg31HalfDim7.key === 'h' && leg31HalfDim7.label === 'ø7', 'HUD Legend (Tier 3.1): half_dim7 displays [h] ø7');
+
+const leg38Dim7 = getQualityLegendInfo('dim7', 3.8);
+assert(leg38Dim7.key === 'd' && leg38Dim7.label === '°7', 'HUD Legend (Tier 3.8): dim7 displays [d] °7');
+
+const leg11Major = getQualityLegendInfo('major', 1.1);
+assert(leg11Major.key === 'M' && leg11Major.label === 'Maj', 'HUD Legend (Tier 1.1): major displays [M] Maj');
+
+const leg11Minor = getQualityLegendInfo('minor', 1.1);
+assert(leg11Minor.key === 'm' && leg11Minor.label === 'Min', 'HUD Legend (Tier 1.1): minor displays [m] Min');
 
 // 5. Adaptive Weighting & Tier-Restricted Multiple-Choice Distractor Tests
 console.log('\n--- 5. Adaptive Engine & Distractor Constraints ---');

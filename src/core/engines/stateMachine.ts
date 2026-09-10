@@ -18,6 +18,7 @@ export const QUALITY_KEY_MAP: Record<string, ChordQuality> = {
   'd': 'diminished',
   'D': 'dim7',
   'a': 'augmented',
+  'A': 'augmented',
   '7': 'dom7',
   'k': 'min7',
   'K': 'min7',
@@ -30,6 +31,55 @@ export const QUALITY_KEY_MAP: Record<string, ChordQuality> = {
   '9': '9',
   '6': '6'
 };
+
+export function resolveQualityKey(key: string, tier?: number | null): ChordQuality | undefined {
+  if (tier !== null && tier !== undefined) {
+    if (tier >= 3.0 && tier < 4.0) {
+      if (tier === 3.8) {
+        if (key === 'd' || key === 'D' || key === 'o' || key === 'O') return 'dim7';
+        if (key === 'h' || key === 'H') return 'half_dim7';
+        if (key === 'm' || key === 'k' || key === 'K') return 'min7';
+        if (key === 'M' || key === 'j' || key === 'J') return 'maj7';
+        if (key === '7') return 'dom7';
+      } else {
+        // Tiers 3.1 - 3.7 (7th chords close, Drop-2, Drop-3)
+        if (key === 'm' || key === 'k' || key === 'K') return 'min7';
+        if (key === 'M' || key === 'j' || key === 'J') return 'maj7';
+        if (key === '7') return 'dom7';
+        if (key === 'h' || key === 'H' || key === 'o' || key === 'O') return 'half_dim7';
+        if (key === 'd' || key === 'D') return 'dim7';
+      }
+    } else if (tier >= 2.0 && tier < 3.0) {
+      if (key === '4') return 'sus4';
+      if (key === '2') return 'sus2';
+      if (key === 'm') return 'minor';
+      if (key === 'M') return 'major';
+      if (key === 'd' || key === 'D') return 'diminished';
+      if (key === 'a' || key === 'A') return 'augmented';
+    } else if (tier >= 4.0 && tier < 4.2) {
+      if (key === '9' || key === 'a' || key === 'A') return 'add9';
+      if (key === '6') return '6';
+      if (key === 'm') return 'm6';
+      if (key === 'M') return '6';
+    } else if (tier >= 4.2) {
+      if (key === '9') return '9';
+      if (key === '7') return '7s9';
+      if (key === 'm') return 'min7';
+      if (key === 'M') return 'maj7';
+    } else {
+      // Triad Tiers (1.1 - 1.4)
+      if (key === 'm') return 'minor';
+      if (key === 'M') return 'major';
+      if (key === 'd' || key === 'D') return 'diminished';
+      if (key === 'a' || key === 'A') return 'augmented';
+      if (key === 'j' || key === 'J') return 'major';
+      if (key === 'k' || key === 'K') return 'minor';
+      if (key === '7') return 'dom7';
+      if (key === 'h' || key === 'H' || key === 'o' || key === 'O') return 'half_dim7';
+    }
+  }
+  return QUALITY_KEY_MAP[key];
+}
 
 export const INVERSION_KEY_MAP: Record<string, Inversion> = {
   '0': 'root',
@@ -51,13 +101,23 @@ export class ChordInputStateMachine {
   private activeSlot: SlotIndex = 0;
   private onCompleteCallback?: (result: ChordSlotState) => void;
   private fixedInversion: Inversion | null = null;
+  private tier: number | null = null;
 
-  constructor(onComplete?: (result: ChordSlotState) => void, fixedInversion?: Inversion | null) {
+  constructor(
+    onComplete?: (result: ChordSlotState) => void,
+    fixedInversion?: Inversion | null,
+    tier?: number | null
+  ) {
     this.onCompleteCallback = onComplete;
     this.fixedInversion = fixedInversion || null;
+    this.tier = tier !== undefined ? tier : null;
     if (this.fixedInversion) {
       this.state.inversion = this.fixedInversion;
     }
+  }
+
+  public setTier(tier: number | null | undefined): void {
+    this.tier = tier !== undefined ? tier : null;
   }
 
   public setFixedInversion(inv: Inversion | null): void {
@@ -147,11 +207,11 @@ export class ChordInputStateMachine {
       }
 
       // Smart-skip: If user typed a quality key directly, auto-fill natural
-      if (QUALITY_KEY_MAP[key] !== undefined) {
+      const qSkip = resolveQualityKey(key, this.tier);
+      if (qSkip !== undefined) {
         this.state.accidental = 'natural';
-        const q = QUALITY_KEY_MAP[key];
-        this.state.quality = q;
-        if (this.state.inversion === '3rd' && CHORD_FORMULAS[q]?.maxInversion !== '3rd') {
+        this.state.quality = qSkip;
+        if (this.state.inversion === '3rd' && CHORD_FORMULAS[qSkip]?.maxInversion !== '3rd') {
           this.state.inversion = null;
         }
         
@@ -168,8 +228,8 @@ export class ChordInputStateMachine {
 
     // Slot 2: Quality
     if (this.activeSlot === 2) {
-      if (QUALITY_KEY_MAP[key] !== undefined) {
-        const q = QUALITY_KEY_MAP[key];
+      const q = resolveQualityKey(key, this.tier);
+      if (q !== undefined) {
         this.state.quality = q;
         if (this.state.inversion === '3rd' && CHORD_FORMULAS[q]?.maxInversion !== '3rd') {
           this.state.inversion = null;

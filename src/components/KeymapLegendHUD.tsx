@@ -9,25 +9,66 @@ interface KeymapLegendHUDProps {
   tier?: number;
 }
 
-const QUALITY_LEGEND_MAP: Record<string, { key: string; label: string }> = {
-  minor: { key: 'm', label: 'Min' },
-  major: { key: 'M', label: 'Maj' },
-  dom7: { key: '7', label: '7th' },
-  maj7: { key: 'j', label: 'Maj7' },
-  min7: { key: 'k', label: 'm7' },
-  half_dim7: { key: 'h', label: 'ø7' },
-  diminished: { key: 'd', label: 'Dim' },
-  augmented: { key: 'a', label: 'Aug' },
-  sus4: { key: '4', label: 'Sus4' },
-  sus2: { key: '2', label: 'Sus2' },
-  dim7: { key: 'o', label: '°7' },
-  add9: { key: '9', label: 'Add9' },
-  '6': { key: '6', label: '6' },
-  m6: { key: 'm', label: 'm6' },
-  '9': { key: '9', label: '9' },
-  '7s9': { key: '7', label: '7♯9' },
-  '7b9': { key: '7', label: '7♭9' }
-};
+export function getQualityLegendInfo(quality: ChordQuality, tier?: number): { key: string; label: string; activeKeys: string[] } {
+  if (tier !== undefined && tier !== null) {
+    if (tier >= 3.0 && tier < 4.0) {
+      if (tier === 3.8) {
+        if (quality === 'dim7') return { key: 'd', label: '°7', activeKeys: ['d', 'D', 'o', 'O'] };
+        if (quality === 'half_dim7') return { key: 'h', label: 'ø7', activeKeys: ['h', 'H'] };
+        if (quality === 'min7') return { key: 'm', label: 'm7', activeKeys: ['m', 'k', 'K'] };
+        if (quality === 'maj7') return { key: 'M', label: 'Maj7', activeKeys: ['M', 'j', 'J'] };
+        if (quality === 'dom7') return { key: '7', label: '7th', activeKeys: ['7'] };
+      } else {
+        // Tiers 3.1 - 3.7
+        if (quality === 'maj7') return { key: 'M', label: 'Maj7', activeKeys: ['M', 'j', 'J'] };
+        if (quality === 'min7') return { key: 'm', label: 'm7', activeKeys: ['m', 'k', 'K'] };
+        if (quality === 'dom7') return { key: '7', label: '7th', activeKeys: ['7'] };
+        if (quality === 'half_dim7') return { key: 'h', label: 'ø7', activeKeys: ['h', 'H', 'o', 'O'] };
+        if (quality === 'dim7') return { key: 'd', label: '°7', activeKeys: ['d', 'D', 'o', 'O'] };
+      }
+    } else if (tier >= 2.0 && tier < 3.0) {
+      if (quality === 'sus4') return { key: '4', label: 'Sus4', activeKeys: ['4'] };
+      if (quality === 'sus2') return { key: '2', label: 'Sus2', activeKeys: ['2'] };
+    } else if (tier >= 4.0 && tier < 4.2) {
+      if (quality === 'add9') return { key: '9', label: 'Add9', activeKeys: ['9', 'a', 'A'] };
+      if (quality === '6') return { key: '6', label: '6', activeKeys: ['6'] };
+      if (quality === 'm6') return { key: 'm', label: 'm6', activeKeys: ['m'] };
+    } else if (tier >= 4.2) {
+      if (quality === '9') return { key: '9', label: '9', activeKeys: ['9'] };
+      if (quality === '7s9') return { key: '7', label: '7♯9', activeKeys: ['7'] };
+      if (quality === '7b9') return { key: '7', label: '7♭9', activeKeys: ['7'] };
+    } else {
+      // Triad Tiers (1.1 - 1.4)
+      if (quality === 'major') return { key: 'M', label: 'Maj', activeKeys: ['M', 'j', 'J'] };
+      if (quality === 'minor') return { key: 'm', label: 'Min', activeKeys: ['m', 'k', 'K'] };
+      if (quality === 'diminished') return { key: 'd', label: 'Dim', activeKeys: ['d', 'D'] };
+      if (quality === 'augmented') return { key: 'a', label: 'Aug', activeKeys: ['a', 'A'] };
+    }
+  }
+
+  // Fallback defaults
+  const defaults: Record<string, { key: string; label: string; activeKeys: string[] }> = {
+    minor: { key: 'm', label: 'Min', activeKeys: ['m', 'k', 'K'] },
+    major: { key: 'M', label: 'Maj', activeKeys: ['M', 'j', 'J'] },
+    dom7: { key: '7', label: '7th', activeKeys: ['7'] },
+    maj7: { key: 'j', label: 'Maj7', activeKeys: ['j', 'J', 'M'] },
+    min7: { key: 'k', label: 'm7', activeKeys: ['k', 'K', 'm'] },
+    half_dim7: { key: 'h', label: 'ø7', activeKeys: ['h', 'H', 'o', 'O'] },
+    diminished: { key: 'd', label: 'Dim', activeKeys: ['d', 'D'] },
+    augmented: { key: 'a', label: 'Aug', activeKeys: ['a', 'A'] },
+    sus4: { key: '4', label: 'Sus4', activeKeys: ['4'] },
+    sus2: { key: '2', label: 'Sus2', activeKeys: ['2'] },
+    dim7: { key: 'o', label: '°7', activeKeys: ['o', 'O', 'd', 'D'] },
+    add9: { key: '9', label: 'Add9', activeKeys: ['9', 'a', 'A'] },
+    '6': { key: '6', label: '6', activeKeys: ['6'] },
+    m6: { key: 'm', label: 'm6', activeKeys: ['m'] },
+    '9': { key: '9', label: '9', activeKeys: ['9'] },
+    '7s9': { key: '7', label: '7♯9', activeKeys: ['7'] },
+    '7b9': { key: '7', label: '7♭9', activeKeys: ['7'] }
+  };
+
+  return defaults[quality] || { key: quality[0], label: quality, activeKeys: [quality[0]] };
+}
 
 export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
   lastPressedKey,
@@ -38,7 +79,7 @@ export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
 
   useEffect(() => {
     if (lastPressedKey) {
-      setActiveKey(lastPressedKey.toLowerCase());
+      setActiveKey(lastPressedKey);
       const timer = setTimeout(() => setActiveKey(null), 300);
       return () => clearTimeout(timer);
     }
@@ -49,7 +90,10 @@ export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
     return null;
   }
 
-  const isKeyActive = (key: string) => activeKey === key.toLowerCase();
+  const isRootActive = (k: string) => activeKey !== null && activeKey.toUpperCase() === k.toUpperCase();
+  const isSharpActive = activeKey === 's' || activeKey === 'S' || activeKey === '#';
+  const isFlatActive = activeKey === 'b' || activeKey === 'B' || activeKey === '-';
+  const isNaturalActive = activeKey === ' ' || activeKey === 'Spacebar';
 
   const tierConfig = tier ? CHORD_TIERS[tier] : undefined;
   const activeQualities: ChordQuality[] = tierConfig?.qualities || ['major', 'minor', 'dom7', 'maj7', 'min7', 'half_dim7'];
@@ -68,7 +112,7 @@ export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
           <span
             key={k}
             className={`px-1.5 py-0.5 rounded border transition-colors ${
-              isKeyActive(k) 
+              isRootActive(k) 
                 ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' 
                 : 'bg-slate-800/80 border-slate-700/60 text-slate-300'
             }`}
@@ -83,9 +127,9 @@ export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
       {/* Accidentals */}
       <div className="flex items-center gap-1">
         <span className="text-slate-400 font-medium mr-0.5">Acc:</span>
-        <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('s') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[S] ♯</span>
-        <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('b') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[B] ♭</span>
-        <span className={`px-1.5 py-0.5 rounded border ${isKeyActive(' ') ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[Space] ♮</span>
+        <span className={`px-1.5 py-0.5 rounded border ${isSharpActive ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[S] ♯</span>
+        <span className={`px-1.5 py-0.5 rounded border ${isFlatActive ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[B] ♭</span>
+        <span className={`px-1.5 py-0.5 rounded border ${isNaturalActive ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[Space] ♮</span>
       </div>
 
       <span className="text-slate-700">|</span>
@@ -94,13 +138,13 @@ export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
       <div className="flex items-center gap-1">
         <span className="text-slate-400 font-medium mr-0.5">Quality:</span>
         {activeQualities.map(q => {
-          const info = QUALITY_LEGEND_MAP[q];
-          if (!info) return null;
+          const info = getQualityLegendInfo(q, tier);
+          const isQualityActive = activeKey !== null && info.activeKeys.includes(activeKey);
           return (
             <span
               key={q}
               className={`px-1.5 py-0.5 rounded border transition-colors ${
-                isKeyActive(info.key)
+                isQualityActive
                   ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold'
                   : 'bg-slate-800/80 border-slate-700/60 text-slate-300'
               }`}
@@ -123,16 +167,16 @@ export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
         ) : (
           <>
             {(!tierConfig || tierConfig.inversions.includes('root')) && (
-              <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('r') || isKeyActive('0') ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[r] Root</span>
+              <span className={`px-1.5 py-0.5 rounded border ${activeKey === 'r' || activeKey === 'R' || activeKey === '0' ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[r] Root</span>
             )}
             {(!tierConfig || tierConfig.inversions.includes('1st')) && (
-              <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('1') ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[1] 1st</span>
+              <span className={`px-1.5 py-0.5 rounded border ${activeKey === '1' ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[1] 1st</span>
             )}
             {(!tierConfig || tierConfig.inversions.includes('2nd')) && (
-              <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('2') ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[2] 2nd</span>
+              <span className={`px-1.5 py-0.5 rounded border ${activeKey === '2' ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[2] 2nd</span>
             )}
             {(!tierConfig || tierConfig.inversions.includes('3rd')) && (
-              <span className={`px-1.5 py-0.5 rounded border ${isKeyActive('3') ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[3] 3rd</span>
+              <span className={`px-1.5 py-0.5 rounded border ${activeKey === '3' ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold' : 'bg-slate-800/80 border-slate-700/60 text-slate-300'}`}>[3] 3rd</span>
             )}
           </>
         )}

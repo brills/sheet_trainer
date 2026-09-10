@@ -25,7 +25,7 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
     ? 'root' 
     : (tierConfig !== undefined && tierConfig.inversions.length === 1 ? tierConfig.inversions[0] : null);
 
-  const [stateMachine] = useState(() => new ChordInputStateMachine(undefined, fixedInversion));
+  const [stateMachine] = useState(() => new ChordInputStateMachine(undefined, fixedInversion, tier));
   const [slotState, setSlotState] = useState<ChordSlotState>(stateMachine.getState());
   const [activeSlot, setActiveSlot] = useState<SlotIndex>(0);
 
@@ -49,12 +49,13 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
     (stateMachine as any).onCompleteCallback = handleComplete;
   }, [stateMachine, handleComplete]);
 
-  // Update fixed inversion when tier changes
+  // Update fixed inversion & tier when tier changes
   useEffect(() => {
+    stateMachine.setTier(tier);
     stateMachine.setFixedInversion(fixedInversion);
     stateMachine.reset();
     syncState();
-  }, [fixedInversion, stateMachine, syncState]);
+  }, [tier, fixedInversion, stateMachine, syncState]);
 
   // Reset when disabled changes or a new problem starts
   useEffect(() => {
