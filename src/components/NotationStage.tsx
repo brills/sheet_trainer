@@ -13,6 +13,7 @@ interface NotationStageProps {
   lastResult?: TrialFeedback | null;
   darkMode?: boolean;
   onContinue?: () => void;
+  canSkip?: boolean;
 }
 
 export const NotationStage: React.FC<NotationStageProps> = ({
@@ -23,7 +24,8 @@ export const NotationStage: React.FC<NotationStageProps> = ({
   isFeedback,
   lastResult,
   darkMode = true,
-  onContinue
+  onContinue,
+  canSkip = true
 }) => {
   const visibleRef = useRef<HTMLDivElement>(null);
   const offscreenRef = useRef<HTMLDivElement>(null);
@@ -240,8 +242,13 @@ export const NotationStage: React.FC<NotationStageProps> = ({
               </span>
               <button
                 type="button"
+                disabled={!canSkip}
                 onClick={onContinue}
-                className="mt-0.5 px-4 py-1.5 sm:py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 shadow-md active:scale-95 transition-all cursor-pointer"
+                className={`mt-0.5 px-4 py-1.5 sm:py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 border shadow-md active:scale-95 transition-all
+                  ${canSkip 
+                    ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700 cursor-pointer' 
+                    : 'bg-slate-900/40 text-slate-600 border-slate-800/40 opacity-40 cursor-not-allowed pointer-events-none'
+                  }`}
               >
                 <span>Next Question</span>
                 <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />

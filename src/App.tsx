@@ -53,6 +53,7 @@ export const App: React.FC = () => {
   const [isFeedback, setIsFeedback] = useState(false);
   const [lastResult, setLastResult] = useState<TrialFeedback | null>(null);
   const [lastPressedKey, setLastPressedKey] = useState<string | null>(null);
+  const [hasBufferedInput, setHasBufferedInput] = useState(false);
 
   // Modals
   const [isTierModalOpen, setIsTierModalOpen] = useState(false);
@@ -130,6 +131,7 @@ export const App: React.FC = () => {
       }
     }
 
+    setHasBufferedInput(false);
     setIsFeedback(false);
     engine.startQuestion();
   }, [activeTrack, getActiveKeyForSampling]);
@@ -166,7 +168,7 @@ export const App: React.FC = () => {
     }
   }, [activeTrack, trackSettings.clef, trackSettings.inputMode, trackSettings.keyMode, trackSettings.activeKeyId, trackSettings.onlyDiatonic, trackProgress.currentTier, currentRoute, spawnNextProblem]);
 
-  // Active Question Keydown Listener (allows advancing with Space, Enter, or ArrowRight without submitting)
+  // Active Question Keydown Listener (allows advancing with Enter or ArrowRight without submitting)
   useEffect(() => {
     if (isFeedback) return; // ackListener handles isFeedback state
 
@@ -179,6 +181,10 @@ export const App: React.FC = () => {
 
       // Use Enter or ArrowRight (avoid Space so it does not conflict with [Space] ♮ in Direct Entry)
       if (e.key === 'Enter' || e.key === 'ArrowRight') {
+        // When user has keyed something, question is NOT skippable
+        if (hasBufferedInput) {
+          return;
+        }
         e.preventDefault();
         spawnNextProblem();
       }
@@ -186,7 +192,7 @@ export const App: React.FC = () => {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isFeedback, isSettingsModalOpen, isTierModalOpen, isKeyModalOpen, currentRoute, spawnNextProblem]);
+  }, [isFeedback, isSettingsModalOpen, isTierModalOpen, isKeyModalOpen, currentRoute, hasBufferedInput, spawnNextProblem]);
 
   // Handle Trial Evaluation
   const evaluateSubmission = useCallback((
@@ -575,6 +581,7 @@ export const App: React.FC = () => {
               lastResult={lastResult}
               darkMode={true}
               onContinue={spawnNextProblem}
+              canSkip={!hasBufferedInput}
             />
 
             {/* Real-Time Stats HUD */}
@@ -595,6 +602,7 @@ export const App: React.FC = () => {
                   disabled={isFeedback}
                   onKeyPressFeedback={setLastPressedKey}
                   tier={trackProgress.currentTier}
+                  onBufferChange={setHasBufferedInput}
                 />
               )}
 

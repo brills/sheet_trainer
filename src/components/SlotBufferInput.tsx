@@ -10,13 +10,15 @@ interface SlotBufferInputProps {
   disabled?: boolean;
   onKeyPressFeedback?: (key: string) => void;
   tier?: number;
+  onBufferChange?: (hasInput: boolean) => void;
 }
 
 export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
   onSubmit,
   disabled = false,
   onKeyPressFeedback,
-  tier
+  tier,
+  onBufferChange
 }) => {
   const tierConfig = tier !== undefined ? CHORD_TIERS[tier] : undefined;
   const isDropVoicing = tierConfig?.voicing === 'drop2' || tierConfig?.voicing === 'drop3';
@@ -32,7 +34,8 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
   const syncState = useCallback(() => {
     setSlotState(stateMachine.getState());
     setActiveSlot(stateMachine.getActiveSlot());
-  }, [stateMachine]);
+    onBufferChange?.(stateMachine.hasInput());
+  }, [stateMachine, onBufferChange]);
 
   const handleComplete = useCallback((res: ChordSlotState) => {
     if (res.root && res.quality && res.inversion) {

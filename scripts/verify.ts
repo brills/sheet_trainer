@@ -225,6 +225,18 @@ sm2nd.handleKey('g');
 sm2nd.handleKey('a');
 assert(inv2ndResult.root === 'G' && inv2ndResult.quality === 'augmented' && inv2ndResult.inversion === '2nd', 'Tier 1.3 (2nd Inv) - Typed "g" then "a": Auto-submitted G Augmented 2nd Inversion');
 
+// Test Buffer State & Unskippable Input Behavior:
+const smCheck = new ChordInputStateMachine(undefined, null, 1.4);
+assert(smCheck.hasInput() === false && smCheck.isEmpty() === true, 'State machine initially has no input (isEmpty = true)');
+smCheck.handleKey('c');
+assert(smCheck.hasInput() === true && smCheck.isEmpty() === false, 'Typing "c" marks buffer as having input (hasInput = true, unskippable)');
+smCheck.handleKey('s');
+assert(smCheck.hasInput() === true, 'Typing "s" preserves hasInput = true');
+smCheck.handleKey('Backspace'); // removes sharp
+assert(smCheck.hasInput() === true, 'Backspacing accidental keeps root, hasInput remains true');
+smCheck.handleKey('Backspace'); // removes root
+assert(smCheck.hasInput() === false && smCheck.isEmpty() === true, 'Backspacing root empties buffer (hasInput = false, skippable again)');
+
 // Test Tier 1.4 (Triad Mastery): Altered triads require inversion selection
 smMixed.reset();
 smMixed.handleKey('d');

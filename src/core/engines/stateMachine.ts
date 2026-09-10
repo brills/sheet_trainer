@@ -116,6 +116,19 @@ export class ChordInputStateMachine {
     return this.activeSlot;
   }
 
+  public hasInput(): boolean {
+    return (
+      this.state.root !== null ||
+      this.state.accidental !== null ||
+      this.state.quality !== null ||
+      (this.fixedInversion ? this.state.inversion !== this.fixedInversion : this.state.inversion !== null)
+    );
+  }
+
+  public isEmpty(): boolean {
+    return !this.hasInput();
+  }
+
   public reset(): void {
     this.state = {
       root: null,
