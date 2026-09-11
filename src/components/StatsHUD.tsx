@@ -38,12 +38,7 @@ export const StatsHUD: React.FC<StatsHUDProps> = ({
           <Target className="w-4 h-4" />
         </div>
         <div className="flex flex-col">
-          <div className="flex items-center gap-1">
-            <span className="text-[9px] font-serif font-bold text-theme-dim uppercase tracking-wider">Accuracy</span>
-            {recentCount > 0 && (
-              <span className="text-[9px] text-theme-dim font-mono">({recentCount}/20)</span>
-            )}
-          </div>
+          <span className="text-[9px] font-serif font-bold text-theme-dim uppercase tracking-wider">Accuracy</span>
           <span className={`text-sm font-bold font-mono ${isAccuracyPassing && recentCount > 0 ? 'text-theme-success' : 'text-theme-primary'}`}>
             {recentCount > 0 ? `${accuracy}%` : '--'}
           </span>
@@ -56,12 +51,7 @@ export const StatsHUD: React.FC<StatsHUDProps> = ({
           <Clock className="w-4 h-4" />
         </div>
         <div className="flex flex-col">
-          <div className="flex items-center gap-1">
-            <span className="text-[9px] font-serif font-bold text-theme-dim uppercase tracking-wider">Avg Latency</span>
-            {recentCount > 0 && (
-              <span className="text-[9px] text-theme-dim font-mono">({recentCount}/20)</span>
-            )}
-          </div>
+          <span className="text-[9px] font-serif font-bold text-theme-dim uppercase tracking-wider">Avg Latency</span>
           <div className="flex items-baseline gap-1">
             <span className={`text-sm font-bold font-mono ${isLatencyPassing ? 'text-theme-success' : 'text-theme-accent'}`}>
               {avgLatencyMs > 0 ? `${(avgLatencyMs / 1000).toFixed(2)}s` : '--'}
