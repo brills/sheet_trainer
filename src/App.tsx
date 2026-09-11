@@ -515,7 +515,7 @@ export const App: React.FC = () => {
   const isKeyMastered = (trackProgress.masteredKeys || []).includes(currentKey.id);
 
   return (
-    <div className="min-h-screen bg-theme-canvas text-theme-primary flex flex-col font-sans selection:bg-theme-accent-tint selection:text-theme-primary">
+    <div className="min-h-screen bg-theme-canvas text-theme-primary flex flex-col items-center font-sans selection:bg-theme-accent-tint selection:text-theme-primary py-3 sm:py-4 px-3 sm:px-4">
       {/* Navigation Bar */}
       <Navigation
         currentRoute={currentRoute}
@@ -540,7 +540,7 @@ export const App: React.FC = () => {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-4xl w-full mx-auto p-4 flex flex-col items-center justify-start">
+      <main className="w-full max-w-md mx-auto flex flex-col items-center justify-start">
         {currentRoute === 'analytics' ? (
           <AnalyticsView
             state={appState}

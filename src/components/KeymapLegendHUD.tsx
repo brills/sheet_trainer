@@ -96,87 +96,85 @@ export const KeymapLegendHUD: React.FC<KeymapLegendHUDProps> = ({
   const activeQualities: ChordQuality[] = tierConfig?.qualities || ['major', 'minor', 'dom7', 'maj7', 'min7', 'half_dim7'];
 
   return (
-    <div className="hidden md:flex items-center justify-center gap-4 px-4 py-2 mt-4 rounded-xl bg-theme-panel border border-theme-border text-[11px] font-mono text-theme-muted select-none shadow-sm">
-      <div className="flex items-center gap-1.5 text-theme-muted font-semibold pr-2 border-r border-theme-border">
-        <Keyboard className="w-3.5 h-3.5 text-theme-accent" />
-        <span>Keys:</span>
-      </div>
-
-      {/* Root Notes */}
-      <div className="flex items-center gap-1">
-        <span className="text-theme-muted font-medium mr-0.5">Root:</span>
-        {['A', 'B', 'C', 'D', 'E', 'F', 'G'].map(k => (
-          <span
-            key={k}
-            className={`px-1.5 py-0.5 rounded border transition-colors ${
-              isRootActive(k) 
-                ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]' 
-                : 'bg-theme-card border-theme-border text-theme-primary'
-            }`}
-          >
-            {k}
-          </span>
-        ))}
-      </div>
-
-      <span className="text-theme-borderStrong">|</span>
-
-      {/* Accidentals */}
-      <div className="flex items-center gap-1">
-        <span className="text-theme-muted font-medium mr-0.5">Acc:</span>
-        <span className={`px-1.5 py-0.5 rounded border ${isSharpActive ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]' : 'bg-theme-card border-theme-border text-theme-primary'}`}>[S] ♯</span>
-        <span className={`px-1.5 py-0.5 rounded border ${isFlatActive ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]' : 'bg-theme-card border-theme-border text-theme-primary'}`}>[B] ♭</span>
-        <span className={`px-1.5 py-0.5 rounded border ${isNaturalActive ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]' : 'bg-theme-card border-theme-border text-theme-primary'}`}>[Space] ♮</span>
-      </div>
-
-      <span className="text-theme-borderStrong">|</span>
-
-      {/* Qualities */}
-      <div className="flex items-center gap-1">
-        <span className="text-theme-muted font-medium mr-0.5">Quality:</span>
-        {activeQualities.map(q => {
-          const info = getQualityLegendInfo(q, tier);
-          const isQualityActive = activeKey !== null && info.activeKeys.includes(activeKey);
-          return (
+    <div className="hidden md:flex flex-col gap-2 w-full max-w-md mx-auto mt-3 p-2.5 rounded-2xl bg-theme-panel border border-theme-border text-[10px] sm:text-[11px] font-mono text-theme-muted select-none shadow-sm">
+      {/* Row 1: Root & Accidentals */}
+      <div className="flex items-center justify-between gap-1 flex-wrap">
+        {/* Roots */}
+        <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 text-theme-dim font-bold uppercase text-[9px] mr-0.5">
+            <Keyboard className="w-3 h-3 text-theme-accent" />
+            <span>Root:</span>
+          </div>
+          {['A', 'B', 'C', 'D', 'E', 'F', 'G'].map(k => (
             <span
-              key={q}
+              key={k}
               className={`px-1.5 py-0.5 rounded border transition-colors ${
-                isQualityActive
-                  ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]'
+                isRootActive(k) 
+                  ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]' 
                   : 'bg-theme-card border-theme-border text-theme-primary'
               }`}
             >
-              [{info.key}] {info.label}
+              {k}
             </span>
-          );
-        })}
+          ))}
+        </div>
+
+        {/* Accidentals */}
+        <div className="flex items-center gap-1">
+          <span className="text-theme-dim font-bold uppercase text-[9px] mr-0.5">Acc:</span>
+          <span className={`px-1.5 py-0.5 rounded border ${isSharpActive ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]' : 'bg-theme-card border-theme-border text-theme-primary'}`}>[S]♯</span>
+          <span className={`px-1.5 py-0.5 rounded border ${isFlatActive ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]' : 'bg-theme-card border-theme-border text-theme-primary'}`}>[B]♭</span>
+          <span className={`px-1.5 py-0.5 rounded border ${isNaturalActive ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]' : 'bg-theme-card border-theme-border text-theme-primary'}`}>[⎵]♮</span>
+        </div>
       </div>
 
-      <span className="text-theme-borderStrong">|</span>
+      {/* Row 2: Qualities & Inversions */}
+      <div className="flex items-center justify-between gap-1 pt-1.5 border-t border-theme-border/60 flex-wrap">
+        {/* Qualities */}
+        <div className="flex items-center gap-1 flex-wrap">
+          <span className="text-theme-dim font-bold uppercase text-[9px] mr-0.5">Quality:</span>
+          {activeQualities.map(q => {
+            const info = getQualityLegendInfo(q, tier);
+            const isQualityActive = activeKey !== null && info.activeKeys.includes(activeKey);
+            return (
+              <span
+                key={q}
+                className={`px-1.5 py-0.5 rounded border transition-colors ${
+                  isQualityActive
+                    ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]'
+                    : 'bg-theme-card border-theme-border text-theme-primary'
+                }`}
+              >
+                [{info.key}]{info.label}
+              </span>
+            );
+          })}
+        </div>
 
-      {/* Inversion / Voicing */}
-      <div className="flex items-center gap-1">
-        <span className="text-theme-muted font-medium mr-0.5">Inv:</span>
-        {tier && (tier === 1.1 || tier === 1.2 || tier === 1.3 || tier === 3.1 || tier === 3.2 || tier === 3.3 || tier === 3.4 || tier === 3.6 || tier === 3.7 || tier === 4.1 || tier === 4.2) ? (
-          <span className="px-2 py-0.5 rounded border bg-theme-panelElevated border-theme-border text-theme-accent text-[10px] font-medium">
-            {tier === 3.6 ? 'Drop-2 (Auto)' : (tier === 3.7 ? 'Drop-3 (Auto)' : 'Auto (Fixed in Tier)')}
-          </span>
-        ) : (
-          <>
-            {(!tierConfig || tierConfig.inversions.includes('root')) && (
-              <span className={`px-1.5 py-0.5 rounded border ${activeKey === 'r' || activeKey === 'R' || activeKey === '0' ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]' : 'bg-theme-card border-theme-border text-theme-primary'}`}>[r] Root</span>
-            )}
-            {(!tierConfig || tierConfig.inversions.includes('1st')) && (
-              <span className={`px-1.5 py-0.5 rounded border ${activeKey === '1' ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]' : 'bg-theme-card border-theme-border text-theme-primary'}`}>[1] 1st</span>
-            )}
-            {(!tierConfig || tierConfig.inversions.includes('2nd')) && (
-              <span className={`px-1.5 py-0.5 rounded border ${activeKey === '2' ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]' : 'bg-theme-card border-theme-border text-theme-primary'}`}>[2] 2nd</span>
-            )}
-            {(!tierConfig || tierConfig.inversions.includes('3rd')) && (
-              <span className={`px-1.5 py-0.5 rounded border ${activeKey === '3' ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]' : 'bg-theme-card border-theme-border text-theme-primary'}`}>[3] 3rd</span>
-            )}
-          </>
-        )}
+        {/* Inversions */}
+        <div className="flex items-center gap-1">
+          <span className="text-theme-dim font-bold uppercase text-[9px] mr-0.5">Inv:</span>
+          {tier && (tier === 1.1 || tier === 1.2 || tier === 1.3 || tier === 3.1 || tier === 3.2 || tier === 3.3 || tier === 3.4 || tier === 3.6 || tier === 3.7 || tier === 4.1 || tier === 4.2) ? (
+            <span className="px-1.5 py-0.5 rounded border bg-theme-panelElevated border-theme-border text-theme-accent text-[9px] font-medium">
+              {tier === 3.6 ? 'Drop-2' : (tier === 3.7 ? 'Drop-3' : 'Auto')}
+            </span>
+          ) : (
+            <>
+              {(!tierConfig || tierConfig.inversions.includes('root')) && (
+                <span className={`px-1.5 py-0.5 rounded border ${activeKey === 'r' || activeKey === 'R' || activeKey === '0' ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]' : 'bg-theme-card border-theme-border text-theme-primary'}`}>[r]Root</span>
+              )}
+              {(!tierConfig || tierConfig.inversions.includes('1st')) && (
+                <span className={`px-1.5 py-0.5 rounded border ${activeKey === '1' ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]' : 'bg-theme-card border-theme-border text-theme-primary'}`}>[1]1st</span>
+              )}
+              {(!tierConfig || tierConfig.inversions.includes('2nd')) && (
+                <span className={`px-1.5 py-0.5 rounded border ${activeKey === '2' ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]' : 'bg-theme-card border-theme-border text-theme-primary'}`}>[2]2nd</span>
+              )}
+              {(!tierConfig || tierConfig.inversions.includes('3rd')) && (
+                <span className={`px-1.5 py-0.5 rounded border ${activeKey === '3' ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]' : 'bg-theme-card border-theme-border text-theme-primary'}`}>[3]3rd</span>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

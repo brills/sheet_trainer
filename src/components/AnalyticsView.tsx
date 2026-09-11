@@ -77,7 +77,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4 flex flex-col gap-6">
+    <div className="w-full max-w-md mx-auto p-1 sm:p-2 flex flex-col gap-5">
       {/* Top Header */}
       <div className="flex items-center justify-between pb-4 border-b border-theme-border">
         <button
