@@ -27,18 +27,8 @@ export const Navigation: React.FC<NavigationProps> = ({
 
   return (
     <header className="w-full max-w-md mx-auto mb-3 rounded-2xl border border-theme-border bg-theme-panel/95 backdrop-blur-md shadow-sm">
-      <div className="w-full px-3 h-12 flex items-center justify-between">
-        {/* App Title & Brand */}
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-theme-card border border-theme-border flex items-center justify-center text-theme-accent shadow-xs">
-            <Music className="w-3.5 h-3.5" />
-          </div>
-          <span className="font-serif font-bold text-sm tracking-tight text-theme-primary hidden xs:inline">
-            Sheet Trainer
-          </span>
-        </div>
-
-        {/* Center Track Tabs (Chords / Arpeggios) */}
+      <div className="w-full px-2.5 h-12 flex items-center justify-between">
+        {/* Track Tabs (Chords / Arpeggios) */}
         <div className="flex items-center p-0.5 rounded-xl bg-theme-card border border-theme-border shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]">
           <button
             type="button"
