@@ -750,6 +750,57 @@ assert(arpTierKeys.every(t => ARPEGGIO_TIER_HINTS[t] && ARPEGGIO_TIER_HINTS[t].v
 const chordTierKeys = Object.keys(CHORD_TIERS).map(Number);
 assert(chordTierKeys.every(t => CHORD_TIER_HINTS[t] && CHORD_TIER_HINTS[t].visualCue && CHORD_TIER_HINTS[t].cheatCode && CHORD_TIER_HINTS[t].formula), 'Every Chord Tier has complete visualCue, cheatCode, and formula hints');
 
+// 12. SVG Notation Engraving & Accidental Clef Clearance
+console.log('\n--- 12. SVG Engraving & Accidental Clearance ---');
+import { Stave, StaveNote, Accidental, Formatter, Voice } from 'vexflow';
+
+function verifyAccidentalClearance(width: number, keys: string[], accIndices: number[]) {
+  const stave = new Stave(10, 20, width - 20);
+  stave.addClef('treble');
+  const staveNote = new StaveNote({ clef: 'treble', keys: keys, duration: 'w' });
+  accIndices.forEach(idx => staveNote.addModifier(new Accidental('#'), idx));
+  staveNote.setStave(stave);
+
+  const voice = new Voice({ num_beats: 4, beat_value: 4 }).setStrict(false);
+  voice.addTickables([staveNote]);
+  new Formatter().joinVoices([voice]).format([voice], width - 20 - 60);
+
+  const noteStartX = stave.getNoteStartX();
+  const noteEndX = stave.getNoteEndX();
+  const modWidth = (staveNote.getModifierContext() as any)?.state?.left_shift || 0;
+  const noteHeadWidth = 15;
+  const totalChordWidth = modWidth + noteHeadWidth;
+  const availableWidth = noteEndX - noteStartX;
+  const extraSpace = availableWidth - totalChordWidth;
+
+  const centerShift = Math.max(0, Math.floor(extraSpace / 2));
+  const tickContext = staveNote.getTickContext();
+  if (tickContext && centerShift > 0) {
+    tickContext.setX(tickContext.getX() + centerShift);
+  }
+
+  const noteX = staveNote.getAbsoluteX();
+  const accLeftX = noteX - modWidth;
+  const gapFromClef = accLeftX - noteStartX;
+  return { gapFromClef, accLeftX, noteStartX, noteX, noteEndX };
+}
+
+// Test Diff Mode (width 170) with 3 sharps (Bmaj7 2nd inv)
+const diff3Sharps = verifyAccidentalClearance(170, ['f/4', 'a/4', 'b/4', 'd/5'], [0, 1, 3]);
+assert(diff3Sharps.gapFromClef >= 10, `Diff View (width 170): 3-accidental chord has >= 10px clef clearance (got ${diff3Sharps.gapFromClef}px gap)`);
+
+// Test Mobile Diff Mode (width 140) with 3 sharps
+const mobileDiff3Sharps = verifyAccidentalClearance(140, ['f/4', 'a/4', 'b/4', 'd/5'], [0, 1, 3]);
+assert(mobileDiff3Sharps.gapFromClef >= 10, `Mobile Diff View (width 140): 3-accidental chord has >= 10px clef clearance (got ${mobileDiff3Sharps.gapFromClef}px gap)`);
+
+// Test Diff Mode (width 170) with 4 sharps (F#maj7)
+const diff4Sharps = verifyAccidentalClearance(170, ['f/4', 'a/4', 'c/5', 'e/5'], [0, 1, 2, 3]);
+assert(diff4Sharps.gapFromClef >= 10, `Diff View (width 170): 4-accidental chord has >= 10px clef clearance (got ${diff4Sharps.gapFromClef}px gap)`);
+
+// Test Main Stage (width 340)
+const mainStageChord = verifyAccidentalClearance(340, ['f/4', 'a/4', 'b/4', 'd/5'], [0, 1, 3]);
+assert(mainStageChord.gapFromClef >= 50, `Main Stage (width 340): chord is centered with generous breathing room (got ${mainStageChord.gapFromClef}px gap)`);
+
 console.log(`\n================================`);
 console.log(`Suite finished: ${passedTests} Passed, ${failedTests} Failed.`);
 if (failedTests > 0) {

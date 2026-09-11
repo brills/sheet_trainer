@@ -68,8 +68,7 @@ export function renderChordToSvg(
   const staveNote = new StaveNote({
     clef: clef,
     keys: keys,
-    duration: 'w',
-    align_center: true
+    duration: 'w'
   });
 
   // Attach accidentals: Only for notes that differ from the active key signature!
@@ -97,6 +96,22 @@ export function renderChordToSvg(
   voice.addTickables([staveNote]);
 
   new Formatter().joinVoices([voice]).format([voice], staveWidth - 60);
+
+  // Center the chord + accidentals group within available space to right of clef/keySig
+  const noteStartX = stave.getNoteStartX();
+  const noteEndX = stave.getNoteEndX();
+  const modWidth = (staveNote.getModifierContext() as any)?.state?.left_shift || 0;
+  const noteHeadWidth = 15;
+  const totalChordWidth = modWidth + noteHeadWidth;
+  const availableWidth = noteEndX - noteStartX;
+  const extraSpace = availableWidth - totalChordWidth;
+
+  const centerShift = Math.max(0, Math.floor(extraSpace / 2));
+  const tickContext = staveNote.getTickContext();
+  if (tickContext && centerShift > 0) {
+    tickContext.setX(tickContext.getX() + centerShift);
+  }
+
   voice.draw(context, stave);
 }
 
@@ -189,8 +204,9 @@ export function renderArpeggioToSvg(
   voice.setStrict(false);
   voice.addTickables(staveNotes);
 
-  // In standard music engraving, arpeggios occupy a compact measure width (~36-40px per note) rather than stretching across the entire stave
-  const justifyWidth = Math.min(staveWidth * 0.55, Math.max(120, staveNotes.length * 38));
+  // In standard music engraving, arpeggios occupy a compact measure width rather than stretching across the entire stave
+  const availableWidth = Math.max(50, stave.getNoteEndX() - stave.getNoteStartX() - 15);
+  const justifyWidth = Math.min(availableWidth, Math.max(70, staveNotes.length * (width < 200 ? 24 : 38)));
   new Formatter().joinVoices([voice]).format([voice], justifyWidth);
 
   voice.draw(context, stave);
