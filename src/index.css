@@ -4,23 +4,30 @@
 
 @layer base {
   :root {
-    --bg-base: #f7f4ee;
-    --bg-surface: #eee9df;
-    --bg-surface-elevated: #e4ddcf;
-    --bg-slot: #fcfbfa;
+    --bg-canvas: #f7f4ee;
+    --bg-card: #fcfbfa;
+    --bg-panel: #eee9df;
+    --bg-panel-elevated: #e4ddcf;
     --border-subtle: #ddd6c8;
     --border-strong: #c8bfaa;
-    --text-main: #38332d;
+    --text-primary: #38332d;
     --text-muted: #6b6358;
-    --text-dim: #948b7e;
+    --text-dim: #8a8275;
     --accent: #8c531b;
-    --accent-light: #f5ede1;
+    --accent-tint: #f5ede1;
     --accent-border: #d4bda8;
+    --success: #2d5736;
+    --success-tint: #eef5ef;
+    --success-border: #bcd4bf;
+    --error: #9c382e;
+    --error-tint: #fbeeed;
+    --error-border: #e2bdb8;
+    --backdrop: rgba(43, 38, 32, 0.45);
   }
 
   body {
-    background-color: #f7f4ee;
-    color: #38332d;
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;

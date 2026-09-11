@@ -27,35 +27,35 @@ export const TrackHeader: React.FC<TrackHeaderProps> = ({
       <button
         type="button"
         onClick={onOpenTierModal}
-        className="w-full flex items-center justify-between p-3 rounded-2xl bg-[#eee9df] border border-[#ddd6c8] hover:border-[#c8bfaa] transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)] group text-left cursor-pointer"
+        className="w-full flex items-center justify-between p-3 rounded-2xl bg-theme-panel border border-theme-border hover:border-theme-borderStrong transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)] group text-left cursor-pointer"
       >
         <div className="flex items-center gap-2.5">
           <div className={`
             w-8 h-8 rounded-xl flex items-center justify-center font-serif font-bold text-xs group-hover:scale-105 transition-transform border
             ${isMastered 
-              ? 'bg-[#e4eee5] border-[#b8ceba] text-[#2e7d5b]' 
-              : 'bg-[#f5ede1] border-[#d4bda8] text-[#8c531b]'}
+              ? 'bg-theme-success-tint border-theme-success-border text-theme-success' 
+              : 'bg-theme-accent-tint border-theme-accent-border text-theme-accent'}
           `}>
             {currentTier}
           </div>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-serif font-bold text-[#38332d] group-hover:text-[#8c531b] transition-colors">
+              <span className="text-xs font-serif font-bold text-theme-primary group-hover:text-theme-accent transition-colors">
                 {tierConfig.title}
               </span>
               {isMastered && (
-                <span className="flex items-center gap-0.5 text-[10px] font-serif font-bold text-[#2e7d5b] bg-[#e4eee5] border border-[#b8ceba] px-1.5 py-0.2 rounded-full">
+                <span className="flex items-center gap-0.5 text-[10px] font-serif font-bold text-theme-success bg-theme-success-tint border border-theme-success-border px-1.5 py-0.2 rounded-full">
                   <CheckCircle2 className="w-3 h-3" /> Mastered
                 </span>
               )}
             </div>
-            <span className="text-[11px] font-cormorant italic text-[#6b6358] truncate max-w-[240px]">
+            <span className="text-[11px] font-cormorant italic text-theme-muted truncate max-w-[240px]">
               {tierConfig.description}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-1 text-xs font-serif font-medium text-[#8c531b] bg-[#f5ede1] border border-[#d4bda8] px-2.5 py-1 rounded-full">
+        <div className="flex items-center gap-1 text-xs font-serif font-medium text-theme-accent bg-theme-accent-tint border border-theme-accent-border px-2.5 py-1 rounded-full">
           <Layers className="w-3.5 h-3.5" />
           <span>Tiers</span>
         </div>

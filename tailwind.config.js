@@ -8,6 +8,27 @@ export default {
   theme: {
     extend: {
       colors: {
+        theme: {
+          canvas: 'var(--bg-canvas, #f7f4ee)',
+          card: 'var(--bg-card, #fcfbfa)',
+          panel: 'var(--bg-panel, #eee9df)',
+          panelElevated: 'var(--bg-panel-elevated, #e4ddcf)',
+          border: 'var(--border-subtle, #ddd6c8)',
+          borderStrong: 'var(--border-strong, #c8bfaa)',
+          primary: 'var(--text-primary, #38332d)',
+          muted: 'var(--text-muted, #6b6358)',
+          dim: 'var(--text-dim, #8a8275)',
+          accent: 'var(--accent, #8c531b)',
+          'accent-tint': 'var(--accent-tint, #f5ede1)',
+          'accent-border': 'var(--accent-border, #d4bda8)',
+          success: 'var(--success, #2d5736)',
+          'success-tint': 'var(--success-tint, #eef5ef)',
+          'success-border': 'var(--success-border, #bcd4bf)',
+          error: 'var(--error, #9c382e)',
+          'error-tint': 'var(--error-tint, #fbeeed)',
+          'error-border': 'var(--error-border, #e2bdb8)',
+          backdrop: 'var(--backdrop, rgba(43, 38, 32, 0.45))',
+        },
         brand: {
           50: '#fdfbf7',
           100: '#f5ede1',

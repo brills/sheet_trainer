@@ -79,16 +79,16 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
   return (
     <div className="w-full max-w-2xl mx-auto p-4 flex flex-col gap-6">
       {/* Top Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-[#ddd6c8]">
+      <div className="flex items-center justify-between pb-4 border-b border-theme-border">
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#eee9df] border border-[#ddd6c8] text-xs font-serif font-semibold text-[#38332d] hover:bg-[#e4ddcf] transition-all cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-theme-panel border border-theme-border text-xs font-serif font-semibold text-theme-primary hover:bg-theme-panelElevated transition-all cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Practice
         </button>
 
-        <h1 className="text-lg font-serif font-bold text-[#38332d] flex items-center gap-2">
+        <h1 className="text-lg font-serif font-bold text-theme-primary flex items-center gap-2">
           Performance Analytics
         </h1>
 
@@ -98,12 +98,12 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
             type="button"
             onClick={handleExport}
             title="Download JSON backup"
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#eee9df] border border-[#ddd6c8] text-xs font-serif font-medium text-[#8c531b] hover:bg-[#f5ede1] hover:border-[#d4bda8] transition-all cursor-pointer"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-theme-panel border border-theme-border text-xs font-serif font-medium text-theme-accent hover:bg-theme-accent-tint hover:border-theme-accent-border transition-all cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" /> Export
           </button>
 
-          <label className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#eee9df] border border-[#ddd6c8] text-xs font-serif font-medium text-[#8c531b] hover:bg-[#f5ede1] hover:border-[#d4bda8] cursor-pointer transition-all">
+          <label className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-theme-panel border border-theme-border text-xs font-serif font-medium text-theme-accent hover:bg-theme-accent-tint hover:border-theme-accent-border cursor-pointer transition-all">
             <Upload className="w-3.5 h-3.5" /> Import
             <input type="file" accept=".json" onChange={handleImport} className="hidden" />
           </label>
@@ -112,7 +112,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
             type="button"
             onClick={handleClearHistory}
             title="Clear trial logs"
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#fbeeed] border border-[#e2bdb8] text-xs font-serif font-medium text-[#9c382e] hover:bg-[#f8deda] transition-all cursor-pointer"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-theme-error-tint border border-theme-error-border text-xs font-serif font-medium text-theme-error hover:bg-theme-error-border/30 transition-all cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" /> Clear Logs
           </button>
@@ -120,20 +120,20 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
       </div>
 
       {importStatus && (
-        <div className="p-3 rounded-xl bg-[#eef5ef] border border-[#bcd4bf] text-[#2d5736] text-xs text-center font-medium font-serif">
+        <div className="p-3 rounded-xl bg-theme-success-tint border border-theme-success-border text-theme-success text-xs text-center font-medium font-serif">
           {importStatus}
         </div>
       )}
 
       {/* Track Filter Tabs */}
-      <div className="flex p-1 rounded-2xl bg-[#eee9df] border border-[#ddd6c8]">
+      <div className="flex p-1 rounded-2xl bg-theme-panel border border-theme-border">
         <button
           type="button"
           onClick={() => setSelectedTrack('chords')}
           className={`flex-1 py-2 text-xs font-serif font-bold rounded-xl transition-all cursor-pointer ${
             selectedTrack === 'chords' 
-              ? 'bg-[#f5ede1] text-[#8c531b] border border-[#d4bda8] shadow-sm' 
-              : 'text-[#6b6358] hover:text-[#38332d]'
+              ? 'bg-theme-accent-tint text-theme-accent border border-theme-accent-border shadow-sm' 
+              : 'text-theme-muted hover:text-theme-primary'
           }`}
         >
           🎼 Chords Track
@@ -143,8 +143,8 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
           onClick={() => setSelectedTrack('arpeggios')}
           className={`flex-1 py-2 text-xs font-serif font-bold rounded-xl transition-all cursor-pointer ${
             selectedTrack === 'arpeggios' 
-              ? 'bg-[#f5ede1] text-[#8c531b] border border-[#d4bda8] shadow-sm' 
-              : 'text-[#6b6358] hover:text-[#38332d]'
+              ? 'bg-theme-accent-tint text-theme-accent border border-theme-accent-border shadow-sm' 
+              : 'text-theme-muted hover:text-theme-primary'
           }`}
         >
           〰️ Arpeggios Track
@@ -153,35 +153,35 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
 
       {/* High-level Scorecard */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="p-4 rounded-2xl bg-[#fcfbfa] border border-[#ddd6c8] flex flex-col items-center shadow-sm">
-          <span className="text-[11px] font-mono font-semibold text-[#6b6358] uppercase">Total Trials</span>
-          <span className="text-2xl font-bold font-mono text-[#38332d] mt-1">{totalTrials}</span>
+        <div className="p-4 rounded-2xl bg-theme-card border border-theme-border flex flex-col items-center shadow-sm">
+          <span className="text-[11px] font-mono font-semibold text-theme-muted uppercase">Total Trials</span>
+          <span className="text-2xl font-bold font-mono text-theme-primary mt-1">{totalTrials}</span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#fcfbfa] border border-[#ddd6c8] flex flex-col items-center shadow-sm">
-          <span className="text-[11px] font-mono font-semibold text-[#6b6358] uppercase flex items-center gap-1">
-            <Target className="w-3.5 h-3.5 text-[#2d5736]" /> Accuracy
+        <div className="p-4 rounded-2xl bg-theme-card border border-theme-border flex flex-col items-center shadow-sm">
+          <span className="text-[11px] font-mono font-semibold text-theme-muted uppercase flex items-center gap-1">
+            <Target className="w-3.5 h-3.5 text-theme-success" /> Accuracy
           </span>
-          <span className="text-2xl font-bold font-mono text-[#2d5736] mt-1">{overallAccuracy}%</span>
+          <span className="text-2xl font-bold font-mono text-theme-success mt-1">{overallAccuracy}%</span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#fcfbfa] border border-[#ddd6c8] flex flex-col items-center shadow-sm">
-          <span className="text-[11px] font-mono font-semibold text-[#6b6358] uppercase flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5 text-[#8c531b]" /> Avg Latency
+        <div className="p-4 rounded-2xl bg-theme-card border border-theme-border flex flex-col items-center shadow-sm">
+          <span className="text-[11px] font-mono font-semibold text-theme-muted uppercase flex items-center gap-1">
+            <Clock className="w-3.5 h-3.5 text-theme-accent" /> Avg Latency
           </span>
-          <span className="text-2xl font-bold font-mono text-[#8c531b] mt-1">{avgLatency}ms</span>
+          <span className="text-2xl font-bold font-mono text-theme-accent mt-1">{avgLatency}ms</span>
         </div>
       </div>
 
       {/* Weakness Matrix Breakdown */}
       <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-serif font-bold text-[#38332d] flex items-center justify-between">
+        <h2 className="text-sm font-serif font-bold text-theme-primary flex items-center justify-between">
           <span>Pattern Weakness Profile</span>
-          <span className="text-xs font-sans font-normal text-[#6b6358]">Targeted by Adaptive Engine</span>
+          <span className="text-xs font-sans font-normal text-theme-muted">Targeted by Adaptive Engine</span>
         </h2>
 
         {weaknessEntries.length === 0 ? (
-          <div className="p-6 rounded-2xl bg-[#fcfbfa] border border-[#ddd6c8] text-center text-xs text-[#8a8275]">
+          <div className="p-6 rounded-2xl bg-theme-card border border-theme-border text-center text-xs text-theme-dim">
             No pattern stats recorded yet. Complete more trials to build your profile!
           </div>
         ) : (
@@ -194,20 +194,20 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                 <div 
                   key={key} 
                   className={`p-3 rounded-xl border flex items-center justify-between ${
-                    isWeak ? 'bg-[#fbeeed] border-[#e2bdb8]' : 'bg-[#fcfbfa] border-[#ddd6c8]'
+                    isWeak ? 'bg-theme-error-tint border-theme-error-border' : 'bg-theme-card border-theme-border'
                   }`}
                 >
                   <div className="flex flex-col">
-                    <span className="text-xs font-bold font-mono text-[#38332d]">{key}</span>
-                    <span className="text-[10px] text-[#6b6358] font-sans">
+                    <span className="text-xs font-bold font-mono text-theme-primary">{key}</span>
+                    <span className="text-[10px] text-theme-muted font-sans">
                       Seen {stats.totalSeen} times | Latency: {stats.avgLatencyMs}ms
                     </span>
                   </div>
 
                   <span className={`text-xs font-bold font-mono px-2 py-0.5 rounded-full border ${
-                    acc >= 90 ? 'bg-[#eef5ef] text-[#2d5736] border-[#bcd4bf]' :
-                    acc >= 75 ? 'bg-[#f5ede1] text-[#8c531b] border-[#d4bda8]' :
-                    'bg-[#fbeeed] text-[#9c382e] border-[#e2bdb8]'
+                    acc >= 90 ? 'bg-theme-success-tint text-theme-success border-theme-success-border' :
+                    acc >= 75 ? 'bg-theme-accent-tint text-theme-accent border-theme-accent-border' :
+                    'bg-theme-error-tint text-theme-error border-theme-error-border'
                   }`}>
                     {acc}%
                   </span>
@@ -220,19 +220,19 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
 
       {/* Recent Trial Logs Table */}
       <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-serif font-bold text-[#38332d]">
+        <h2 className="text-sm font-serif font-bold text-theme-primary">
           Recent Trial Activity (Last 20)
         </h2>
 
         {trials.length === 0 ? (
-          <div className="p-6 rounded-2xl bg-[#fcfbfa] border border-[#ddd6c8] text-center text-xs text-[#8a8275]">
+          <div className="p-6 rounded-2xl bg-theme-card border border-theme-border text-center text-xs text-theme-dim">
             No trial history recorded yet.
           </div>
         ) : (
-          <div className="rounded-2xl border border-[#ddd6c8] bg-[#fcfbfa] overflow-hidden shadow-sm">
+          <div className="rounded-2xl border border-theme-border bg-theme-card overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-sans">
-                <thead className="bg-[#eee9df] text-[#6b6358] uppercase font-mono text-[10px] border-b border-[#ddd6c8]">
+                <thead className="bg-theme-panel text-theme-muted uppercase font-mono text-[10px] border-b border-theme-border">
                   <tr>
                     <th className="p-3 font-semibold">Status</th>
                     <th className="p-3 font-semibold">Pattern</th>
@@ -241,24 +241,24 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                     <th className="p-3 font-semibold">Time</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#eee9df] font-mono text-[#38332d]">
+                <tbody className="divide-y divide-theme-panel font-mono text-theme-primary">
                   {trials.slice(0, 20).map(t => (
-                    <tr key={t.id} className="hover:bg-[#f7f4ee]">
+                    <tr key={t.id} className="hover:bg-theme-canvas">
                       <td className="p-3">
                         {t.isCorrect ? (
-                          <span className="flex items-center gap-1 text-[#2d5736] font-bold">
+                          <span className="flex items-center gap-1 text-theme-success font-bold">
                             <CheckCircle2 className="w-3.5 h-3.5" /> Pass
                           </span>
                         ) : (
-                          <span className="flex items-center gap-1 text-[#9c382e] font-bold">
+                          <span className="flex items-center gap-1 text-theme-error font-bold">
                             <XCircle className="w-3.5 h-3.5" /> Miss
                           </span>
                         )}
                       </td>
-                      <td className="p-3 font-serif font-bold text-[#38332d]">{t.patternId}</td>
-                      <td className="p-3 text-[#6b6358]">{t.clef === 'treble' ? '𝄞 Treble' : '𝄢 Bass'}</td>
-                      <td className="p-3 text-[#8c531b] font-bold">{t.latencyMs}ms</td>
-                      <td className="p-3 text-[#8a8275] text-[10px]">
+                      <td className="p-3 font-serif font-bold text-theme-primary">{t.patternId}</td>
+                      <td className="p-3 text-theme-muted">{t.clef === 'treble' ? '𝄞 Treble' : '𝄢 Bass'}</td>
+                      <td className="p-3 text-theme-accent font-bold">{t.latencyMs}ms</td>
+                      <td className="p-3 text-theme-dim text-[10px]">
                         {new Date(t.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                       </td>
                     </tr>
