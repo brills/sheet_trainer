@@ -1,4 +1,4 @@
-import { ChordDefinition, ArpeggioDefinition, MultipleChoiceOption } from '../../types';
+import { ChordDefinition, ArpeggioDefinition, MultipleChoiceOption, NoteLetter, Inversion, ChordQuality, ArpeggioContour } from '../../types';
 import { CHORD_TIERS, CHORD_FORMULAS, formatInversionName } from '../theory/chords';
 import { ARPEGGIO_TIERS } from '../theory/arpeggios';
 import { NOTE_LETTERS, formatNoteName } from '../theory/notes';
@@ -12,10 +12,48 @@ function shuffle<T>(arr: T[]): T[] {
   return copy;
 }
 
+/**
+ * Returns musically plausible distractor roots based on sight-reading perceptual traps:
+ * 1. Inversion bass note trap (reading the lowest note as the root)
+ * 2. Harmonic neighbors: Dominant (5th) and Subdominant (4th)
+ * 3. Relative major/minor (shared notes/dyads)
+ * 4. Line / space step neighbors (+1 or -1 scale step)
+ */
+function getPlausibleDistractorRoots(targetRoot: NoteLetter, targetInversion: Inversion): NoteLetter[] {
+  const rootIndex = NOTE_LETTERS.indexOf(targetRoot);
+  const candidates: NoteLetter[] = [];
+
+  // 1. Inversion Bass Note Trap: If inverted, the lowest note is a major perceptual trap
+  if (targetInversion === '1st') {
+    candidates.push(NOTE_LETTERS[(rootIndex + 2) % 7]); // 3rd is in bass
+  } else if (targetInversion === '2nd') {
+    candidates.push(NOTE_LETTERS[(rootIndex + 4) % 7]); // 5th is in bass
+  } else if (targetInversion === '3rd') {
+    candidates.push(NOTE_LETTERS[(rootIndex + 6) % 7]); // 7th is in bass
+  }
+
+  // 2. Harmonic circle neighbors (5th and 4th)
+  candidates.push(NOTE_LETTERS[(rootIndex + 4) % 7]); // 5th
+  candidates.push(NOTE_LETTERS[(rootIndex + 3) % 7]); // 4th
+
+  // 3. Relative key / 3rd relation
+  candidates.push(NOTE_LETTERS[(rootIndex + 5) % 7]); // 6th (relative minor/major)
+  candidates.push(NOTE_LETTERS[(rootIndex + 2) % 7]); // 3rd
+
+  // 4. Line / space step neighbors (+1 / -1 scale step)
+  candidates.push(NOTE_LETTERS[(rootIndex + 1) % 7]);
+  candidates.push(NOTE_LETTERS[(rootIndex + 6) % 7]);
+
+  // Deduplicate and filter out target root
+  const unique = Array.from(new Set(candidates)).filter(r => r !== targetRoot);
+  return unique;
+}
+
+/**
+ * Generates balanced, non-leaking multiple-choice options for chords.
+ * Eliminates meta-gaming / option elimination tricks (e.g. counting root frequencies).
+ */
 export function generateChordMultipleChoiceOptions(target: ChordDefinition): MultipleChoiceOption[] {
-  const options: MultipleChoiceOption[] = [];
-  const rootStr = formatNoteName(target.root, target.rootAccidental);
-  const qualityStr = CHORD_FORMULAS[target.quality].shortName;
   const isDropVoicing = target.voicing === 'drop2' || target.voicing === 'drop3';
   const invStr = isDropVoicing 
     ? (target.voicing === 'drop2' 
@@ -23,169 +61,133 @@ export function generateChordMultipleChoiceOptions(target: ChordDefinition): Mul
         : (target.omit5 ? 'Drop-3 (omit 5)' : 'Drop-3 Voicing'))
     : formatInversionName(target.inversion, 'full');
 
-  // 1. Correct Option
-  options.push({
-    id: target.id,
-    label: `${rootStr}${qualityStr}`,
-    sublabel: invStr,
-    isCorrect: true,
-    chordData: {
-      root: target.root,
-      accidental: target.rootAccidental,
-      quality: target.quality,
-      inversion: target.inversion,
-      voicing: target.voicing,
-      omit5: target.omit5
-    }
-  });
-
   const tierConfig = CHORD_TIERS[target.tier] || CHORD_TIERS[1.1];
   const allowedInversions = tierConfig.inversions;
   const allowedQualities = tierConfig.qualities;
-  const otherInversions = allowedInversions.filter(inv => inv !== target.inversion);
   const otherQualities = allowedQualities.filter(q => q !== target.quality);
-  const otherRoots = NOTE_LETTERS.filter(r => r !== target.root);
+  const otherInversions = allowedInversions.filter(inv => inv !== target.inversion);
+  const plausibleRoots = getPlausibleDistractorRoots(target.root, target.inversion);
 
+  // Helper to construct a MultipleChoiceOption
+  const makeOption = (
+    root: NoteLetter,
+    qual: ChordQuality,
+    inv: Inversion,
+    isTarget: boolean
+  ): MultipleChoiceOption => {
+    const rStr = formatNoteName(root, target.rootAccidental);
+    const qStr = CHORD_FORMULAS[qual]?.shortName || 'Maj';
+    const iStr = isDropVoicing ? invStr : formatInversionName(inv, 'full');
+
+    return {
+      id: isTarget ? target.id : `dist_${root}_${qual}_${inv}_${Math.random().toString(36).substring(2, 7)}`,
+      label: `${rStr}${qStr}`,
+      sublabel: iStr,
+      isCorrect: isTarget,
+      chordData: {
+        root,
+        accidental: target.rootAccidental,
+        quality: qual,
+        inversion: inv,
+        voicing: target.voicing,
+        omit5: target.omit5
+      }
+    };
+  };
+
+  const options: MultipleChoiceOption[] = [];
   const seen = new Set<string>();
-  seen.add(`${rootStr}:${target.quality}:${target.inversion}`);
 
-  // Candidate 1: Quality Trap (Same root, different quality from tier, same inversion)
-  if (otherQualities.length > 0) {
+  const addOpt = (root: NoteLetter, qual: ChordQuality, inv: Inversion, isTarget: boolean) => {
+    // Inversion sanity check for triads (no 3rd inversion allowed on triads)
+    const validInv = (inv === '3rd' && CHORD_FORMULAS[qual]?.maxInversion !== '3rd') ? 'root' : inv;
+    const key = `${root}:${qual}:${validInv}`;
+    if (!seen.has(key) && options.length < 4) {
+      seen.add(key);
+      options.push(makeOption(root, qual, validInv, isTarget));
+    }
+  };
+
+  // Always add correct option first
+  addOpt(target.root, target.quality, target.inversion, true);
+
+  // Available Balanced Strategies:
+  // Strategy 1: Symmetrical 2x2 Matrix (2 of Root A, 2 of Root B with balanced qualities/inversions)
+  // Strategy 2: 4 All-Distinct Roots (Each root appears exactly once)
+  // Strategy 3: 4 All-Same Root (Pure Quality / Inversion discrimination)
+
+  const canDoMode3_Qual = otherQualities.length >= 3 && !isDropVoicing && allowedInversions.length === 1;
+  const canDoMode1_Qual = otherQualities.length >= 1;
+  const canDoMode1_Inv = !isDropVoicing && otherInversions.length >= 1;
+
+  // Random strategy selection
+  const roll = Math.random();
+
+  if (canDoMode3_Qual && roll < 0.25) {
+    // Strategy 3: 4 All-Same Root (Pure Quality Test)
+    const shuffledQuals = shuffle(otherQualities);
+    for (const q of shuffledQuals) {
+      addOpt(target.root, q, target.inversion, false);
+      if (options.length === 4) break;
+    }
+  } else if (canDoMode1_Qual && (roll < 0.65 || (allowedQualities.length >= 2 && allowedInversions.length === 1))) {
+    // Strategy 1A: Symmetrical 2x2 Matrix across Qualities
+    // [RootA Qual1, RootA Qual2, RootB Qual1, RootB Qual2]
+    const pairedRoot = plausibleRoots[0] || (target.root === 'C' ? 'G' : 'C');
     const trapQuality = otherQualities[Math.floor(Math.random() * otherQualities.length)];
-    const trapQualityStr = CHORD_FORMULAS[trapQuality]?.shortName || 'm';
-    const sig = `${rootStr}:${trapQuality}:${target.inversion}`;
-    if (!seen.has(sig)) {
-      seen.add(sig);
-      options.push({
-        id: `trap_qual_${trapQuality}_${target.inversion}`,
-        label: `${rootStr}${trapQualityStr}`,
-        sublabel: invStr,
-        isCorrect: false,
-        chordData: {
-          root: target.root,
-          accidental: target.rootAccidental,
-          quality: trapQuality,
-          inversion: target.inversion,
-          voicing: target.voicing,
-          omit5: target.omit5
-        }
-      });
-    }
-  }
 
-  // Candidate 2: Inversion Trap (ONLY for close-position tiers with multiple inversions)
-  if (!isDropVoicing && otherInversions.length > 0) {
+    // Option 2: Root A with trap quality
+    addOpt(target.root, trapQuality, target.inversion, false);
+    // Option 3: Root B with target quality
+    addOpt(pairedRoot, target.quality, target.inversion, false);
+    // Option 4: Root B with trap quality
+    addOpt(pairedRoot, trapQuality, target.inversion, false);
+  } else if (canDoMode1_Inv && roll < 0.85) {
+    // Strategy 1B: Symmetrical 2x2 Matrix across Inversions
+    // [RootA Inv1, RootA Inv2, RootB Inv1, RootB Inv2]
+    const pairedRoot = plausibleRoots[0] || (target.root === 'C' ? 'G' : 'C');
     const trapInv = otherInversions[Math.floor(Math.random() * otherInversions.length)];
-    const trapInvStr = formatInversionName(trapInv, 'full');
-    const sig = `${rootStr}:${target.quality}:${trapInv}`;
-    if (!seen.has(sig)) {
-      seen.add(sig);
-      options.push({
-        id: `trap_inv_${trapInv}`,
-        label: `${rootStr}${qualityStr}`,
-        sublabel: trapInvStr,
-        isCorrect: false,
-        chordData: {
-          root: target.root,
-          accidental: target.rootAccidental,
-          quality: target.quality,
-          inversion: trapInv,
-          voicing: target.voicing,
-          omit5: target.omit5
-        }
-      });
+
+    // Option 2: Root A with trap inversion
+    addOpt(target.root, target.quality, trapInv, false);
+    // Option 3: Root B with target inversion
+    addOpt(pairedRoot, target.quality, target.inversion, false);
+    // Option 4: Root B with trap inversion
+    addOpt(pairedRoot, target.quality, trapInv, false);
+  } else {
+    // Strategy 2: 4 All-Distinct Roots (Every root appears exactly once!)
+    // [Root A, Root B, Root C, Root D]
+    const distinctRoots = plausibleRoots.slice(0, 3);
+    for (const dRoot of distinctRoots) {
+      // Pick allowed quality / inversion consistent with tier
+      const dQual = allowedQualities.length > 1 && Math.random() > 0.5 
+        ? allowedQualities[Math.floor(Math.random() * allowedQualities.length)] 
+        : target.quality;
+      const dInv = isDropVoicing ? target.inversion : (allowedInversions.length > 1 && Math.random() > 0.5
+        ? allowedInversions[Math.floor(Math.random() * allowedInversions.length)]
+        : target.inversion);
+      addOpt(dRoot, dQual, dInv, false);
+      if (options.length === 4) break;
     }
   }
 
-  // Candidate 3: Root Traps with valid tier qualities and allowed inversions
-  const shuffledRoots = shuffle(otherRoots);
-  for (const trapRoot of shuffledRoots) {
-    if (options.length >= 4) break;
-    const trapRootStr = formatNoteName(trapRoot, target.rootAccidental);
-    const trapQual = allowedQualities[Math.floor(Math.random() * allowedQualities.length)];
-    const trapQualStr = CHORD_FORMULAS[trapQual]?.shortName || 'Maj';
-    const allowedForQuality = allowedInversions.filter(inv => 
-      inv !== '3rd' || CHORD_FORMULAS[trapQual]?.maxInversion === '3rd'
-    );
-    const trapInv = isDropVoicing ? target.inversion : allowedForQuality[Math.floor(Math.random() * allowedForQuality.length)];
-    const trapInvStr = isDropVoicing ? invStr : formatInversionName(trapInv, 'full');
-    const sig = `${trapRootStr}:${trapQual}:${trapInv}`;
-    if (!seen.has(sig)) {
-      seen.add(sig);
-      options.push({
-        id: `trap_root_${trapRoot}_${trapQual}_${trapInv}`,
-        label: `${trapRootStr}${trapQualStr}`,
-        sublabel: trapInvStr,
-        isCorrect: false,
-        chordData: {
-          root: trapRoot,
-          accidental: target.rootAccidental,
-          quality: trapQual,
-          inversion: trapInv,
-          voicing: target.voicing,
-          omit5: target.omit5
-        }
-      });
-    }
-  }
-
-  // Fallback if needed to guarantee 4 options
-  let fallbackIndex = 0;
+  // Robust Fallback: Guarantee exactly 4 options under any restricted tier
+  let fallbackIdx = 0;
   while (options.length < 4) {
-    const fallbackRoot = NOTE_LETTERS[fallbackIndex % NOTE_LETTERS.length];
-    const fallbackRootStr = formatNoteName(fallbackRoot, target.rootAccidental);
-    const fallbackQual = allowedQualities[fallbackIndex % allowedQualities.length];
-    const fallbackQualStr = CHORD_FORMULAS[fallbackQual]?.shortName || 'Maj';
-    const allowedForFallback = allowedInversions.filter(inv => 
-      inv !== '3rd' || CHORD_FORMULAS[fallbackQual]?.maxInversion === '3rd'
-    );
-    const fallbackInv = isDropVoicing ? target.inversion : allowedForFallback[fallbackIndex % allowedForFallback.length];
-    const fallbackInvStr = isDropVoicing ? invStr : formatInversionName(fallbackInv, 'full');
-    const sig = `${fallbackRootStr}:${fallbackQual}:${fallbackInv}`;
-    if (!seen.has(sig)) {
-      seen.add(sig);
-      options.push({
-        id: `fallback_${fallbackIndex}`,
-        label: `${fallbackRootStr}${fallbackQualStr}`,
-        sublabel: fallbackInvStr,
-        isCorrect: false,
-        chordData: {
-          root: fallbackRoot,
-          accidental: target.rootAccidental,
-          quality: fallbackQual,
-          inversion: fallbackInv,
-          voicing: target.voicing,
-          omit5: target.omit5
-        }
-      });
-    }
-    fallbackIndex++;
+    const fRoot = plausibleRoots[fallbackIdx % plausibleRoots.length] || NOTE_LETTERS[fallbackIdx % NOTE_LETTERS.length];
+    const fQual = allowedQualities[fallbackIdx % allowedQualities.length];
+    const fInv = isDropVoicing ? target.inversion : allowedInversions[fallbackIdx % allowedInversions.length];
+    addOpt(fRoot, fQual, fInv, false);
+    fallbackIdx++;
   }
 
   return shuffle(options);
 }
 
+/**
+ * Generates balanced, non-leaking multiple-choice options for arpeggios.
+ */
 export function generateArpeggioMultipleChoiceOptions(target: ArpeggioDefinition): MultipleChoiceOption[] {
-  const options: MultipleChoiceOption[] = [];
-  const rootStr = formatNoteName(target.root, target.rootAccidental);
-  const qualityStr = CHORD_FORMULAS[target.quality].shortName;
-  const contourLabel = target.contour.charAt(0).toUpperCase() + target.contour.slice(1);
-
-  // 1. Correct Option
-  options.push({
-    id: target.id,
-    label: `${rootStr}${qualityStr} (${contourLabel})`,
-    sublabel: `Starts on ${target.startingDegree}`,
-    isCorrect: true,
-    arpeggioData: {
-      root: target.root,
-      accidental: target.rootAccidental,
-      quality: target.quality,
-      contour: target.contour,
-      startingDegree: target.startingDegree
-    }
-  });
-
   const tierConfig = ARPEGGIO_TIERS[target.tier] || ARPEGGIO_TIERS[1.1];
   const allowedContours = tierConfig.contours;
   const allowedDegrees = tierConfig.startingDegrees;
@@ -194,132 +196,96 @@ export function generateArpeggioMultipleChoiceOptions(target: ArpeggioDefinition
   const otherContours = allowedContours.filter(c => c !== target.contour);
   const otherDegrees = allowedDegrees.filter(d => d !== target.startingDegree);
   const otherQualities = allowedQualities.filter(q => q !== target.quality);
-  const otherRoots = NOTE_LETTERS.filter(r => r !== target.root);
+  const plausibleRoots = getPlausibleDistractorRoots(target.root, 'root');
 
-  const seen = new Set<string>();
-  seen.add(`${rootStr}:${target.quality}:${target.contour}:${target.startingDegree}`);
+  const makeArpOption = (
+    root: NoteLetter,
+    qual: ChordQuality,
+    contour: ArpeggioContour,
+    degree: 'root' | '3rd' | '5th',
+    isTarget: boolean
+  ): MultipleChoiceOption => {
+    const rStr = formatNoteName(root, target.rootAccidental);
+    const qStr = CHORD_FORMULAS[qual]?.shortName || 'Maj';
+    const cLabel = contour.charAt(0).toUpperCase() + contour.slice(1);
 
-  // Trap 1: Quality trap (if tier has multiple qualities)
-  if (otherQualities.length > 0) {
-    const trapQuality = otherQualities[Math.floor(Math.random() * otherQualities.length)];
-    const trapQualityStr = CHORD_FORMULAS[trapQuality]?.shortName || 'm';
-    const sig = `${rootStr}:${trapQuality}:${target.contour}:${target.startingDegree}`;
-    if (!seen.has(sig)) {
-      seen.add(sig);
-      options.push({
-        id: `trap_qual_${trapQuality}`,
-        label: `${rootStr}${trapQualityStr} (${contourLabel})`,
-        sublabel: `Starts on ${target.startingDegree}`,
-        isCorrect: false,
-        arpeggioData: {
-          root: target.root,
-          accidental: target.rootAccidental,
-          quality: trapQuality,
-          contour: target.contour,
-          startingDegree: target.startingDegree
-        }
-      });
-    }
-  }
-
-  // Trap 2: Contour trap (ONLY if tier has multiple contours!)
-  if (otherContours.length > 0) {
-    const trapContour = otherContours[Math.floor(Math.random() * otherContours.length)];
-    const trapContourLabel = trapContour.charAt(0).toUpperCase() + trapContour.slice(1);
-    const sig = `${rootStr}:${target.quality}:${trapContour}:${target.startingDegree}`;
-    if (!seen.has(sig)) {
-      seen.add(sig);
-      options.push({
-        id: `trap_contour_${trapContour}`,
-        label: `${rootStr}${qualityStr} (${trapContourLabel})`,
-        sublabel: `Starts on ${target.startingDegree}`,
-        isCorrect: false,
-        arpeggioData: {
-          root: target.root,
-          accidental: target.rootAccidental,
-          quality: target.quality,
-          contour: trapContour,
-          startingDegree: target.startingDegree
-        }
-      });
-    }
-  }
-
-  // Trap 3: Degree trap (ONLY if tier has multiple starting degrees!)
-  if (otherDegrees.length > 0) {
-    const trapDegree = otherDegrees[Math.floor(Math.random() * otherDegrees.length)];
-    const sig = `${rootStr}:${target.quality}:${target.contour}:${trapDegree}`;
-    if (!seen.has(sig)) {
-      seen.add(sig);
-      options.push({
-        id: `trap_degree_${trapDegree}`,
-        label: `${rootStr}${qualityStr} (${contourLabel})`,
-        sublabel: `Starts on ${trapDegree}`,
-        isCorrect: false,
-        arpeggioData: {
-          root: target.root,
-          accidental: target.rootAccidental,
-          quality: target.quality,
-          contour: target.contour,
-          startingDegree: trapDegree
-        }
-      });
-    }
-  }
-
-  // Trap 4: Root traps (using allowed qualities, contours, degrees)
-  const shuffledRoots = shuffle(otherRoots);
-  for (const trapRoot of shuffledRoots) {
-    if (options.length >= 4) break;
-    const trapRootStr = formatNoteName(trapRoot, target.rootAccidental);
-    const trapContour = allowedContours[Math.floor(Math.random() * allowedContours.length)];
-    const trapContourLabel = trapContour.charAt(0).toUpperCase() + trapContour.slice(1);
-    const trapDegree = allowedDegrees[Math.floor(Math.random() * allowedDegrees.length)];
-    const trapQual = allowedQualities[Math.floor(Math.random() * allowedQualities.length)];
-    const trapQualStr = CHORD_FORMULAS[trapQual]?.shortName || 'Maj';
-    const sig = `${trapRootStr}:${trapQual}:${trapContour}:${trapDegree}`;
-    if (!seen.has(sig)) {
-      seen.add(sig);
-      options.push({
-        id: `trap_root_${trapRoot}_${trapQual}`,
-        label: `${trapRootStr}${trapQualStr} (${trapContourLabel})`,
-        sublabel: `Starts on ${trapDegree}`,
-        isCorrect: false,
-        arpeggioData: {
-          root: trapRoot,
-          accidental: target.rootAccidental,
-          quality: trapQual,
-          contour: trapContour,
-          startingDegree: trapDegree
-        }
-      });
-    }
-  }
-
-  // Fill up to 4 if needed
-  let fallbackIndex = 0;
-  while (options.length < 4) {
-    const fallbackRoot = NOTE_LETTERS[fallbackIndex % NOTE_LETTERS.length];
-    const fallbackRootStr = formatNoteName(fallbackRoot, target.rootAccidental);
-    const fallbackContour = target.contour;
-    const fallbackContourLabel = fallbackContour.charAt(0).toUpperCase() + fallbackContour.slice(1);
-    const fallbackDegree = target.startingDegree;
-    options.push({
-      id: `trap_arp_fallback_${fallbackIndex}_${target.id}`,
-      label: `${fallbackRootStr}${qualityStr} (${fallbackContourLabel})`,
-      sublabel: `Starts on ${fallbackDegree}`,
-      isCorrect: false,
+    return {
+      id: isTarget ? target.id : `dist_arp_${root}_${qual}_${contour}_${degree}_${Math.random().toString(36).substring(2, 7)}`,
+      label: `${rStr}${qStr} (${cLabel})`,
+      sublabel: `Starts on ${degree}`,
+      isCorrect: isTarget,
       arpeggioData: {
-        root: fallbackRoot,
+        root,
         accidental: target.rootAccidental,
-        quality: target.quality,
-        contour: fallbackContour,
-        startingDegree: fallbackDegree
+        quality: qual,
+        contour,
+        startingDegree: degree
       }
-    });
-    fallbackIndex++;
+    };
+  };
+
+  const options: MultipleChoiceOption[] = [];
+  const seen = new Set<string>();
+
+  const addArpOpt = (root: NoteLetter, qual: ChordQuality, contour: ArpeggioContour, degree: 'root' | '3rd' | '5th', isTarget: boolean) => {
+    const key = `${root}:${qual}:${contour}:${degree}`;
+    if (!seen.has(key) && options.length < 4) {
+      seen.add(key);
+      options.push(makeArpOption(root, qual, contour, degree, isTarget));
+    }
+  };
+
+  // Add target first
+  addArpOpt(target.root, target.quality, target.contour, target.startingDegree, true);
+
+  const canDo2x2Contour = otherContours.length >= 1;
+  const canDo2x2Qual = otherQualities.length >= 1;
+  const canDo2x2Degree = otherDegrees.length >= 1;
+  const roll = Math.random();
+
+  if (canDo2x2Contour && roll < 0.4) {
+    // Symmetrical 2x2 Matrix across Contours
+    const pairedRoot = plausibleRoots[0] || (target.root === 'C' ? 'G' : 'C');
+    const trapContour = otherContours[Math.floor(Math.random() * otherContours.length)];
+
+    addArpOpt(target.root, target.quality, trapContour, target.startingDegree, false);
+    addArpOpt(pairedRoot, target.quality, target.contour, target.startingDegree, false);
+    addArpOpt(pairedRoot, target.quality, trapContour, target.startingDegree, false);
+  } else if (canDo2x2Qual && roll < 0.7) {
+    // Symmetrical 2x2 Matrix across Qualities
+    const pairedRoot = plausibleRoots[0] || (target.root === 'C' ? 'G' : 'C');
+    const trapQual = otherQualities[Math.floor(Math.random() * otherQualities.length)];
+
+    addArpOpt(target.root, trapQual, target.contour, target.startingDegree, false);
+    addArpOpt(pairedRoot, target.quality, target.contour, target.startingDegree, false);
+    addArpOpt(pairedRoot, trapQual, target.contour, target.startingDegree, false);
+  } else if (canDo2x2Degree && roll < 0.85) {
+    // Symmetrical 2x2 Matrix across Starting Degrees
+    const pairedRoot = plausibleRoots[0] || (target.root === 'C' ? 'G' : 'C');
+    const trapDegree = otherDegrees[Math.floor(Math.random() * otherDegrees.length)];
+
+    addArpOpt(target.root, target.quality, target.contour, trapDegree, false);
+    addArpOpt(pairedRoot, target.quality, target.contour, target.startingDegree, false);
+    addArpOpt(pairedRoot, target.quality, target.contour, trapDegree, false);
+  } else {
+    // 4 All-Distinct Roots
+    const distinctRoots = plausibleRoots.slice(0, 3);
+    for (const dRoot of distinctRoots) {
+      addArpOpt(dRoot, target.quality, target.contour, target.startingDegree, false);
+      if (options.length === 4) break;
+    }
+  }
+
+  // Fallback if needed
+  let fallbackIdx = 0;
+  while (options.length < 4) {
+    const fRoot = plausibleRoots[fallbackIdx % plausibleRoots.length] || NOTE_LETTERS[fallbackIdx % NOTE_LETTERS.length];
+    const fQual = allowedQualities[fallbackIdx % allowedQualities.length];
+    const fContour = allowedContours[fallbackIdx % allowedContours.length];
+    const fDegree = allowedDegrees[fallbackIdx % allowedDegrees.length];
+    addArpOpt(fRoot, fQual, fContour, fDegree, false);
+    fallbackIdx++;
   }
 
   return shuffle(options);
 }
-
