@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Font Comparison — M vs m Clarity in Sheet Trainer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:wght@600;700&family=EB+Garamond:wght@600;700;800&family=Lora:wght@600;700&family=Newsreader:wght@600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@600;700;800&family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f4ee;
+      --card: #fcfbfa;
+      --panel: #eee9df;
+      --border: #ddd6c8;
+      --text: #38332d;
+      --muted: #6b6358;
+      --accent: #84532b;
+      --accent-tint: #f5ede1;
+      --accent-border: #d4bda8;
+      --success: #485c3b;
+      --success-tint: #edf2ea;
+      --error: #9c382e;
+      --error-tint: #fbeeed;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      padding: 24px 16px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    p.sub {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .problem-banner {
+      background: var(--error-tint);
+      border: 1px solid #e2bdb8;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      font-size: 13px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .card.current {
+      border: 2px dashed #9c382e;
+      background: #fdfaf9;
+    }
+    .card.recommended {
+      border: 2px solid var(--accent);
+      position: relative;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-current { background: var(--error-tint); color: var(--error); }
+    .badge-rec { background: var(--accent-tint); color: var(--accent); border: 1px solid var(--accent-border); }
+    .badge-alt { background: var(--panel); color: var(--muted); }
+    
+    .font-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .font-desc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    
+    .demo-box {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .chord-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .chord-pill {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .chord-pill.active {
+      background: var(--accent-tint);
+      border-color: var(--accent-border);
+      color: var(--accent);
+    }
+    
+    .mc-preview {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .mc-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    
+    /* Font families */
+    .f-cinzel { font-family: 'Cinzel', serif; }
+    .f-eb-garamond { font-family: 'EB Garamond', serif; }
+    .f-cormorant { font-family: 'Cormorant Garamond', serif; }
+    .f-lora { font-family: 'Lora', serif; }
+    .f-newsreader { font-family: 'Newsreader', serif; }
+    .f-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .f-inter { font-family: 'Inter', sans-serif; }
+    .f-mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Typography Comparison — 'M' (Major) vs 'm' (minor) Clarity</h1>
+    <p class="sub">Notice why Cinzel causes issues (it is a small-caps titling font with no true lowercase 'm') and compare alternative typefaces below.</p>
+
+    <div class="problem-banner">
+      <strong>The Cinzel Issue:</strong> In <code>Cinzel</code>, lowercase <code>m</code> is rendered as a miniature uppercase <code>ᴍ</code>. In chord symbols, <code>C Maj</code> and <code>C m</code> or <code>Cmaj7</code> and <code>Cm7</code> look virtually identical because both use the capital M glyph structure.
+    </div>
+
+    <div class="grid">
+      <!-- 0. CURRENT: CINZEL -->
+      <div class="card current">
+        <span class="badge badge-current">Current (Problematic)</span>
+        <div class="font-title f-cinzel">Cinzel (Titling Small-Caps)</div>
+        <div class="font-desc">All lowercase letters are small capital glyphs. Notice M and m have the exact same shape.</div>
+        
+        <div class="demo-box">
+          <div class="chord-row f-cinzel">
+            <div class="chord-pill">C Maj</div>
+            <div class="chord-pill">C min</div>
+            <div class="chord-pill">C m</div>
+            <div class="chord-pill active">Cmaj7</div>
+            <div class="chord-pill active">Cm7</div>
+          </div>
+          <div class="mc-preview f-cinzel">
+            <div class="mc-btn">1. C Maj (Root)</div>
+            <div class="mc-btn">2. C min (Root)</div>
+            <div class="mc-btn">3. Cmaj7</div>
+            <div class="mc-btn">4. Cm7 (1st Inv)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. OPTION 1: EB GARAMOND (CLASSICAL SERIF) -->
+      <div class="card recommended">
+        <span class="badge badge-rec">Option 1 (Recommended Classical Serif)</span>
+        <div class="font-title f-eb-garamond" style="font-size: 21px;">EB Garamond (Classical Book Serif)</div>
+        <div class="font-desc">Maintains the warm conservatory aesthetic with authentic, highly distinct lowercase 'm' and uppercase 'M'.</div>
+        
+        <div class="demo-box">
+          <div class="chord-row f-eb-garamond">
+            <div class="chord-pill">C Maj</div>
+            <div class="chord-pill">C min</div>
+            <div class="chord-pill">C m</div>
+            <div class="chord-pill active">Cmaj7</div>
+            <div class="chord-pill active">Cm7</div>
+          </div>
+          <div class="mc-preview f-eb-garamond">
+            <div class="mc-btn">1. C Maj (Root)</div>
+            <div class="mc-btn">2. C min (Root)</div>
+            <div class="mc-btn">3. Cmaj7</div>
+            <div class="mc-btn">4. Cm7 (1st Inv)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. OPTION 2: CORMORANT GARAMOND -->
+      <div class="card">
+        <span class="badge badge-alt">Option 2 (Refined Display Serif)</span>
+        <div class="font-title f-cormorant" style="font-size: 22px;">Cormorant Garamond</div>
+        <div class="font-desc">Elegant, high-contrast serif already bundled in the app. Graceful rounded 'm'.</div>
+        
+        <div class="demo-box">
+          <div class="chord-row f-cormorant">
+            <div class="chord-pill">C Maj</div>
+            <div class="chord-pill">C min</div>
+            <div class="chord-pill">C m</div>
+            <div class="chord-pill active">Cmaj7</div>
+            <div class="chord-pill active">Cm7</div>
+          </div>
+          <div class="mc-preview f-cormorant">
+            <div class="mc-btn">1. C Maj (Root)</div>
+            <div class="mc-btn">2. C min (Root)</div>
+            <div class="mc-btn">3. Cmaj7</div>
+            <div class="mc-btn">4. Cm7 (1st Inv)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. OPTION 3: PLUS JAKARTA SANS -->
+      <div class="card recommended">
+        <span class="badge badge-rec">Option 3 (Recommended Clean Sans)</span>
+        <div class="font-title f-jakarta">Plus Jakarta Sans (Modern Geometric)</div>
+        <div class="font-desc">Ultra-clean, modern legibility. Ideal for rapid sub-second flash card chunking.</div>
+        
+        <div class="demo-box">
+          <div class="chord-row f-jakarta">
+            <div class="chord-pill">C Maj</div>
+            <div class="chord-pill">C min</div>
+            <div class="chord-pill">C m</div>
+            <div class="chord-pill active">Cmaj7</div>
+            <div class="chord-pill active">Cm7</div>
+          </div>
+          <div class="mc-preview f-jakarta">
+            <div class="mc-btn">1. C Maj (Root)</div>
+            <div class="mc-btn">2. C min (Root)</div>
+            <div class="mc-btn">3. Cmaj7</div>
+            <div class="mc-btn">4. Cm7 (1st Inv)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. OPTION 4: LORA -->
+      <div class="card">
+        <span class="badge badge-alt">Option 4 (Contemporary Balanced Serif)</span>
+        <div class="font-title f-lora">Lora (Contemporary Serif)</div>
+        <div class="font-desc">Contemporary serif with brushed curves and sturdy letterforms designed specifically for screens.</div>
+        
+        <div class="demo-box">
+          <div class="chord-row f-lora">
+            <div class="chord-pill">C Maj</div>
+            <div class="chord-pill">C min</div>
+            <div class="chord-pill">C m</div>
+            <div class="chord-pill active">Cmaj7</div>
+            <div class="chord-pill active">Cm7</div>
+          </div>
+          <div class="mc-preview f-lora">
+            <div class="mc-btn">1. C Maj (Root)</div>
+            <div class="mc-btn">2. C min (Root)</div>
+            <div class="mc-btn">3. Cmaj7</div>
+            <div class="mc-btn">4. Cm7 (1st Inv)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. OPTION 5: JETBRAINS MONO -->
+      <div class="card">
+        <span class="badge badge-alt">Option 5 (Technical Score Publisher)</span>
+        <div class="font-title f-mono">JetBrains Mono (Technical Lead)</div>
+        <div class="font-desc">Zero ambiguity between any characters. Fixed-width chords line up with mechanical precision.</div>
+        
+        <div class="demo-box">
+          <div class="chord-row f-mono">
+            <div class="chord-pill">C Maj</div>
+            <div class="chord-pill">C min</div>
+            <div class="chord-pill">C m</div>
+            <div class="chord-pill active">Cmaj7</div>
+            <div class="chord-pill active">Cm7</div>
+          </div>
+          <div class="mc-preview f-mono">
+            <div class="mc-btn">1. C Maj (Root)</div>
+            <div class="mc-btn">2. C min (Root)</div>
+            <div class="mc-btn">3. Cmaj7</div>
+            <div class="mc-btn">4. Cm7 (1st Inv)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

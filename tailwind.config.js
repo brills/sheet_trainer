@@ -53,7 +53,7 @@ export default {
         }
       },
       fontFamily: {
-        serif: ['Cinzel', 'serif'],
+        serif: ['"EB Garamond"', 'Cormorant Garamond', 'serif'],
         cormorant: ['Cormorant Garamond', 'serif'],
         sans: ['Plus Jakarta Sans', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
         mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
