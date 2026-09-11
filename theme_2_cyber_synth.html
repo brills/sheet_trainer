@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sheet Trainer — Cyber Synth / Arcade Neon HUD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #06070d;
+      --bg-surface: #0e111d;
+      --bg-surface-elevated: #161a2e;
+      --bg-slot: #090b14;
+      --border-subtle: #1e243d;
+      --border-strong: #2f3960;
+      --neon-cyan: #00f0ff;
+      --neon-magenta: #ff007f;
+      --neon-violet: #a855f7;
+      --neon-green: #00ff88;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --accent: var(--neon-cyan);
+      --accent-glow: rgba(0, 240, 255, 0.2);
+      --accent-border: rgba(0, 240, 255, 0.6);
+      --btn-corner: 6px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      background-image: 
+        radial-gradient(ellipse at 50% 0%, rgba(168, 85, 247, 0.12) 0%, transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(0, 240, 255, 0.08) 0%, transparent 50%),
+        linear-gradient(rgba(14, 17, 29, 0.4) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(14, 17, 29, 0.4) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+      color: var(--text-main);
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.4;
+    }
+
+    .font-orbitron { font-family: 'Orbitron', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Top Navigation */
+    header {
+      background: rgba(14, 17, 29, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .nav-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 16px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.08em;
+      color: var(--text-main);
+      text-transform: uppercase;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--neon-cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--neon-cyan);
+    }
+
+    /* Cyber Segmented Controls */
+    .segmented-control {
+      background: var(--bg-slot);
+      padding: 4px;
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      gap: 4px;
+      clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    }
+
+    .segment-btn {
+      padding: 6px 16px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+    }
+
+    .segment-btn:hover {
+      color: var(--text-main);
+    }
+
+    .segment-btn.active {
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--neon-cyan);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+    }
+
+    .tool-btn {
+      padding: 6px 12px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-strong);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+    }
+
+    .tool-btn:hover {
+      border-color: var(--neon-cyan);
+      color: var(--text-main);
+      box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+    }
+
+    .badge-cyber {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      padding: 1px 6px;
+      background: rgba(0, 240, 255, 0.15);
+      border: 1px solid var(--neon-cyan);
+      color: var(--neon-cyan);
+      border-radius: 2px;
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 480px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Control Toolbar */
+    .showcase-toolbar {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      border-left: 3px solid var(--accent);
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.4);
+    }
+
+    .toolbar-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+
+    .toolbar-label {
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+    }
+
+    .toolbar-options {
+      display: flex;
+      gap: 5px;
+    }
+
+    .chip-btn {
+      padding: 4px 10px;
+      background: var(--bg-slot);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+
+    .chip-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    /* Tier Header */
+    .tier-card {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      cursor: pointer;
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+      transition: all 0.2s;
+    }
+
+    .tier-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .tier-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tier-badge {
+      width: 34px;
+      height: 34px;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--accent);
+    }
+
+    .tier-title-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tier-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      color: var(--text-main);
+    }
+
+    .tier-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      background: rgba(0, 255, 136, 0.15);
+      border: 1px solid var(--neon-green);
+      color: var(--neon-green);
+      text-transform: uppercase;
+    }
+
+    .tier-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .tier-tag {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid var(--accent);
+      padding: 4px 10px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      text-transform: uppercase;
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    /* Notation Stage (Holographic Laser Stave) */
+    .stage-container {
+      width: 100%;
+      background: linear-gradient(180deg, #0e111d 0%, #080a12 100%);
+      border: 1px solid var(--border-strong);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-bottom: 12px;
+      min-height: 190px;
+      box-shadow: inset 0 0 25px rgba(0, 240, 255, 0.05), 0 4px 20px rgba(0,0,0,0.5);
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    }
+
+    .stage-svg-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    /* Side-by-Side Diff View */
+    .diff-container {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .diff-staves {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .diff-card {
+      background: var(--bg-slot);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .diff-card.error {
+      border-color: var(--neon-magenta);
+      background: rgba(255, 0, 127, 0.06);
+      box-shadow: 0 0 10px rgba(255, 0, 127, 0.2);
+    }
+
+    .diff-card.correct {
+      border-color: var(--neon-green);
+      background: rgba(0, 255, 136, 0.06);
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+    }
+
+    .diff-badge {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .diff-badge.error { color: var(--neon-magenta); text-shadow: 0 0 8px var(--neon-magenta); }
+    .diff-badge.correct { color: var(--neon-green); text-shadow: 0 0 8px var(--neon-green); }
+
+    .diff-banner {
+      width: 100%;
+      padding: 8px 12px;
+      background: rgba(255, 0, 127, 0.15);
+      border: 1px solid var(--neon-magenta);
+      box-shadow: 0 0 12px rgba(255, 0, 127, 0.3);
+      color: #ffb3d9;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Stats HUD (Arcade Cyber Gauges) */
+    .stats-hud {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-bottom: 2px solid var(--accent);
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stat-icon-wrap {
+      width: 26px;
+      height: 26px;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      box-shadow: 0 0 6px var(--accent-glow);
+    }
+
+    .stat-data {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 8px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+    }
+
+    .stat-val {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--text-main);
+    }
+
+    .stat-val.accent { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
+    .stat-val.success { color: var(--neon-green); text-shadow: 0 0 8px var(--neon-green); }
+
+    /* 4-Slot Visual Display */
+    .slot-buffer {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 8px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 12px;
+    }
+
+    .slot-box {
+      background: var(--bg-slot);
+      border: 1px solid var(--border-subtle);
+      height: 62px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+
+    .slot-box.active {
+      border-color: var(--accent);
+      background: rgba(0, 240, 255, 0.08);
+      box-shadow: 0 0 12px var(--accent-glow), inset 0 0 8px var(--accent-glow);
+    }
+
+    .slot-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 8px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      margin-bottom: 2px;
+    }
+
+    .slot-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--accent);
+      text-shadow: 0 0 8px var(--accent);
+    }
+
+    .slot-value.empty {
+      color: var(--border-strong);
+      text-shadow: none;
+    }
+
+    /* Keypad Layout (Arcade Backlit Keycaps) */
+    .keypad-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      padding: 10px;
+    }
+
+    .keypad-row {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .key-btn {
+      flex: 1;
+      height: 44px;
+      background: linear-gradient(180deg, #181d33 0%, #101322 100%);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--btn-corner);
+      color: var(--text-main);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.1s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+    }
+
+    .key-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .key-btn:active {
+      transform: scale(0.96);
+    }
+
+    .key-btn.selected {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent);
+    }
+
+    .key-btn.small {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      height: 38px;
+    }
+
+    .key-grid-7 {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      width: 100%;
+    }
+
+    .key-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      width: 100%;
+    }
+
+    /* Multiple Choice Pad */
+    .mc-container {
+      display: none;
+      width: 100%;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .mc-option-btn {
+      background: linear-gradient(180deg, #151a2d 0%, #0d101d 100%);
+      border: 1px solid var(--border-strong);
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s ease;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+    }
+
+    .mc-option-btn:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .mc-shortcut {
+      position: absolute;
+      top: 6px;
+      left: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--accent);
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--accent);
+      padding: 1px 5px;
+    }
+
+    .mc-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-top: 4px;
+    }
+
+    .mc-sublabel {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Keymap Legend */
+    .keymap-legend {
+      width: 100%;
+      margin-top: 14px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .kbd {
+      background: var(--bg-slot);
+      border: 1px solid var(--border-strong);
+      padding: 1px 5px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--accent);
+    }
+
+    .icon {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="nav-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+        </div>
+        <span>Sheet Trainer</span>
+        <span class="badge-cyber">CYBER</span>
+      </div>
+
+      <!-- Segmented Track Switcher -->
+      <div class="segmented-control">
+        <button type="button" class="segment-btn active" id="btnTrackChords" onclick="setTrack('chords')">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+          Chords
+        </button>
+        <button type="button" class="segment-btn" id="btnTrackArpeggios" onclick="setTrack('arpeggios')">
+          <svg class="icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          Arpeggios
+        </button>
+      </div>
+
+      <!-- Right Nav Tools -->
+      <div class="nav-tools">
+        <div class="tool-btn">
+          <svg class="icon" style="color:var(--neon-cyan)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+          <span>G / Em</span>
+          <span class="badge-cyber">1♯</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Stage & Interactive Playground -->
+  <main>
+
+    <!-- Style Tweaker Toolbar -->
+    <div class="showcase-toolbar">
+      <div class="toolbar-row">
+        <span class="toolbar-label">Input Style</span>
+        <div class="toolbar-options">
+          <button class="chip-btn active" id="modeDirect" onclick="setInputMode('direct')">4-Slot Entry</button>
+          <button class="chip-btn" id="modeMC" onclick="setInputMode('mc')">Multiple Choice</button>
+          <button class="chip-btn" id="modeDiff" onclick="toggleDiff()">Diff View</button>
+        </div>
+      </div>
+      <div class="toolbar-row">
+        <span class="toolbar-label">Corner Style</span>
+        <div class="toolbar-options">
+          <button class="chip-btn active" onclick="setCorner('tech', this)">Cyber Cut</button>
+          <button class="chip-btn" onclick="setCorner('sharp', this)">Sharp 2px</button>
+          <button class="chip-btn" onclick="setCorner('round', this)">Round 8px</button>
+        </div>
+      </div>
+      <div class="toolbar-row">
+        <span class="toolbar-label">Neon Core</span>
+        <div class="toolbar-options">
+          <button class="chip-btn active" style="color:#00f0ff" onclick="setNeon('#00f0ff', this)">Cyan</button>
+          <button class="chip-btn" style="color:#ff007f" onclick="setNeon('#ff007f', this)">Magenta</button>
+          <button class="chip-btn" style="color:#a855f7" onclick="setNeon('#a855f7', this)">Violet</button>
+          <button class="chip-btn" style="color:#00ff88" onclick="setNeon('#00ff88', this)">Lime</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tier Header Bar -->
+    <div class="tier-card">
+      <div class="tier-left">
+        <div class="tier-badge">3.1</div>
+        <div>
+          <div class="tier-title-row">
+            <span class="tier-title">7th Chords (Root Position)</span>
+            <span class="tier-status">Active</span>
+          </div>
+          <div class="tier-desc">Maj7, Dom7, Min7 & Half-Diminished 7ths</div>
+        </div>
+      </div>
+      <div class="tier-tag">
+        <svg class="icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+        <span>Tiers</span>
+      </div>
+    </div>
+
+    <!-- Holographic Stave Stage -->
+    <div class="stage-container" id="singleStage">
+      <div class="stage-svg-wrap">
+        <svg width="340" height="150" viewBox="0 0 340 150">
+          <defs>
+            <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+
+          <!-- Glowing Staff Lines -->
+          <line x1="20" y1="45" x2="320" y2="45" stroke="#2a3556" stroke-width="1.2"/>
+          <line x1="20" y1="58" x2="320" y2="58" stroke="#2a3556" stroke-width="1.2"/>
+          <line x1="20" y1="71" x2="320" y2="71" stroke="#2a3556" stroke-width="1.2"/>
+          <line x1="20" y1="84" x2="320" y2="84" stroke="#2a3556" stroke-width="1.2"/>
+          <line x1="20" y1="97" x2="320" y2="97" stroke="#2a3556" stroke-width="1.2"/>
+          
+          <line x1="20" y1="45" x2="20" y2="97" stroke="var(--neon-cyan)" stroke-width="2" filter="url(#glow-cyan)"/>
+          <line x1="320" y1="45" x2="320" y2="97" stroke="var(--neon-cyan)" stroke-width="2" filter="url(#glow-cyan)"/>
+
+          <!-- G-Clef -->
+          <text x="32" y="93" fill="#00f0ff" font-family="serif" font-size="62" filter="url(#glow-cyan)">𝄞</text>
+
+          <!-- Key Signature 1 Sharp -->
+          <text x="76" y="52" fill="#00f0ff" font-family="JetBrains Mono" font-size="18" font-weight="bold">♯</text>
+
+          <!-- Luminous Chord Notes: G4 - B4 - D5 - F#5 -->
+          <ellipse cx="190" cy="84" rx="7.5" ry="5.5" fill="#00f0ff" filter="url(#glow-cyan)" transform="rotate(-15 190 84)"/>
+          <ellipse cx="190" cy="71" rx="7.5" ry="5.5" fill="#00f0ff" filter="url(#glow-cyan)" transform="rotate(-15 190 71)"/>
+          <ellipse cx="190" cy="58" rx="7.5" ry="5.5" fill="#00f0ff" filter="url(#glow-cyan)" transform="rotate(-15 190 58)"/>
+          <ellipse cx="190" cy="45" rx="7.5" ry="5.5" fill="#00f0ff" filter="url(#glow-cyan)" transform="rotate(-15 190 45)"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Side-by-Side Diff View -->
+    <div class="diff-container" id="diffStage">
+      <div class="diff-banner">
+        <span>MISMATCH: Target is <strong>Gmaj7 (Root)</strong></span>
+        <span style="font-family:'Orbitron';font-size:10px;">PRESS [ENTER]</span>
+      </div>
+      <div class="diff-staves">
+        <!-- Error Chord -->
+        <div class="diff-card error">
+          <span class="diff-badge error">INPUT: G7</span>
+          <svg width="150" height="100" viewBox="0 0 150 100">
+            <line x1="10" y1="25" x2="140" y2="25" stroke="#33243a" stroke-width="1"/>
+            <line x1="10" y1="36" x2="140" y2="36" stroke="#33243a" stroke-width="1"/>
+            <line x1="10" y1="47" x2="140" y2="47" stroke="#33243a" stroke-width="1"/>
+            <line x1="10" y1="58" x2="140" y2="58" stroke="#33243a" stroke-width="1"/>
+            <line x1="10" y1="69" x2="140" y2="69" stroke="#33243a" stroke-width="1"/>
+            <text x="14" y="66" fill="#ff007f" font-family="serif" font-size="34">𝄞</text>
+            <text x="64" y="32" fill="#ff007f" font-family="JetBrains Mono" font-size="14">♮</text>
+            <ellipse cx="95" cy="58" rx="6" ry="4.5" fill="#ff007f" transform="rotate(-15 95 58)"/>
+            <ellipse cx="95" cy="47" rx="6" ry="4.5" fill="#ff007f" transform="rotate(-15 95 47)"/>
+            <ellipse cx="95" cy="36" rx="6" ry="4.5" fill="#ff007f" transform="rotate(-15 95 36)"/>
+            <ellipse cx="95" cy="25" rx="6" ry="4.5" fill="#ff007f" transform="rotate(-15 95 25)"/>
+          </svg>
+        </div>
+
+        <!-- Target Chord -->
+        <div class="diff-card correct">
+          <span class="diff-badge correct">TARGET: Gmaj7</span>
+          <svg width="150" height="100" viewBox="0 0 150 100">
+            <line x1="10" y1="25" x2="140" y2="25" stroke="#1b3830" stroke-width="1"/>
+            <line x1="10" y1="36" x2="140" y2="36" stroke="#1b3830" stroke-width="1"/>
+            <line x1="10" y1="47" x2="140" y2="47" stroke="#1b3830" stroke-width="1"/>
+            <line x1="10" y1="58" x2="140" y2="58" stroke="#1b3830" stroke-width="1"/>
+            <line x1="10" y1="69" x2="140" y2="69" stroke="#1b3830" stroke-width="1"/>
+            <text x="14" y="66" fill="#00ff88" font-family="serif" font-size="34">𝄞</text>
+            <text x="66" y="30" fill="#00ff88" font-family="JetBrains Mono" font-size="14">♯</text>
+            <ellipse cx="95" cy="58" rx="6" ry="4.5" fill="#00ff88" transform="rotate(-15 95 58)"/>
+            <ellipse cx="95" cy="47" rx="6" ry="4.5" fill="#00ff88" transform="rotate(-15 95 47)"/>
+            <ellipse cx="95" cy="36" rx="6" ry="4.5" fill="#00ff88" transform="rotate(-15 95 36)"/>
+            <ellipse cx="95" cy="25" rx="6" ry="4.5" fill="#00ff88" transform="rotate(-15 95 25)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Real-Time Stats HUD -->
+    <div class="stats-hud">
+      <div class="stat-card">
+        <div class="stat-icon-wrap">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
+        </div>
+        <div class="stat-data">
+          <span class="stat-label">Streak</span>
+          <span class="stat-val accent">14</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrap">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+        </div>
+        <div class="stat-data">
+          <span class="stat-label">Accuracy</span>
+          <span class="stat-val success">95%</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrap">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <div class="stat-data">
+          <span class="stat-label">Latency</span>
+          <span class="stat-val">1.18s</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Direct Entry Section: 4-Slot Buffer + Keypad -->
+    <div id="directEntrySection" style="width:100%">
+      <div class="slot-buffer">
+        <div class="slot-box active" id="slot0">
+          <span class="slot-label">1. Root</span>
+          <span class="slot-value" id="valRoot">G</span>
+        </div>
+        <div class="slot-box" id="slot1">
+          <span class="slot-label">2. Acc</span>
+          <span class="slot-value" id="valAcc">♮</span>
+        </div>
+        <div class="slot-box" id="slot2">
+          <span class="slot-label">3. Quality</span>
+          <span class="slot-value" id="valQual">maj7</span>
+        </div>
+        <div class="slot-box" id="slot3">
+          <span class="slot-label">4. Inv</span>
+          <span class="slot-value" id="valInv">Root</span>
+        </div>
+      </div>
+
+      <div class="keypad-container">
+        <!-- Row 1: Note Roots -->
+        <div class="keypad-row">
+          <button type="button" class="key-btn" onclick="selectRoot('C')">C</button>
+          <button type="button" class="key-btn" onclick="selectRoot('D')">D</button>
+          <button type="button" class="key-btn" onclick="selectRoot('E')">E</button>
+          <button type="button" class="key-btn" onclick="selectRoot('F')">F</button>
+          <button type="button" class="key-btn selected" onclick="selectRoot('G')">G</button>
+          <button type="button" class="key-btn" onclick="selectRoot('A')">A</button>
+          <button type="button" class="key-btn" onclick="selectRoot('B')">B</button>
+        </div>
+
+        <!-- Row 2: Accidentals + Inversions -->
+        <div class="key-grid-7">
+          <button type="button" class="key-btn small selected" onclick="selectAcc('♮')">♮</button>
+          <button type="button" class="key-btn small" onclick="selectAcc('♯')">♯</button>
+          <button type="button" class="key-btn small" onclick="selectAcc('♭')">♭</button>
+          <button type="button" class="key-btn small selected" onclick="selectInv('Root')">Root</button>
+          <button type="button" class="key-btn small" onclick="selectInv('1st')">1st</button>
+          <button type="button" class="key-btn small" onclick="selectInv('2nd')">2nd</button>
+          <button type="button" class="key-btn small" onclick="selectInv('3rd')">3rd</button>
+        </div>
+
+        <!-- Row 3: Qualities -->
+        <div class="key-grid-4">
+          <button type="button" class="key-btn small" onclick="selectQual('Maj')">Maj</button>
+          <button type="button" class="key-btn small" onclick="selectQual('Min')">Min</button>
+          <button type="button" class="key-btn small" onclick="selectQual('7')">7 (Dom)</button>
+          <button type="button" class="key-btn small selected" onclick="selectQual('maj7')">maj7</button>
+        </div>
+        <div class="key-grid-4">
+          <button type="button" class="key-btn small" onclick="selectQual('min7')">min7</button>
+          <button type="button" class="key-btn small" onclick="selectQual('ø7')">ø7 (m7♭5)</button>
+          <button type="button" class="key-btn small" onclick="selectQual('dim7')">dim7</button>
+          <button type="button" class="key-btn small" onclick="selectQual('aug')">aug</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Multiple Choice Section -->
+    <div class="mc-container" id="mcSection">
+      <button type="button" class="mc-option-btn">
+        <span class="mc-shortcut">1</span>
+        <span class="mc-label">Gmaj7</span>
+        <span class="mc-sublabel">Root Position</span>
+      </button>
+      <button type="button" class="mc-option-btn">
+        <span class="mc-shortcut">2</span>
+        <span class="mc-label">G7</span>
+        <span class="mc-sublabel">Dominant 7th</span>
+      </button>
+      <button type="button" class="mc-option-btn">
+        <span class="mc-shortcut">3</span>
+        <span class="mc-label">Em7</span>
+        <span class="mc-sublabel">1st Inversion</span>
+      </button>
+      <button type="button" class="mc-option-btn">
+        <span class="mc-shortcut">4</span>
+        <span class="mc-label">Bmin7</span>
+        <span class="mc-sublabel">Root Position</span>
+      </button>
+    </div>
+
+    <!-- Keyboard Legend Footer -->
+    <div class="keymap-legend">
+      <div class="legend-item"><span class="kbd">C..B</span> Roots</div>
+      <div class="legend-item"><span class="kbd">1 2 3</span> ♮ ♯ ♭</div>
+      <div class="legend-item"><span class="kbd">M m 7 J</span> Qualities</div>
+      <div class="legend-item"><span class="kbd">R 1 2 3</span> Inversions</div>
+    </div>
+
+  </main>
+
+  <script>
+    function setInputMode(mode) {
+      document.getElementById('modeDirect').classList.toggle('active', mode === 'direct');
+      document.getElementById('modeMC').classList.toggle('active', mode === 'mc');
+      document.getElementById('directEntrySection').style.display = mode === 'direct' ? 'block' : 'none';
+      document.getElementById('mcSection').style.display = mode === 'mc' ? 'grid' : 'none';
+    }
+
+    let isDiff = false;
+    function toggleDiff() {
+      isDiff = !isDiff;
+      document.getElementById('modeDiff').classList.toggle('active', isDiff);
+      document.getElementById('singleStage').style.display = isDiff ? 'none' : 'flex';
+      document.getElementById('diffStage').style.display = isDiff ? 'flex' : 'none';
+    }
+
+    function setCorner(type, btn) {
+      document.querySelectorAll('.toolbar-options button').forEach(b => {
+        if (['Cyber Cut', 'Sharp 2px', 'Round 8px'].includes(b.innerText)) {
+          b.classList.remove('active');
+        }
+      });
+      btn.classList.add('active');
+
+      const root = document.documentElement;
+      if (type === 'tech') {
+        root.style.setProperty('--btn-corner', '0px');
+      } else if (type === 'sharp') {
+        root.style.setProperty('--btn-corner', '2px');
+      } else if (type === 'round') {
+        root.style.setProperty('--btn-corner', '8px');
+      }
+    }
+
+    function setNeon(color, btn) {
+      document.querySelectorAll('.toolbar-options button').forEach(b => {
+        if (['Cyan', 'Magenta', 'Violet', 'Lime'].includes(b.innerText)) {
+          b.classList.remove('active');
+        }
+      });
+      btn.classList.add('active');
+      const root = document.documentElement;
+      root.style.setProperty('--accent', color);
+      root.style.setProperty('--accent-glow', color + '33');
+    }
+
+    function selectRoot(r) { document.getElementById('valRoot').innerText = r; }
+    function selectAcc(a) { document.getElementById('valAcc').innerText = a; }
+    function selectQual(q) { document.getElementById('valQual').innerText = q; }
+    function selectInv(i) { document.getElementById('valInv').innerText = i; }
+    function setTrack(t) {
+      document.getElementById('btnTrackChords').classList.toggle('active', t === 'chords');
+      document.getElementById('btnTrackArpeggios').classList.toggle('active', t === 'arpeggios');
+    }
+  </script>
+</body>
+</html>

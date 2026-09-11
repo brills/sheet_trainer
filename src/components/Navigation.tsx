@@ -26,20 +26,20 @@ export const Navigation: React.FC<NavigationProps> = ({
     : '0♮';
 
   return (
-    <header className="w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40">
+    <header className="w-full border-b border-[#ddd6c8] bg-[#eee9df]/95 backdrop-blur-md sticky top-0 z-40 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
       <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* App Title & Brand */}
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-inner">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-[#fcfbfa] border border-[#ddd6c8] flex items-center justify-center text-[#8c531b] shadow-sm">
             <Music className="w-4 h-4" />
           </div>
-          <span className="font-bold text-base tracking-tight bg-gradient-to-r from-emerald-400 to-teal-200 bg-clip-text text-transparent">
+          <span className="font-serif font-bold text-base tracking-tight text-[#38332d]">
             Sheet Trainer
           </span>
         </div>
 
         {/* Center Track Tabs (Chords / Arpeggios) */}
-        <div className="flex items-center p-1 rounded-xl bg-slate-900 border border-slate-800">
+        <div className="flex items-center p-1 rounded-xl bg-[#fcfbfa] border border-[#ddd6c8] shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]">
           <button
             type="button"
             onClick={() => {
@@ -47,10 +47,10 @@ export const Navigation: React.FC<NavigationProps> = ({
               if (currentRoute !== 'chords') onRouteChange('chords');
             }}
             className={`
-              flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all
+              flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-serif font-semibold transition-all
               ${activeTrack === 'chords' && currentRoute === 'chords'
-                ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
-                : 'text-slate-400 hover:text-slate-200'}
+                ? 'bg-[#f5ede1] text-[#8c531b] border border-[#d4bda8] shadow-sm font-bold'
+                : 'text-[#6b6358] hover:text-[#38332d] border border-transparent'}
             `}
           >
             <Music className="w-3.5 h-3.5" />
@@ -64,10 +64,10 @@ export const Navigation: React.FC<NavigationProps> = ({
               if (currentRoute !== 'arpeggios') onRouteChange('arpeggios');
             }}
             className={`
-              flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all
+              flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-serif font-semibold transition-all
               ${activeTrack === 'arpeggios' && currentRoute === 'arpeggios'
-                ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
-                : 'text-slate-400 hover:text-slate-200'}
+                ? 'bg-[#f5ede1] text-[#8c531b] border border-[#d4bda8] shadow-sm font-bold'
+                : 'text-[#6b6358] hover:text-[#38332d] border border-transparent'}
             `}
           >
             <Activity className="w-3.5 h-3.5" />
@@ -82,15 +82,15 @@ export const Navigation: React.FC<NavigationProps> = ({
               type="button"
               onClick={onOpenKeyModal}
               title="Open Circle of Fifths & Key Selector"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-850 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-slate-100 text-xs font-semibold transition-all cursor-pointer shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#fcfbfa] hover:bg-[#e4ddcf] border border-[#ddd6c8] text-[#38332d] text-xs font-serif font-semibold transition-all cursor-pointer shadow-sm"
             >
-              <Compass className="w-3.5 h-3.5 text-emerald-400" />
+              <Compass className="w-3.5 h-3.5 text-[#8c531b]" />
               <span className="hidden sm:inline">{activeKey.name}</span>
               <span className="sm:hidden">{activeKey.id}</span>
               {isKeyMastered && (
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#2e7d5b]" />
               )}
-              <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-slate-950 border border-slate-800 text-emerald-400">
+              <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-[#f5ede1] border border-[#d4bda8] text-[#8c531b] font-bold">
                 {accCount}
               </span>
             </button>
@@ -101,10 +101,10 @@ export const Navigation: React.FC<NavigationProps> = ({
             onClick={() => onRouteChange('analytics')}
             title="Performance Analytics"
             className={`
-              p-2 rounded-xl border transition-all
+              p-2 rounded-xl border transition-all cursor-pointer
               ${currentRoute === 'analytics'
-                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'}
+                ? 'bg-[#f5ede1] border-[#d4bda8] text-[#8c531b]'
+                : 'bg-[#fcfbfa] border-[#ddd6c8] text-[#6b6358] hover:text-[#38332d] hover:bg-[#e4ddcf] shadow-sm'}
             `}
           >
             <BarChart2 className="w-4 h-4" />
@@ -115,10 +115,10 @@ export const Navigation: React.FC<NavigationProps> = ({
             onClick={() => onRouteChange('settings')}
             title="App Settings"
             className={`
-              p-2 rounded-xl border transition-all
+              p-2 rounded-xl border transition-all cursor-pointer
               ${currentRoute === 'settings'
-                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
-                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'}
+                ? 'bg-[#f5ede1] border-[#d4bda8] text-[#8c531b]'
+                : 'bg-[#fcfbfa] border-[#ddd6c8] text-[#6b6358] hover:text-[#38332d] hover:bg-[#e4ddcf] shadow-sm'}
             `}
           >
             <SettingsIcon className="w-4 h-4" />

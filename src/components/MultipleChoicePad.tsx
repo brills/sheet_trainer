@@ -53,22 +53,22 @@ export const MultipleChoicePad: React.FC<MultipleChoicePadProps> = ({
           onClick={() => onSelect(option.id)}
           className={`
             relative flex flex-col items-center justify-center p-4 rounded-2xl border
-            bg-slate-900/80 border-slate-800 text-slate-100 shadow-xl backdrop-blur-sm
-            hover:border-emerald-500/60 hover:bg-slate-850 hover:shadow-emerald-500/10
-            active:scale-95 transition-all touch-manipulation group
+            bg-[#fcfbfa] border-[#ddd6c8] text-[#38332d] shadow-sm
+            hover:border-[#d4bda8] hover:bg-[#f5ede1] hover:text-[#8c531b]
+            active:scale-95 transition-all touch-manipulation group cursor-pointer
             disabled:opacity-60 disabled:pointer-events-none
           `}
         >
           {/* Key badge */}
-          <div className="absolute top-2 left-2.5 px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700/80 text-[10px] font-mono font-bold text-slate-400 group-hover:text-emerald-400 group-hover:border-emerald-500/40">
+          <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md bg-[#eee9df] border border-[#ddd6c8] text-[10px] font-mono font-bold text-[#6b6358] group-hover:text-[#8c531b] group-hover:border-[#d4bda8]">
             {idx + 1}
           </div>
 
-          <span className="text-base font-bold font-mono tracking-tight mt-1 text-slate-100 group-hover:text-emerald-300">
+          <span className="text-base font-serif font-bold tracking-tight mt-1 text-[#38332d] group-hover:text-[#8c531b] transition-colors">
             {option.label}
           </span>
           {option.sublabel && (
-            <span className="text-xs text-slate-400 mt-0.5">
+            <span className="text-xs text-[#6b6358] mt-0.5 font-sans">
               {option.sublabel}
             </span>
           )}

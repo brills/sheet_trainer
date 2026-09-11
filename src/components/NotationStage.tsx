@@ -138,22 +138,21 @@ export const NotationStage: React.FC<NotationStageProps> = ({
       {/* Main Notation Card with Strict Constant Responsive Height */}
       <div className={`
         relative w-full h-[295px] sm:h-[350px] rounded-3xl border transition-colors duration-200
-        flex flex-col justify-between overflow-hidden
-        ${darkMode ? 'bg-slate-900/90 border-slate-800 backdrop-blur-md shadow-2xl shadow-black/50' : 'bg-white border-slate-200 shadow-xl'}
-        ${isFeedback && lastResult?.isCorrect ? 'border-emerald-500/80 ring-2 ring-emerald-500/20' : ''}
-        ${isIncorrect ? 'border-rose-500/80 ring-2 ring-rose-500/20' : ''}
+        flex flex-col justify-between overflow-hidden bg-[#faf7f2] border-[#ddd6c8] shadow-[0_2px_8px_rgba(0,0,0,0.03)]
+        ${isFeedback && lastResult?.isCorrect ? 'border-[#b8ceba] ring-2 ring-[#e4eee5]' : ''}
+        ${isIncorrect ? 'border-rose-300 ring-2 ring-rose-100' : ''}
       `}>
         
-        {/* 1. Dedicated Header Bar (Fixed Height: 34px on mobile, 38px on desktop) */}
-        <div className="h-[34px] sm:h-[38px] px-3 sm:px-4 flex items-center justify-between border-b border-slate-800/60 bg-slate-950/40 shrink-0 text-xs">
+        {/* 1. Dedicated Header Bar */}
+        <div className="h-[34px] sm:h-[38px] px-3 sm:px-4 flex items-center justify-between border-b border-[#ddd6c8] bg-[#eee9df]/60 shrink-0 text-xs">
           {/* Left: Clef & Key Signature Indicator */}
-          <div className="flex items-center gap-1.5 text-slate-300 font-medium">
-            <span className="font-bold text-emerald-400">
+          <div className="flex items-center gap-1.5 text-[#38332d] font-medium">
+            <span className="font-serif font-bold text-[#8c531b]">
               {activeClef === 'bass' ? '𝄢 Bass Clef' : '𝄞 Treble Clef'}
             </span>
-            <span className="text-slate-600">·</span>
-            <span className="text-[11px] text-slate-400 flex items-center gap-1">
-              <Compass className="w-3 h-3 text-emerald-500" />
+            <span className="text-[#c8bfaa]">·</span>
+            <span className="text-[11px] text-[#6b6358] font-serif flex items-center gap-1">
+              <Compass className="w-3 h-3 text-[#8c531b]" />
               <span>{activeKey?.name || 'C / Am'}</span>
             </span>
           </div>
@@ -161,18 +160,18 @@ export const NotationStage: React.FC<NotationStageProps> = ({
           {/* Right: State-Specific Status Pill */}
           <div className="flex items-center">
             {!isFeedback && (
-              <span className="flex items-center gap-1 text-[10px] sm:text-[11px] text-slate-400 font-mono bg-slate-900/80 border border-slate-800 px-2 py-0.5 rounded-full">
-                <Timer className="w-3 h-3 text-emerald-400/80" />
+              <span className="flex items-center gap-1 text-[10px] sm:text-[11px] text-[#6b6358] font-serif bg-[#fcfbfa] border border-[#ddd6c8] px-2 py-0.5 rounded-full shadow-xs">
+                <Timer className="w-3 h-3 text-[#8c531b]" />
                 <span>Active Trial</span>
               </span>
             )}
 
             {isFeedback && lastResult?.isCorrect && (
-              <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-500/40 px-2.5 py-0.5 rounded-full shadow-sm animate-in fade-in">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="flex items-center gap-1 text-[11px] font-serif font-bold text-[#2e7d5b] bg-[#e4eee5] border border-[#b8ceba] px-2.5 py-0.5 rounded-full shadow-xs animate-in fade-in">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#2e7d5b]" />
                 <span>Correct!</span>
                 {lastResult.latencyMs !== undefined && lastResult.latencyMs > 0 && (
-                  <span className="text-[10px] font-mono text-emerald-200/80 font-normal ml-0.5 pl-1 border-l border-emerald-700/60">
+                  <span className="text-[10px] font-mono text-[#2e7d5b]/80 font-normal ml-0.5 pl-1 border-l border-[#b8ceba]">
                     {(lastResult.latencyMs / 1000).toFixed(2)}s
                   </span>
                 )}
@@ -180,8 +179,8 @@ export const NotationStage: React.FC<NotationStageProps> = ({
             )}
 
             {isFeedback && !lastResult?.isCorrect && (
-              <span className="flex items-center gap-1 text-[11px] font-bold text-rose-300 bg-rose-950/80 border border-rose-500/40 px-2.5 py-0.5 rounded-full shadow-sm animate-in fade-in">
-                <XCircle className="w-3.5 h-3.5 text-rose-400" />
+              <span className="flex items-center gap-1 text-[11px] font-serif font-bold text-[#a83248] bg-[#faf4f5] border border-rose-200 px-2.5 py-0.5 rounded-full shadow-xs animate-in fade-in">
+                <XCircle className="w-3.5 h-3.5 text-[#a83248]" />
                 <span>Incorrect</span>
               </span>
             )}
@@ -198,28 +197,28 @@ export const NotationStage: React.FC<NotationStageProps> = ({
             />
           )}
 
-          {/* Side-by-Side Comparison Staves (Shown strictly within the same 155px/175px bounds on error) */}
+          {/* Side-by-Side Comparison Staves */}
           {hasSideBySide && (
             <div className="w-full h-full flex items-center justify-center px-2 animate-in fade-in zoom-in-95 duration-150">
               <div className="w-full grid grid-cols-2 gap-2 items-center">
                 {/* Left: User Answer */}
-                <div className="flex flex-col items-center rounded-2xl bg-rose-950/20 border border-rose-900/40 p-1 relative">
-                  <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-rose-400 mb-0.5">
+                <div className="flex flex-col items-center rounded-2xl bg-[#faf4f5] border border-rose-200 p-1 relative">
+                  <span className="text-[9px] sm:text-[10px] font-serif font-bold uppercase tracking-wider text-[#a83248] mb-0.5">
                     Your Answer
                   </span>
                   <div ref={userDiffRef} className="flex items-center justify-center min-h-[95px] sm:min-h-[110px]" />
-                  <span className="text-[10px] sm:text-[11px] font-mono font-bold text-rose-300 truncate max-w-[140px]">
+                  <span className="text-[10px] sm:text-[11px] font-mono font-bold text-[#a83248] truncate max-w-[140px]">
                     {lastResult.userStr}
                   </span>
                 </div>
 
                 {/* Right: Correct Answer */}
-                <div className="flex flex-col items-center rounded-2xl bg-emerald-950/20 border border-emerald-900/40 p-1 relative">
-                  <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-emerald-400 mb-0.5">
+                <div className="flex flex-col items-center rounded-2xl bg-[#f2f7f4] border border-[#b8ceba] p-1 relative">
+                  <span className="text-[9px] sm:text-[10px] font-serif font-bold uppercase tracking-wider text-[#2e7d5b] mb-0.5">
                     Correct Pattern
                   </span>
                   <div ref={targetDiffRef} className="flex items-center justify-center min-h-[95px] sm:min-h-[110px]" />
-                  <span className="text-[10px] sm:text-[11px] font-mono font-bold text-emerald-300 truncate max-w-[140px]">
+                  <span className="text-[10px] sm:text-[11px] font-mono font-bold text-[#2e7d5b] truncate max-w-[140px]">
                     {lastResult.correctStr}
                   </span>
                 </div>
@@ -228,31 +227,31 @@ export const NotationStage: React.FC<NotationStageProps> = ({
           )}
         </div>
 
-        {/* 3. Dedicated Bottom Panel (Fixed Height: 106px on mobile, 137px on desktop) */}
-        <div className="h-[106px] sm:h-[137px] w-full flex flex-col items-center justify-center px-3 py-1.5 sm:py-2 border-t border-slate-800/60 bg-slate-950/50 shrink-0 text-center">
+        {/* 3. Dedicated Bottom Panel */}
+        <div className="h-[106px] sm:h-[137px] w-full flex flex-col items-center justify-center px-3 py-1.5 sm:py-2 border-t border-[#ddd6c8] bg-[#eee9df]/50 shrink-0 text-center">
           
           {/* State A: Question Presentation Standby Guide */}
           {!isFeedback && (
             <div className="flex flex-col items-center justify-center gap-1 sm:gap-1.5 w-full animate-in fade-in">
-              <span className="text-xs sm:text-sm font-semibold text-slate-200">
+              <span className="text-xs sm:text-sm font-serif font-semibold text-[#38332d]">
                 Identify the pattern on the staff
               </span>
-              <span className="text-[10px] sm:text-xs text-slate-400">
+              <span className="text-[10px] sm:text-xs font-cormorant italic text-[#6b6358]">
                 Take as much time as needed · Play along or submit answer
               </span>
               <button
                 type="button"
                 disabled={!canSkip}
                 onClick={onContinue}
-                className={`mt-0.5 px-4 py-1.5 sm:py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 border shadow-md active:scale-95 transition-all
+                className={`mt-0.5 px-4 py-1.5 sm:py-1.5 rounded-xl font-serif font-bold text-xs flex items-center gap-1.5 border shadow-sm active:scale-95 transition-all
                   ${canSkip 
-                    ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700 cursor-pointer' 
-                    : 'bg-slate-900/40 text-slate-600 border-slate-800/40 opacity-40 cursor-not-allowed pointer-events-none'
+                    ? 'bg-[#fcfbfa] hover:bg-[#e4ddcf] text-[#38332d] border-[#ddd6c8] cursor-pointer' 
+                    : 'bg-[#eee9df]/40 text-[#948b7e] border-[#ddd6c8]/40 opacity-40 cursor-not-allowed pointer-events-none'
                   }`}
               >
                 <span>Next Question</span>
-                <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-[10px] text-slate-400 font-normal ml-0.5">(Enter / ➔)</span>
+                <ArrowRight className="w-3.5 h-3.5 text-[#8c531b]" />
+                <span className="text-[10px] text-[#948b7e] font-normal ml-0.5">(Enter / ➔)</span>
               </button>
             </div>
           )}
@@ -260,19 +259,19 @@ export const NotationStage: React.FC<NotationStageProps> = ({
           {/* State B: Correct Answer Feedback Panel */}
           {isFeedback && lastResult?.isCorrect && (
             <div className="flex flex-col items-center justify-center gap-1 sm:gap-1.5 w-full animate-in fade-in">
-              <div className="flex items-center gap-1.5 font-mono text-xs sm:text-sm font-bold text-emerald-300">
+              <div className="flex items-center gap-1.5 font-serif text-xs sm:text-sm font-bold text-[#2e7d5b]">
                 <span>{track === 'chords' ? (chord?.displayName) : (arpeggio?.displayName)}</span>
               </div>
 
               {notesSummary && (
-                <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-mono text-slate-300 truncate max-w-full">
+                <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-mono text-[#6b6358] truncate max-w-full">
                   <span>Notes: {notesSummary}</span>
                 </div>
               )}
 
               {lastResult?.masteryNotification ? (
-                <div className="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-amber-300 bg-amber-950/60 border border-amber-500/40 px-2 py-0.5 rounded-lg">
-                  <Award className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <div className="flex items-center gap-1 text-[10px] sm:text-xs font-serif font-bold text-[#8c531b] bg-[#f5ede1] border border-[#d4bda8] px-2 py-0.5 rounded-lg">
+                  <Award className="w-3.5 h-3.5 text-[#8c531b] shrink-0" />
                   <span>{lastResult.masteryNotification}</span>
                 </div>
               ) : null}
@@ -280,7 +279,7 @@ export const NotationStage: React.FC<NotationStageProps> = ({
               <button
                 type="button"
                 onClick={onContinue}
-                className="mt-0.5 px-4 py-1.5 sm:py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+                className="mt-0.5 px-4 py-1.5 sm:py-2 rounded-xl font-serif font-bold text-xs flex items-center gap-1.5 bg-[#f5ede1] hover:bg-[#ecd9c5] text-[#8c531b] border border-[#d4bda8] shadow-sm active:scale-95 transition-all cursor-pointer"
               >
                 <span>Next Question</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -301,32 +300,32 @@ export const NotationStage: React.FC<NotationStageProps> = ({
                       className={`
                         px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-mono font-bold border flex items-center gap-1
                         ${slot.isMatch 
-                          ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300' 
-                          : 'bg-rose-950/80 border-rose-500/60 text-rose-200 shadow-sm'}
+                          ? 'bg-[#f2f7f4] border-[#b8ceba] text-[#2e7d5b]' 
+                          : 'bg-[#faf4f5] border-rose-200 text-[#a83248] shadow-xs'}
                       `}
                     >
-                      <span className="text-[9px] uppercase text-slate-400">{slot.label}:</span>
+                      <span className="text-[9px] uppercase font-serif text-[#6b6358]">{slot.label}:</span>
                       <span>{slot.userVal}</span>
                       {!slot.isMatch && (
-                        <span className="text-emerald-400 text-[10px]">→ {slot.correctVal}</span>
+                        <span className="text-[#2e7d5b] text-[10px]">→ {slot.correctVal}</span>
                       )}
                     </div>
                   ))}
                 </div>
               ) : (
-                <span className="text-xs font-mono font-bold text-slate-200 truncate max-w-full">
+                <span className="text-xs font-serif font-bold text-[#38332d] truncate max-w-full">
                   Target: {track === 'chords' ? (chord?.displayName) : (arpeggio?.displayName)}
                 </span>
               )}
 
               {/* Fully Diminished 7th Grading Clarification Note */}
               {((track === 'chords' && chord?.quality === 'dim7') || (track === 'arpeggios' && arpeggio?.quality === 'dim7')) ? (
-                <div className="flex items-center gap-1 text-[9px] sm:text-[10px] text-amber-300 bg-amber-950/60 border border-amber-500/30 px-2 py-0.5 rounded max-w-full truncate">
+                <div className="flex items-center gap-1 text-[9px] sm:text-[10px] text-[#8c531b] bg-[#f5ede1] border border-[#d4bda8] px-2 py-0.5 rounded max-w-full truncate">
                   <span>💡 <strong>°7 Grading:</strong> Graded by spelled notation (stack bottom = Root; 2nd clash top = Root).</span>
                 </div>
               ) : (
                 notesSummary && (
-                  <span className="text-[10px] sm:text-xs font-mono text-slate-300 truncate max-w-full">
+                  <span className="text-[10px] sm:text-xs font-mono text-[#6b6358] truncate max-w-full">
                     Correct Notes: {notesSummary}
                   </span>
                 )
@@ -335,7 +334,7 @@ export const NotationStage: React.FC<NotationStageProps> = ({
               <button
                 type="button"
                 onClick={onContinue}
-                className="mt-0.5 px-4 py-1.5 sm:py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 bg-rose-500 hover:bg-rose-400 text-slate-950 shadow-md shadow-rose-500/20 active:scale-95 transition-all cursor-pointer"
+                className="mt-0.5 px-4 py-1.5 sm:py-2 rounded-xl font-serif font-bold text-xs flex items-center gap-1.5 bg-[#faf4f5] hover:bg-[#f5eaef] text-[#a83248] border border-rose-200 shadow-sm active:scale-95 transition-all cursor-pointer"
               >
                 <span>Continue to Next Question</span>
                 <ArrowRight className="w-3.5 h-3.5" />

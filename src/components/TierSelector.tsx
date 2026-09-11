@@ -33,22 +33,22 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
   const hintsMap = track === 'chords' ? CHORD_TIER_HINTS : ARPEGGIO_TIER_HINTS;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in">
-      <div className="relative w-full max-w-lg max-h-[85vh] flex flex-col rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2b2620]/45 backdrop-blur-sm animate-in fade-in">
+      <div className="relative w-full max-w-lg max-h-[85vh] flex flex-col rounded-3xl bg-[#f7f4ee] border border-[#ddd6c8] shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900/90">
+        <div className="flex items-center justify-between p-4 border-b border-[#ddd6c8] bg-[#eee9df]">
           <div className="flex flex-col">
-            <h2 className="text-base font-bold text-slate-100">
+            <h2 className="text-base font-serif font-bold text-[#38332d]">
               {track === 'chords' ? '🎼 Chords Curriculum' : '〰️ Arpeggios Curriculum'}
             </h2>
-            <p className="text-xs text-slate-400">
-              Select any tier to practice, or tap <span className="text-amber-400 font-semibold">💡 Hint</span> for theory cues
+            <p className="text-xs text-[#6b6358]">
+              Select any tier to practice, or tap <span className="text-[#8c531b] font-semibold">💡 Hint</span> for theory cues
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-all cursor-pointer"
+            className="p-1.5 rounded-full text-[#6b6358] hover:text-[#38332d] hover:bg-[#e4ddcf] transition-all cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -68,8 +68,8 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
                 className={`
                   shrink-0 rounded-2xl border transition-all overflow-hidden
                   ${isCurrent 
-                    ? 'bg-slate-900/90 border-emerald-500/80 ring-2 ring-emerald-500/20 shadow-lg shadow-emerald-500/10' 
-                    : 'bg-slate-950/60 border-slate-800/80 hover:border-slate-700'}
+                    ? 'bg-[#fcfbfa] border-[#d4bda8] ring-2 ring-[#d4bda8]/50 shadow-sm' 
+                    : 'bg-[#fcfbfa] border-[#ddd6c8] hover:border-[#c8bfaa]'}
                 `}
               >
                 {/* Main Clickable Row */}
@@ -87,19 +87,19 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
                       <div className={`
                         w-10 h-10 rounded-xl flex items-center justify-center font-mono font-bold text-sm border shrink-0
                         ${isMastered 
-                          ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400' 
+                          ? 'bg-[#eef5ef] border-[#bcd4bf] text-[#2d5736]' 
                           : isCurrent
-                            ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-extrabold'
-                            : 'bg-slate-800 border-slate-700 text-slate-400 group-hover:text-slate-200'}
+                            ? 'bg-[#f5ede1] text-[#8c531b] border-[#d4bda8] font-extrabold shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]'
+                            : 'bg-[#eee9df] border-[#ddd6c8] text-[#6b6358] group-hover:text-[#38332d]'}
                       `}>
                         {t.tier}
                       </div>
 
                       <div className="flex flex-col min-w-0">
-                        <span className="text-sm font-bold text-slate-200 group-hover:text-white transition-colors truncate">
+                        <span className="text-sm font-serif font-bold text-[#38332d] group-hover:text-[#8c531b] transition-colors truncate">
                           {t.title}
                         </span>
-                        <span className="text-xs text-slate-400 line-clamp-1">
+                        <span className="text-xs text-[#6b6358] line-clamp-1 font-sans">
                           {t.description}
                         </span>
                       </div>
@@ -107,15 +107,15 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
 
                     <div className="flex items-center gap-1.5 pl-2 shrink-0">
                       {isMastered ? (
-                        <span className="flex items-center gap-1 text-xs font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2.5 py-1 rounded-full">
+                        <span className="flex items-center gap-1 text-xs font-semibold text-[#2d5736] bg-[#eef5ef] border border-[#bcd4bf] px-2.5 py-1 rounded-full">
                           <CheckCircle2 className="w-3.5 h-3.5" /> Mastered
                         </span>
                       ) : isCurrent ? (
-                        <span className="flex items-center gap-1 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-full">
+                        <span className="flex items-center gap-1 text-xs font-semibold text-[#8c531b] bg-[#f5ede1] border border-[#d4bda8] px-2.5 py-1 rounded-full">
                           <Play className="w-3 h-3 fill-current" /> Active
                         </span>
                       ) : (
-                        <span className="p-1 text-slate-600 group-hover:text-slate-400 transition-colors">
+                        <span className="p-1 text-[#8a8275] group-hover:text-[#38332d] transition-colors">
                           <ChevronRight className="w-4 h-4" />
                         </span>
                       )}
@@ -134,12 +134,12 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
                       className={`
                         flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer shrink-0
                         ${isHintExpanded 
-                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm' 
-                          : 'bg-slate-800/80 text-amber-400/90 border-slate-700/80 hover:bg-amber-950/30 hover:border-amber-500/40 hover:text-amber-300'}
+                          ? 'bg-[#f5ede1] text-[#8c531b] border-[#d4bda8] shadow-sm' 
+                          : 'bg-[#eee9df] text-[#8c531b] border-[#ddd6c8] hover:bg-[#f5ede1] hover:border-[#d4bda8]'}
                       `}
                     >
                       <Lightbulb className="w-3.5 h-3.5 fill-current" />
-                      <span className="hidden sm:inline">Hint</span>
+                      <span className="hidden sm:inline font-sans">Hint</span>
                       {isHintExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                     </button>
                   )}
@@ -147,26 +147,26 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
 
                 {/* Expanded Hint Section */}
                 {isHintExpanded && hint && (
-                  <div className="p-3.5 border-t border-slate-800 bg-slate-950/80 flex flex-col gap-2 text-xs animate-in fade-in slide-in-from-top-1 duration-200">
-                    <div className="flex items-start gap-2 text-amber-300 font-medium">
-                      <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <div className="p-3.5 border-t border-[#ddd6c8] bg-[#f5ede1]/50 flex flex-col gap-2 text-xs animate-in fade-in slide-in-from-top-1 duration-200">
+                    <div className="flex items-start gap-2 text-[#8c531b] font-medium">
+                      <Sparkles className="w-4 h-4 text-[#8c531b] shrink-0 mt-0.5" />
                       <div>
-                        <span className="font-bold text-amber-400 uppercase tracking-wider text-[10px] block mb-0.5">Visual Shape Cue:</span>
-                        <span className="text-slate-300 leading-relaxed">{hint.visualCue}</span>
+                        <span className="font-bold text-[#8c531b] uppercase tracking-wider text-[10px] block mb-0.5 font-mono">Visual Shape Cue:</span>
+                        <span className="text-[#38332d] leading-relaxed font-sans">{hint.visualCue}</span>
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-2 text-emerald-300 font-medium pt-1.5 border-t border-slate-800/80">
-                      <span className="w-4 text-center text-emerald-400 font-bold">💡</span>
+                    <div className="flex items-start gap-2 text-[#2d5736] font-medium pt-1.5 border-t border-[#ddd6c8]/60">
+                      <span className="w-4 text-center text-[#2d5736] font-bold">💡</span>
                       <div>
-                        <span className="font-bold text-emerald-400 uppercase tracking-wider text-[10px] block mb-0.5">Recognition Cheat Code:</span>
-                        <span className="text-slate-300 leading-relaxed">{hint.cheatCode}</span>
+                        <span className="font-bold text-[#2d5736] uppercase tracking-wider text-[10px] block mb-0.5 font-mono">Recognition Cheat Code:</span>
+                        <span className="text-[#38332d] leading-relaxed font-sans">{hint.cheatCode}</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-slate-400 pt-1.5 border-t border-slate-800/80 font-mono text-[11px] flex-wrap">
-                      <span className="text-slate-500 font-bold uppercase tracking-wider text-[10px]">Formula:</span>
-                      <span className="text-emerald-400/90 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">{hint.formula}</span>
+                    <div className="flex items-center gap-2 text-[#6b6358] pt-1.5 border-t border-[#ddd6c8]/60 font-mono text-[11px] flex-wrap">
+                      <span className="text-[#8a8275] font-bold uppercase tracking-wider text-[10px]">Formula:</span>
+                      <span className="text-[#8c531b] bg-[#fcfbfa] px-2 py-0.5 rounded border border-[#ddd6c8]">{hint.formula}</span>
                     </div>
                   </div>
                 )}

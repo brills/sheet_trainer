@@ -29,8 +29,8 @@ export function renderChordToSvg(
   renderer.resize(width, height);
   const context = renderer.getContext();
 
-  // Style colors: high contrast slate-100 for dark mode, or explicit override
-  const strokeColor = options.strokeColor || (isDark ? '#f8fafc' : '#0f172a');
+  // Style colors: soft bistre #38332d for light mode or #f8fafc for dark mode
+  const strokeColor = options.strokeColor || (isDark ? '#f8fafc' : '#38332d');
   context.setStrokeStyle(strokeColor);
   context.setFillStyle(strokeColor);
 
@@ -130,7 +130,7 @@ export function renderArpeggioToSvg(
   renderer.resize(width, height);
   const context = renderer.getContext();
 
-  const strokeColor = options.strokeColor || (isDark ? '#f8fafc' : '#0f172a');
+  const strokeColor = options.strokeColor || (isDark ? '#f8fafc' : '#38332d');
   context.setStrokeStyle(strokeColor);
   context.setFillStyle(strokeColor);
 

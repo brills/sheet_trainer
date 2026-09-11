@@ -3,13 +3,31 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --bg-base: #f7f4ee;
+    --bg-surface: #eee9df;
+    --bg-surface-elevated: #e4ddcf;
+    --bg-slot: #fcfbfa;
+    --border-subtle: #ddd6c8;
+    --border-strong: #c8bfaa;
+    --text-main: #38332d;
+    --text-muted: #6b6358;
+    --text-dim: #948b7e;
+    --accent: #8c531b;
+    --accent-light: #f5ede1;
+    --accent-border: #d4bda8;
+  }
+
   body {
+    background-color: #f7f4ee;
+    color: #38332d;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
   }
 }
 
-/* Custom scrollbar */
+/* Custom soft scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -18,31 +36,20 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.2);
+  background: rgba(148, 139, 126, 0.25);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.4);
+  background: rgba(140, 83, 27, 0.35);
 }
 
-/* Ensure VexFlow ledger lines, stave lines, and glyphs are high-contrast in dark mode */
-.dark svg path[stroke="#000000"],
-.dark svg path[stroke="#000"],
-.dark svg path[stroke="black"],
-.dark svg line[stroke="#000000"],
-.dark svg line[stroke="#000"],
-.dark svg line[stroke="black"],
-.dark svg rect[fill="#000000"],
-.dark svg rect[fill="#000"],
-.dark svg rect[fill="black"] {
-  stroke: #f8fafc !important;
-  fill: #f8fafc !important;
+/* VexFlow SVG staff and notehead default styling */
+svg path.vf-ledgerline,
+svg path.vf-staveline {
+  stroke: #635b50 !important;
 }
 
-/* VexFlow ledger lines and staff lines */
-.dark svg path.vf-ledgerline,
-.dark svg path.vf-staveline,
-.dark svg path.vf-notehead {
-  stroke: #f8fafc !important;
-  fill: #f8fafc !important;
+svg path.vf-notehead {
+  stroke: #38332d !important;
+  fill: #38332d !important;
 }

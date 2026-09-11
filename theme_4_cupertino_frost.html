@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sheet Trainer — Cupertino Frost / Liquid Obsidian Glass</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #030712;
+      --glass-bg: rgba(255, 255, 255, 0.04);
+      --glass-bg-hover: rgba(255, 255, 255, 0.08);
+      --glass-bg-active: rgba(255, 255, 255, 0.12);
+      --glass-border: rgba(255, 255, 255, 0.09);
+      --glass-border-strong: rgba(255, 255, 255, 0.18);
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --accent: #6366f1;
+      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+      --accent-glow: rgba(99, 102, 241, 0.25);
+      --success: #10b981;
+      --error: #f43f5e;
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 22px;
+      --radius-xl: 28px;
+      --radius-full: 9999px;
+      --btn-radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.14) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 60%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Top Floating Navigation */
+    header {
+      background: rgba(3, 7, 18, 0.7);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--glass-border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .nav-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 16px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      background: var(--accent-gradient);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
+    /* Floating Pill Segmented Controls */
+    .segmented-control {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 4px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--glass-border);
+      display: flex;
+      gap: 2px;
+      backdrop-filter: blur(12px);
+    }
+
+    .segment-btn {
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      font-family: inherit;
+    }
+
+    .segment-btn:hover {
+      color: var(--text-main);
+    }
+
+    .segment-btn.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      border: 1px solid var(--glass-border-strong);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .nav-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tool-btn {
+      padding: 6px 14px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-full);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      backdrop-filter: blur(12px);
+    }
+
+    .tool-btn:hover {
+      background: var(--glass-bg-hover);
+      border-color: var(--glass-border-strong);
+      color: var(--text-main);
+    }
+
+    .badge-frost {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #a5b4fc;
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 480px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Control Toolbar */
+    .showcase-toolbar {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .toolbar-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+
+    .toolbar-label {
+      color: var(--text-dim);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .toolbar-options {
+      display: flex;
+      gap: 5px;
+    }
+
+    .chip-btn {
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .chip-btn.active {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+
+    /* Tier Header Card */
+    .tier-card {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      cursor: pointer;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      transition: all 0.2s;
+    }
+
+    .tier-card:hover {
+      border-color: var(--glass-border-strong);
+      background: var(--glass-bg-hover);
+    }
+
+    .tier-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tier-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 800;
+      color: #a5b4fc;
+    }
+
+    .tier-title-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tier-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .tier-status {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--success);
+    }
+
+    .tier-desc {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .tier-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: #a5b4fc;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Notation Stage (Frosted Floating Crystal Card) */
+    .stage-container {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-bottom: 12px;
+      min-height: 190px;
+      backdrop-filter: blur(28px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    .stage-svg-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    /* Side-by-Side Diff View */
+    .diff-container {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .diff-staves {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .diff-card {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: var(--radius-lg);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+    }
+
+    .diff-card.error {
+      border-color: rgba(244, 63, 94, 0.4);
+      background: rgba(244, 63, 94, 0.06);
+    }
+
+    .diff-card.correct {
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.06);
+    }
+
+    .diff-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+
+    .diff-badge.error { color: var(--error); }
+    .diff-badge.correct { color: var(--success); }
+
+    .diff-banner {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: #fca5a5;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(16px);
+    }
+
+    /* Stats HUD (Floating Glass Chips) */
+    .stats-hud {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(16px);
+    }
+
+    .stat-icon-wrap {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-sm);
+      background: rgba(99, 102, 241, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #a5b4fc;
+    }
+
+    .stat-data {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-dim);
+    }
+
+    .stat-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .stat-val.accent { color: #818cf8; }
+    .stat-val.success { color: var(--success); }
+
+    /* 4-Slot Visual Display */
+    .slot-buffer {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 12px;
+      backdrop-filter: blur(20px);
+    }
+
+    .slot-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      height: 62px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .slot-box.active {
+      border-color: #818cf8;
+      background: rgba(99, 102, 241, 0.1);
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.25);
+    }
+
+    .slot-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-dim);
+      margin-bottom: 2px;
+    }
+
+    .slot-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 19px;
+      font-weight: 700;
+      color: #818cf8;
+    }
+
+    .slot-value.empty {
+      color: var(--text-dim);
+      font-weight: 400;
+    }
+
+    /* Keypad Layout (Frosted Squircle Keycaps) */
+    .keypad-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 10px;
+      backdrop-filter: blur(20px);
+    }
+
+    .keypad-row {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .key-btn {
+      flex: 1;
+      height: 46px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--btn-radius);
+      color: var(--text-main);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+
+    .key-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--glass-border-strong);
+      transform: translateY(-1px);
+    }
+
+    .key-btn:active {
+      transform: scale(0.96);
+    }
+
+    .key-btn.selected {
+      background: var(--accent-gradient);
+      color: #ffffff;
+      border-color: rgba(255,255,255,0.4);
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
+
+    .key-btn.small {
+      font-size: 12px;
+      font-weight: 600;
+      height: 40px;
+    }
+
+    .key-grid-7 {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      width: 100%;
+    }
+
+    .key-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      width: 100%;
+    }
+
+    /* Multiple Choice Pad */
+    .mc-container {
+      display: none;
+      width: 100%;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .mc-option-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .mc-option-btn:hover {
+      border-color: #818cf8;
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .mc-shortcut {
+      position: absolute;
+      top: 8px;
+      left: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      color: #a5b4fc;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 2px 7px;
+      border-radius: 999px;
+    }
+
+    .mc-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-top: 4px;
+    }
+
+    .mc-sublabel {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Keymap Legend */
+    .keymap-legend {
+      width: 100%;
+      margin-top: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-dim);
+      backdrop-filter: blur(16px);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .kbd {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+      border-radius: 6px;
+      padding: 1px 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: #a5b4fc;
+    }
+
+    .icon {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Floating Header -->
+  <header>
+    <div class="nav-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+        </div>
+        <span>Sheet Trainer</span>
+        <span class="badge-frost">FROST</span>
+      </div>
+
+      <!-- Segmented Track Switcher -->
+      <div class="segmented-control">
+        <button type="button" class="segment-btn active" id="btnTrackChords" onclick="setTrack('chords')">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+          Chords
+        </button>
+        <button type="button" class="segment-btn" id="btnTrackArpeggios" onclick="setTrack('arpeggios')">
+          <svg class="icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          Arpeggios
+        </button>
+      </div>
+
+      <!-- Right Nav Tools -->
+      <div class="nav-tools">
+        <div class="tool-btn">
+          <svg class="icon" style="color:#a5b4fc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+          <span>G / Em</span>
+          <span class="badge-frost">1♯</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Stage -->
+  <main>
+
+    <!-- Toolbar Tweaker -->
+    <div class="showcase-toolbar">
+      <div class="toolbar-row">
+        <span class="toolbar-label">Input Style</span>
+        <div class="toolbar-options">
+          <button class="chip-btn active" id="modeDirect" onclick="setInputMode('direct')">4-Slot Entry</button>
+          <button class="chip-btn" id="modeMC" onclick="setInputMode('mc')">Multiple Choice</button>
+          <button class="chip-btn" id="modeDiff" onclick="toggleDiff()">Diff View</button>
+        </div>
+      </div>
+      <div class="toolbar-row">
+        <span class="toolbar-label">Glass Corner</span>
+        <div class="toolbar-options">
+          <button class="chip-btn active" onclick="setRadius('squircle', this)">Squircle 14px</button>
+          <button class="chip-btn" onclick="setRadius('pill', this)">Pill Full</button>
+          <button class="chip-btn" onclick="setRadius('compact', this)">Compact 8px</button>
+        </div>
+      </div>
+      <div class="toolbar-row">
+        <span class="toolbar-label">Gradient Tint</span>
+        <div class="toolbar-options">
+          <button class="chip-btn active" style="color:#818cf8" onclick="setTint('indigo', this)">Indigo/Violet</button>
+          <button class="chip-btn" style="color:#34d399" onclick="setTint('emerald', this)">Emerald/Teal</button>
+          <button class="chip-btn" style="color:#f472b6" onclick="setTint('rose', this)">Rose/Amber</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tier Header Bar -->
+    <div class="tier-card">
+      <div class="tier-left">
+        <div class="tier-badge">3.1</div>
+        <div>
+          <div class="tier-title-row">
+            <span class="tier-title">7th Chords (Root Position)</span>
+            <span class="tier-status">Mastered</span>
+          </div>
+          <div class="tier-desc">Maj7, Dom7, Min7 & Half-Diminished 7ths</div>
+        </div>
+      </div>
+      <div class="tier-tag">
+        <svg class="icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+        <span>Tiers</span>
+      </div>
+    </div>
+
+    <!-- Floating Crystal Stave Stage -->
+    <div class="stage-container" id="singleStage">
+      <div class="stage-svg-wrap">
+        <svg width="340" height="150" viewBox="0 0 340 150">
+          <!-- Translucent Staff Lines -->
+          <line x1="20" y1="45" x2="320" y2="45" stroke="#4b5563" stroke-width="1.2"/>
+          <line x1="20" y1="58" x2="320" y2="58" stroke="#4b5563" stroke-width="1.2"/>
+          <line x1="20" y1="71" x2="320" y2="71" stroke="#4b5563" stroke-width="1.2"/>
+          <line x1="20" y1="84" x2="320" y2="84" stroke="#4b5563" stroke-width="1.2"/>
+          <line x1="20" y1="97" x2="320" y2="97" stroke="#4b5563" stroke-width="1.2"/>
+          
+          <line x1="20" y1="45" x2="20" y2="97" stroke="#9ca3af" stroke-width="1.5"/>
+          <line x1="320" y1="45" x2="320" y2="97" stroke="#9ca3af" stroke-width="1.5"/>
+
+          <!-- G-Clef in Bright White/Indigo Glow -->
+          <text x="32" y="93" fill="#f3f4f6" font-family="serif" font-size="62">𝄞</text>
+
+          <!-- Key Signature 1 Sharp -->
+          <text x="76" y="52" fill="#f3f4f6" font-family="JetBrains Mono" font-size="18" font-weight="bold">♯</text>
+
+          <!-- Noteheads: G4 - B4 - D5 - F#5 -->
+          <ellipse cx="190" cy="84" rx="7.5" ry="5.5" fill="#f3f4f6" transform="rotate(-15 190 84)"/>
+          <ellipse cx="190" cy="71" rx="7.5" ry="5.5" fill="#f3f4f6" transform="rotate(-15 190 71)"/>
+          <ellipse cx="190" cy="58" rx="7.5" ry="5.5" fill="#f3f4f6" transform="rotate(-15 190 58)"/>
+          <ellipse cx="190" cy="45" rx="7.5" ry="5.5" fill="#f3f4f6" transform="rotate(-15 190 45)"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Side-by-Side Diff View -->
+    <div class="diff-container" id="diffStage">
+      <div class="diff-banner">
+        <span>Incorrect: Target was <strong>Gmaj7 (Root)</strong></span>
+        <span style="font-size:11px;color:#fecdd3;">Press Enter to retry</span>
+      </div>
+      <div class="diff-staves">
+        <!-- Error Chord -->
+        <div class="diff-card error">
+          <span class="diff-badge error">Your Answer: G7</span>
+          <svg width="150" height="100" viewBox="0 0 150 100">
+            <line x1="10" y1="25" x2="140" y2="25" stroke="#4b5563" stroke-width="1"/>
+            <line x1="10" y1="36" x2="140" y2="36" stroke="#4b5563" stroke-width="1"/>
+            <line x1="10" y1="47" x2="140" y2="47" stroke="#4b5563" stroke-width="1"/>
+            <line x1="10" y1="58" x2="140" y2="58" stroke="#4b5563" stroke-width="1"/>
+            <line x1="10" y1="69" x2="140" y2="69" stroke="#4b5563" stroke-width="1"/>
+            <text x="14" y="66" fill="#f43f5e" font-family="serif" font-size="34">𝄞</text>
+            <text x="64" y="32" fill="#f43f5e" font-family="JetBrains Mono" font-size="14">♮</text>
+            <ellipse cx="95" cy="58" rx="6" ry="4.5" fill="#f43f5e" transform="rotate(-15 95 58)"/>
+            <ellipse cx="95" cy="47" rx="6" ry="4.5" fill="#f43f5e" transform="rotate(-15 95 47)"/>
+            <ellipse cx="95" cy="36" rx="6" ry="4.5" fill="#f43f5e" transform="rotate(-15 95 36)"/>
+            <ellipse cx="95" cy="25" rx="6" ry="4.5" fill="#f43f5e" transform="rotate(-15 95 25)"/>
+          </svg>
+        </div>
+
+        <!-- Target Chord -->
+        <div class="diff-card correct">
+          <span class="diff-badge correct">Target: Gmaj7</span>
+          <svg width="150" height="100" viewBox="0 0 150 100">
+            <line x1="10" y1="25" x2="140" y2="25" stroke="#4b5563" stroke-width="1"/>
+            <line x1="10" y1="36" x2="140" y2="36" stroke="#4b5563" stroke-width="1"/>
+            <line x1="10" y1="47" x2="140" y2="47" stroke="#4b5563" stroke-width="1"/>
+            <line x1="10" y1="58" x2="140" y2="58" stroke="#4b5563" stroke-width="1"/>
+            <line x1="10" y1="69" x2="140" y2="69" stroke="#4b5563" stroke-width="1"/>
+            <text x="14" y="66" fill="#10b981" font-family="serif" font-size="34">𝄞</text>
+            <text x="66" y="30" fill="#10b981" font-family="JetBrains Mono" font-size="14">♯</text>
+            <ellipse cx="95" cy="58" rx="6" ry="4.5" fill="#10b981" transform="rotate(-15 95 58)"/>
+            <ellipse cx="95" cy="47" rx="6" ry="4.5" fill="#10b981" transform="rotate(-15 95 47)"/>
+            <ellipse cx="95" cy="36" rx="6" ry="4.5" fill="#10b981" transform="rotate(-15 95 36)"/>
+            <ellipse cx="95" cy="25" rx="6" ry="4.5" fill="#10b981" transform="rotate(-15 95 25)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Real-Time Stats HUD -->
+    <div class="stats-hud">
+      <div class="stat-card">
+        <div class="stat-icon-wrap">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
+        </div>
+        <div class="stat-data">
+          <span class="stat-label">Streak</span>
+          <span class="stat-val accent">14</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrap">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+        </div>
+        <div class="stat-data">
+          <span class="stat-label">Accuracy</span>
+          <span class="stat-val success">95%</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrap">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <div class="stat-data">
+          <span class="stat-label">Latency</span>
+          <span class="stat-val">1.18s</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Direct Entry Section: 4-Slot Buffer + Keypad -->
+    <div id="directEntrySection" style="width:100%">
+      <div class="slot-buffer">
+        <div class="slot-box active" id="slot0">
+          <span class="slot-label">1. Root</span>
+          <span class="slot-value" id="valRoot">G</span>
+        </div>
+        <div class="slot-box" id="slot1">
+          <span class="slot-label">2. Acc</span>
+          <span class="slot-value" id="valAcc">♮</span>
+        </div>
+        <div class="slot-box" id="slot2">
+          <span class="slot-label">3. Quality</span>
+          <span class="slot-value" id="valQual">maj7</span>
+        </div>
+        <div class="slot-box" id="slot3">
+          <span class="slot-label">4. Inv</span>
+          <span class="slot-value" id="valInv">Root</span>
+        </div>
+      </div>
+
+      <div class="keypad-container">
+        <!-- Row 1: Note Roots -->
+        <div class="keypad-row">
+          <button type="button" class="key-btn" onclick="selectRoot('C')">C</button>
+          <button type="button" class="key-btn" onclick="selectRoot('D')">D</button>
+          <button type="button" class="key-btn" onclick="selectRoot('E')">E</button>
+          <button type="button" class="key-btn" onclick="selectRoot('F')">F</button>
+          <button type="button" class="key-btn selected" onclick="selectRoot('G')">G</button>
+          <button type="button" class="key-btn" onclick="selectRoot('A')">A</button>
+          <button type="button" class="key-btn" onclick="selectRoot('B')">B</button>
+        </div>
+
+        <!-- Row 2: Accidentals + Inversions -->
+        <div class="key-grid-7">
+          <button type="button" class="key-btn small selected" onclick="selectAcc('♮')">♮</button>
+          <button type="button" class="key-btn small" onclick="selectAcc('♯')">♯</button>
+          <button type="button" class="key-btn small" onclick="selectAcc('♭')">♭</button>
+          <button type="button" class="key-btn small selected" onclick="selectInv('Root')">Root</button>
+          <button type="button" class="key-btn small" onclick="selectInv('1st')">1st</button>
+          <button type="button" class="key-btn small" onclick="selectInv('2nd')">2nd</button>
+          <button type="button" class="key-btn small" onclick="selectInv('3rd')">3rd</button>
+        </div>
+
+        <!-- Row 3: Qualities -->
+        <div class="key-grid-4">
+          <button type="button" class="key-btn small" onclick="selectQual('Maj')">Maj</button>
+          <button type="button" class="key-btn small" onclick="selectQual('Min')">Min</button>
+          <button type="button" class="key-btn small" onclick="selectQual('7')">7 (Dom)</button>
+          <button type="button" class="key-btn small selected" onclick="selectQual('maj7')">maj7</button>
+        </div>
+        <div class="key-grid-4">
+          <button type="button" class="key-btn small" onclick="selectQual('min7')">min7</button>
+          <button type="button" class="key-btn small" onclick="selectQual('ø7')">ø7 (m7♭5)</button>
+          <button type="button" class="key-btn small" onclick="selectQual('dim7')">dim7</button>
+          <button type="button" class="key-btn small" onclick="selectQual('aug')">aug</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Multiple Choice Section -->
+    <div class="mc-container" id="mcSection">
+      <button type="button" class="mc-option-btn">
+        <span class="mc-shortcut">1</span>
+        <span class="mc-label">Gmaj7</span>
+        <span class="mc-sublabel">Root Position</span>
+      </button>
+      <button type="button" class="mc-option-btn">
+        <span class="mc-shortcut">2</span>
+        <span class="mc-label">G7</span>
+        <span class="mc-sublabel">Dominant 7th</span>
+      </button>
+      <button type="button" class="mc-option-btn">
+        <span class="mc-shortcut">3</span>
+        <span class="mc-label">Em7</span>
+        <span class="mc-sublabel">1st Inversion</span>
+      </button>
+      <button type="button" class="mc-option-btn">
+        <span class="mc-shortcut">4</span>
+        <span class="mc-label">Bmin7</span>
+        <span class="mc-sublabel">Root Position</span>
+      </button>
+    </div>
+
+    <!-- Keyboard Legend Footer -->
+    <div class="keymap-legend">
+      <div class="legend-item"><span class="kbd">C..B</span> Roots</div>
+      <div class="legend-item"><span class="kbd">1 2 3</span> ♮ ♯ ♭</div>
+      <div class="legend-item"><span class="kbd">M m 7 J</span> Qualities</div>
+      <div class="legend-item"><span class="kbd">R 1 2 3</span> Inversions</div>
+    </div>
+
+  </main>
+
+  <script>
+    function setInputMode(mode) {
+      document.getElementById('modeDirect').classList.toggle('active', mode === 'direct');
+      document.getElementById('modeMC').classList.toggle('active', mode === 'mc');
+      document.getElementById('directEntrySection').style.display = mode === 'direct' ? 'block' : 'none';
+      document.getElementById('mcSection').style.display = mode === 'mc' ? 'grid' : 'none';
+    }
+
+    let isDiff = false;
+    function toggleDiff() {
+      isDiff = !isDiff;
+      document.getElementById('modeDiff').classList.toggle('active', isDiff);
+      document.getElementById('singleStage').style.display = isDiff ? 'none' : 'flex';
+      document.getElementById('diffStage').style.display = isDiff ? 'flex' : 'none';
+    }
+
+    function setRadius(type, btn) {
+      document.querySelectorAll('.toolbar-options button').forEach(b => {
+        if (['Squircle 14px', 'Pill Full', 'Compact 8px'].includes(b.innerText)) {
+          b.classList.remove('active');
+        }
+      });
+      btn.classList.add('active');
+      const root = document.documentElement;
+      if (type === 'squircle') {
+        root.style.setProperty('--btn-radius', '14px');
+        root.style.setProperty('--radius-md', '16px');
+        root.style.setProperty('--radius-lg', '22px');
+      } else if (type === 'pill') {
+        root.style.setProperty('--btn-radius', '9999px');
+        root.style.setProperty('--radius-md', '24px');
+        root.style.setProperty('--radius-lg', '28px');
+      } else if (type === 'compact') {
+        root.style.setProperty('--btn-radius', '8px');
+        root.style.setProperty('--radius-md', '10px');
+        root.style.setProperty('--radius-lg', '14px');
+      }
+    }
+
+    function setTint(tint, btn) {
+      document.querySelectorAll('.toolbar-options button').forEach(b => {
+        if (['Indigo/Violet', 'Emerald/Teal', 'Rose/Amber'].includes(b.innerText)) {
+          b.classList.remove('active');
+        }
+      });
+      btn.classList.add('active');
+      const root = document.documentElement;
+      if (tint === 'indigo') {
+        root.style.setProperty('--accent', '#6366f1');
+        root.style.setProperty('--accent-gradient', 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%)');
+        root.style.setProperty('--accent-glow', 'rgba(99, 102, 241, 0.25)');
+      } else if (tint === 'emerald') {
+        root.style.setProperty('--accent', '#10b981');
+        root.style.setProperty('--accent-gradient', 'linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #3b82f6 100%)');
+        root.style.setProperty('--accent-glow', 'rgba(16, 185, 129, 0.25)');
+      } else if (tint === 'rose') {
+        root.style.setProperty('--accent', '#f43f5e');
+        root.style.setProperty('--accent-gradient', 'linear-gradient(135deg, #f43f5e 0%, #fb923c 50%, #facc15 100%)');
+        root.style.setProperty('--accent-glow', 'rgba(244, 63, 94, 0.25)');
+      }
+    }
+
+    function selectRoot(r) { document.getElementById('valRoot').innerText = r; }
+    function selectAcc(a) { document.getElementById('valAcc').innerText = a; }
+    function selectQual(q) { document.getElementById('valQual').innerText = q; }
+    function selectInv(i) { document.getElementById('valInv').innerText = i; }
+    function setTrack(t) {
+      document.getElementById('btnTrackChords').classList.toggle('active', t === 'chords');
+      document.getElementById('btnTrackArpeggios').classList.toggle('active', t === 'arpeggios');
+    }
+  </script>
+</body>
+</html>

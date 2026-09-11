@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sheet Trainer — UI Theme & Style Design Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Cinzel:wght@700&family=Orbitron:wght@800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #090b10;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #0f131a;
+      border-bottom: 1px solid #1e2430;
+      padding: 14px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 2px 8px;
+      background: #1e2430;
+      color: #38bdf8;
+      border-radius: 999px;
+      border: 1px solid #2d3748;
+    }
+
+    .theme-nav {
+      display: flex;
+      gap: 6px;
+      background: #151922;
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid #262e3d;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      color: #ffffff;
+    }
+
+    .nav-btn.active {
+      background: #232a38;
+      color: #f8fafc;
+      border-color: #3b465c;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .layout-toggle {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-action {
+      padding: 7px 12px;
+      border-radius: 8px;
+      background: #1e2430;
+      border: 1px solid #2e384d;
+      color: #f1f5f9;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .btn-action:hover {
+      background: #2a3344;
+      border-color: #3b4761;
+    }
+
+    main {
+      flex: 1;
+      padding: 20px;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Summary Hero Cards */
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .theme-card {
+      background: #12161f;
+      border: 1px solid #1e2636;
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .theme-card:hover {
+      transform: translateY(-2px);
+      border-color: #3b4761;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+
+    .theme-card.active {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3);
+    }
+
+    .theme-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .theme-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    .theme-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .theme-desc {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.45;
+    }
+
+    .palette-strip {
+      display: flex;
+      height: 18px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .swatch {
+      flex: 1;
+      height: 100%;
+    }
+
+    .theme-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .tag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      background: #181e2b;
+      border: 1px solid #232c3d;
+      border-radius: 4px;
+      color: #cbd5e1;
+    }
+
+    /* Live Preview Viewer Container */
+    .viewer-container {
+      width: 100%;
+      background: #0b0d13;
+      border: 1px solid #1e2636;
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    }
+
+    .viewer-header {
+      background: #12161f;
+      border-bottom: 1px solid #1e2636;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .viewer-title {
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .iframe-wrapper {
+      width: 100%;
+      height: 800px;
+      background: #000;
+      position: relative;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Side-by-Side Comparison Mode */
+    .split-grid {
+      display: none;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .split-frame {
+      width: 100%;
+      height: 720px;
+      background: #000;
+      border: 1px solid #1e2636;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-title">
+      <span>🎼 Sheet Trainer Design Studio</span>
+      <span class="badge">A/B Style Showcase</span>
+    </div>
+
+    <div class="theme-nav">
+      <button class="nav-btn active" onclick="loadTheme('theme_conservatory_light_alternatives.html', this)">
+        <span style="color:#b45309">●</span> Light Conservatory (4 Palettes)
+      </button>
+      <button class="nav-btn" onclick="loadTheme('theme_1_nordic_minimal.html', this)">
+        <span style="color:#f59e0b">●</span> Nordic Studio
+      </button>
+      <button class="nav-btn" onclick="loadTheme('theme_2_cyber_synth.html', this)">
+        <span style="color:#00f0ff">●</span> Cyber Synth
+      </button>
+      <button class="nav-btn" onclick="loadTheme('theme_4_cupertino_frost.html', this)">
+        <span style="color:#818cf8">●</span> Cupertino Frost
+      </button>
+    </div>
+
+    <div class="layout-toggle">
+      <button class="btn-action" id="btnToggleSplit" onclick="toggleSplitView()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+        Split View
+      </button>
+      <a class="btn-action" id="btnOpenDirect" href="theme_conservatory_light_alternatives.html" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        Open Standalone
+      </a>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Theme Overview Cards -->
+    <div class="hero-grid">
+      <!-- Light Conservatory (4 Variations) -->
+      <div class="theme-card active" onclick="loadTheme('theme_conservatory_light_alternatives.html', document.querySelectorAll('.nav-btn')[0])">
+        <div class="theme-card-header">
+          <span class="theme-name">Light Conservatory (4 Palettes)</span>
+          <span class="theme-number">NEW</span>
+        </div>
+        <p class="theme-desc">Warm editorial parchment, ivory manuscript, Vienna Prussian blue, and sage botanical. No dark backgrounds, exquisite classical engraving.</p>
+        <div class="palette-strip">
+          <div class="swatch" style="background:#fbf8f1"></div>
+          <div class="swatch" style="background:#ede3d1"></div>
+          <div class="swatch" style="background:#b45309"></div>
+          <div class="swatch" style="background:#1e40af"></div>
+          <div class="swatch" style="background:#1c1917"></div>
+        </div>
+        <div class="theme-tags">
+          <span class="tag">Warm Parchment</span>
+          <span class="tag">Light Paper Stave</span>
+          <span class="tag">4 Light Palettes</span>
+        </div>
+      </div>
+
+      <!-- Theme 1 -->
+      <div class="theme-card" onclick="loadTheme('theme_1_nordic_minimal.html', document.querySelectorAll('.nav-btn')[1])">
+        <div class="theme-card-header">
+          <span class="theme-name">1. Nordic Studio</span>
+          <span class="theme-number">01</span>
+        </div>
+        <p class="theme-desc">Dieter Rams / Teenage Engineering audio gear. Matte obsidian, precision 6px keycaps, cadmium amber accents, monospace micro-labels.</p>
+        <div class="palette-strip">
+          <div class="swatch" style="background:#0d0f12"></div>
+          <div class="swatch" style="background:#1d212a"></div>
+          <div class="swatch" style="background:#f59e0b"></div>
+          <div class="swatch" style="background:#10b981"></div>
+          <div class="swatch" style="background:#f1f5f9"></div>
+        </div>
+        <div class="theme-tags">
+          <span class="tag">Tactile Keycaps</span>
+          <span class="tag">Studio LED HUD</span>
+        </div>
+      </div>
+
+      <!-- Theme 2 -->
+      <div class="theme-card" onclick="loadTheme('theme_2_cyber_synth.html', document.querySelectorAll('.nav-btn')[2])">
+        <div class="theme-card-header">
+          <span class="theme-name">2. Cyber Synth</span>
+          <span class="theme-number">02</span>
+        </div>
+        <p class="theme-desc">Retro-futuristic arcade console & DAW workstation. Neon cyan & magenta glows, angled cyber chamfers, holographic laser staves.</p>
+        <div class="palette-strip">
+          <div class="swatch" style="background:#06070d"></div>
+          <div class="swatch" style="background:#161a2e"></div>
+          <div class="swatch" style="background:#00f0ff"></div>
+          <div class="swatch" style="background:#ff007f"></div>
+          <div class="swatch" style="background:#00ff88"></div>
+        </div>
+        <div class="theme-tags">
+          <span class="tag">Cyber Cutouts</span>
+          <span class="tag">Neon Glow</span>
+        </div>
+      </div>
+
+      <!-- Theme 4 -->
+      <div class="theme-card" onclick="loadTheme('theme_4_cupertino_frost.html', document.querySelectorAll('.nav-btn')[3])">
+        <div class="theme-card-header">
+          <span class="theme-name">4. Cupertino Frost</span>
+          <span class="theme-number">04</span>
+        </div>
+        <p class="theme-desc">Apple VisionOS / macOS liquid obsidian glass. Translucent frosted squircle cards, fluid aurora gradients, indigo & violet highlights.</p>
+        <div class="palette-strip">
+          <div class="swatch" style="background:#030712"></div>
+          <div class="swatch" style="background:rgba(255,255,255,0.08)"></div>
+          <div class="swatch" style="background:#6366f1"></div>
+          <div class="swatch" style="background:#8b5cf6"></div>
+          <div class="swatch" style="background:#10b981"></div>
+        </div>
+        <div class="theme-tags">
+          <span class="tag">Frosted Glass</span>
+          <span class="tag">Squircle Curves</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Preview Stage -->
+    <div class="viewer-container" id="singleViewer">
+      <div class="viewer-header">
+        <div class="viewer-title">
+          <span id="currentThemeTitle">Classical Conservatory — Light Color Scheme Alternatives</span>
+        </div>
+        <div style="font-size:12px;color:#94a3b8;">
+          💡 Click the 4 color scheme buttons at the top of the preview to switch light palettes live.
+        </div>
+      </div>
+      <div class="iframe-wrapper">
+        <iframe id="themeIframe" src="theme_conservatory_light_alternatives.html"></iframe>
+      </div>
+    </div>
+
+    <!-- Split Mode Comparison -->
+    <div class="split-grid" id="splitGrid">
+      <div class="split-frame">
+        <iframe src="theme_conservatory_light_alternatives.html"></iframe>
+      </div>
+      <div class="split-frame">
+        <iframe src="theme_1_nordic_minimal.html"></iframe>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let currentThemeUrl = 'theme_conservatory_light_alternatives.html';
+
+    function loadTheme(url, btnElement) {
+      currentThemeUrl = url;
+      document.getElementById('themeIframe').src = url;
+      document.getElementById('btnOpenDirect').href = url;
+
+      // Update Nav buttons
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      if (btnElement) btnElement.classList.add('active');
+
+      // Update Hero Cards
+      document.querySelectorAll('.theme-card').forEach((card, idx) => {
+        const urls = [
+          'theme_conservatory_light_alternatives.html',
+          'theme_1_nordic_minimal.html', 
+          'theme_2_cyber_synth.html', 
+          'theme_4_cupertino_frost.html'
+        ];
+        card.classList.toggle('active', urls[idx] === url);
+      });
+
+      const titles = {
+        'theme_conservatory_light_alternatives.html': 'Classical Conservatory — Light Color Scheme Alternatives (Ivory, Vienna, Sage, Pearl)',
+        'theme_1_nordic_minimal.html': 'Theme 1: Nordic Studio (Braun Modernist)',
+        'theme_2_cyber_synth.html': 'Theme 2: Cyber Synth (Arcade Neon HUD)',
+        'theme_4_cupertino_frost.html': 'Theme 4: Cupertino Frost (Liquid Obsidian Glass)'
+      };
+      document.getElementById('currentThemeTitle').innerText = titles[url] || url;
+    }
+
+    let isSplit = false;
+    function toggleSplitView() {
+      isSplit = !isSplit;
+      document.getElementById('btnToggleSplit').classList.toggle('active', isSplit);
+      document.getElementById('singleViewer').style.display = isSplit ? 'none' : 'flex';
+      document.getElementById('splitGrid').style.display = isSplit ? 'grid' : 'none';
+    }
+  </script>
+</body>
+</html>

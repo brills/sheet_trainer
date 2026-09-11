@@ -515,7 +515,7 @@ export const App: React.FC = () => {
   const isKeyMastered = (trackProgress.masteredKeys || []).includes(currentKey.id);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-[#f7f4ee] text-[#38332d] flex flex-col font-sans selection:bg-[#ecd9c5] selection:text-[#38332d]">
       {/* Navigation Bar */}
       <Navigation
         currentRoute={currentRoute}
@@ -551,12 +551,12 @@ export const App: React.FC = () => {
           <>
             {/* Promotion Notification Banner */}
             {promotionNotification && (
-              <div className="w-full max-w-md mb-2 p-3 rounded-2xl bg-emerald-950/80 border border-emerald-500/80 text-emerald-300 text-xs font-bold text-center flex items-center justify-between shadow-xl animate-in zoom-in-95">
+              <div className="w-full max-w-md mb-2 p-3 rounded-2xl bg-[#f5ede1] border border-[#d4bda8] text-[#8c531b] text-xs font-serif font-bold text-center flex items-center justify-between shadow-sm animate-in zoom-in-95">
                 <span>{promotionNotification}</span>
                 <button
                   type="button"
                   onClick={() => setPromotionNotification(null)}
-                  className="px-2 py-0.5 rounded-lg bg-emerald-900/60 hover:bg-emerald-800 text-white text-[10px]"
+                  className="px-2 py-0.5 rounded-lg bg-[#e4ddcf] hover:bg-[#ddd6c8] text-[#38332d] text-[10px]"
                 >
                   Dismiss
                 </button>
@@ -579,7 +579,7 @@ export const App: React.FC = () => {
               keySignature={currentKey}
               isFeedback={isFeedback}
               lastResult={lastResult}
-              darkMode={true}
+              darkMode={false}
               onContinue={spawnNextProblem}
               canSkip={!hasBufferedInput}
             />

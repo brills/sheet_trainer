@@ -123,39 +123,39 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
     : standardQualities;
 
   return (
-    <div className="w-full max-w-md mx-auto flex flex-col gap-4 mt-2">
+    <div className="w-full max-w-md mx-auto flex flex-col gap-3 mt-2">
       {/* 4-Slot Visual Display */}
-      <div className="grid grid-cols-4 gap-2 p-2 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl backdrop-blur-md">
+      <div className="grid grid-cols-4 gap-2 p-2 rounded-2xl bg-[#eee9df] border border-[#ddd6c8] shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
         {/* Slot 1: Root */}
         <div className={`
           flex flex-col items-center justify-center h-16 rounded-xl border transition-all
-          ${activeSlot === 0 ? 'border-emerald-500 bg-emerald-950/30 ring-2 ring-emerald-500/30 shadow-lg shadow-emerald-500/10' : 'border-slate-800 bg-slate-950/60'}
+          ${activeSlot === 0 ? 'border-[#d4bda8] bg-[#f5ede1] ring-1 ring-[#d4bda8] shadow-xs' : 'border-[#ddd6c8] bg-[#fcfbfa]'}
         `}>
-          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 mb-0.5">1. Root</span>
-          <span className="text-xl font-bold font-mono text-emerald-400">
-            {slotState.root || <span className="text-slate-700 font-normal">_</span>}
+          <span className="text-[9px] uppercase font-serif font-bold tracking-wider text-[#948b7e] mb-0.5">1. Root</span>
+          <span className="text-xl font-bold font-serif text-[#8c531b]">
+            {slotState.root || <span className="text-[#c8bfaa] font-normal">_</span>}
           </span>
         </div>
 
         {/* Slot 2: Accidental */}
         <div className={`
           flex flex-col items-center justify-center h-16 rounded-xl border transition-all
-          ${activeSlot === 1 ? 'border-emerald-500 bg-emerald-950/30 ring-2 ring-emerald-500/30 shadow-lg shadow-emerald-500/10' : 'border-slate-800 bg-slate-950/60'}
+          ${activeSlot === 1 ? 'border-[#d4bda8] bg-[#f5ede1] ring-1 ring-[#d4bda8] shadow-xs' : 'border-[#ddd6c8] bg-[#fcfbfa]'}
         `}>
-          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 mb-0.5">2. Acc</span>
-          <span className="text-xl font-bold font-mono text-emerald-400">
-            {slotState.accidental ? (slotState.accidental === 'natural' ? '♮' : accidentalSymbol(slotState.accidental)) : <span className="text-slate-700 font-normal">♮</span>}
+          <span className="text-[9px] uppercase font-serif font-bold tracking-wider text-[#948b7e] mb-0.5">2. Acc</span>
+          <span className="text-xl font-bold font-mono text-[#8c531b]">
+            {slotState.accidental ? (slotState.accidental === 'natural' ? '♮' : accidentalSymbol(slotState.accidental)) : <span className="text-[#c8bfaa] font-normal">♮</span>}
           </span>
         </div>
 
         {/* Slot 3: Quality */}
         <div className={`
           flex flex-col items-center justify-center h-16 rounded-xl border transition-all
-          ${activeSlot === 2 ? 'border-emerald-500 bg-emerald-950/30 ring-2 ring-emerald-500/30 shadow-lg shadow-emerald-500/10' : 'border-slate-800 bg-slate-950/60'}
+          ${activeSlot === 2 ? 'border-[#d4bda8] bg-[#f5ede1] ring-1 ring-[#d4bda8] shadow-xs' : 'border-[#ddd6c8] bg-[#fcfbfa]'}
         `}>
-          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 mb-0.5">3. Quality</span>
-          <span className="text-base font-bold font-mono text-emerald-400 truncate max-w-[80px]">
-            {slotState.quality ? CHORD_FORMULAS[slotState.quality].shortName : <span className="text-slate-700 font-normal">_</span>}
+          <span className="text-[9px] uppercase font-serif font-bold tracking-wider text-[#948b7e] mb-0.5">3. Quality</span>
+          <span className="text-base font-bold font-serif text-[#8c531b] truncate max-w-[80px]">
+            {slotState.quality ? CHORD_FORMULAS[slotState.quality].shortName : <span className="text-[#c8bfaa] font-normal">_</span>}
           </span>
         </div>
 
@@ -163,31 +163,31 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
         <div className={`
           flex flex-col items-center justify-center h-16 rounded-xl border transition-all
           ${isFixedInversion 
-            ? 'border-slate-800/80 bg-slate-950/40 text-slate-400'
-            : (activeSlot === 3 ? 'border-emerald-500 bg-emerald-950/30 ring-2 ring-emerald-500/30 shadow-lg shadow-emerald-500/10' : 'border-slate-800 bg-slate-950/60')}
+            ? 'border-[#ddd6c8] bg-[#fcfbfa]/80 text-[#8c531b]'
+            : (activeSlot === 3 ? 'border-[#d4bda8] bg-[#f5ede1] ring-1 ring-[#d4bda8] shadow-xs' : 'border-[#ddd6c8] bg-[#fcfbfa]')}
         `}>
           <div className="flex items-center gap-1 mb-0.5">
-            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">
+            <span className="text-[9px] uppercase font-serif font-bold tracking-wider text-[#948b7e]">
               {isDropVoicing ? '4. Voicing' : '4. Inv'}
             </span>
             {isFixedInversion && (
-              <span className="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700">Tier</span>
+              <span className="text-[8px] font-serif px-1 py-0.2 rounded bg-[#eee9df] text-[#6b6358] border border-[#ddd6c8]">Tier</span>
             )}
           </div>
           {isDropVoicing ? (
-            <span className="text-xs font-bold font-mono text-emerald-400/90">
+            <span className="text-xs font-bold font-serif text-[#8c531b]">
               {tierConfig?.voicing === 'drop2' ? 'Drop-2' : 'Drop-3'}
             </span>
           ) : (
-            <span className={`text-base font-bold font-mono ${isFixedInversion ? 'text-emerald-400/80' : 'text-emerald-400'}`}>
-              {slotState.inversion ? (slotState.inversion === 'root' ? 'Root' : slotState.inversion) : <span className="text-slate-700 font-normal">_</span>}
+            <span className={`text-base font-bold font-serif ${isFixedInversion ? 'text-[#8c531b]' : 'text-[#8c531b]'}`}>
+              {slotState.inversion ? (slotState.inversion === 'root' ? 'Root' : slotState.inversion) : <span className="text-[#c8bfaa] font-normal">_</span>}
             </span>
           )}
         </div>
       </div>
 
       {/* Mobile Touch Pad Matrix */}
-      <div className="flex flex-col gap-2 p-3 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm">
+      <div className="flex flex-col gap-2 p-3 rounded-2xl bg-[#eee9df] border border-[#ddd6c8] shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
         {/* Row 1: Root Notes */}
         <div className="flex items-center justify-between gap-1.5">
           {NOTE_LETTERS.map(letter => (
@@ -197,11 +197,11 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
               disabled={disabled}
               onClick={() => onSelectRoot(letter)}
               className={`
-                flex-1 h-11 rounded-xl font-bold font-mono text-sm border transition-all
-                active:scale-95 touch-manipulation
+                flex-1 h-11 rounded-xl font-bold font-serif text-sm border transition-all
+                active:scale-95 touch-manipulation cursor-pointer
                 ${slotState.root === letter 
-                  ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-md shadow-emerald-500/30' 
-                  : 'bg-slate-800/90 text-slate-200 border-slate-700 hover:bg-slate-750 hover:border-slate-600'}
+                  ? 'bg-[#f5ede1] text-[#8c531b] border-[1.5px] border-[#d4bda8] shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]' 
+                  : 'bg-[#fcfbfa] text-[#38332d] border-[#ddd6c8] hover:bg-[#e4ddcf] hover:border-[#c8bfaa] shadow-[0_1px_2px_rgba(0,0,0,0.02),0_1px_0_#d5ccba]'}
               `}
             >
               {letter}
@@ -212,30 +212,27 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
         {/* Row 2: Accidentals + Inversions */}
         <div className="grid grid-cols-7 gap-1.5">
           {/* Accidentals (3 buttons) */}
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={() => onSelectAccidental('natural')}
-            className="h-10 rounded-xl font-mono text-sm font-semibold bg-slate-800/90 text-slate-300 border border-slate-700 active:scale-95"
-          >
-            ♮
-          </button>
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={() => onSelectAccidental('sharp')}
-            className="h-10 rounded-xl font-mono text-sm font-semibold bg-slate-800/90 text-slate-300 border border-slate-700 active:scale-95"
-          >
-            ♯
-          </button>
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={() => onSelectAccidental('flat')}
-            className="h-10 rounded-xl font-mono text-sm font-semibold bg-slate-800/90 text-slate-300 border border-slate-700 active:scale-95"
-          >
-            ♭
-          </button>
+          {(['natural', 'sharp', 'flat'] as Accidental[]).map(acc => {
+            const sym = acc === 'natural' ? '♮' : (acc === 'sharp' ? '♯' : '♭');
+            const isSelected = slotState.accidental === acc || (!slotState.accidental && acc === 'natural');
+
+            return (
+              <button
+                key={acc}
+                type="button"
+                disabled={disabled}
+                onClick={() => onSelectAccidental(acc)}
+                className={`
+                  h-10 rounded-xl font-mono text-sm font-semibold border active:scale-95 cursor-pointer transition-all
+                  ${isSelected
+                    ? 'bg-[#f5ede1] text-[#8c531b] border-[1.5px] border-[#d4bda8] shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] font-bold'
+                    : 'bg-[#fcfbfa] text-[#38332d] border-[#ddd6c8] hover:bg-[#e4ddcf] shadow-[0_1px_2px_rgba(0,0,0,0.02),0_1px_0_#d5ccba]'}
+                `}
+              >
+                {sym}
+              </button>
+            );
+          })}
 
           {/* Inversions (4 buttons) */}
           {(['root', '1st', '2nd', '3rd'] as Inversion[]).map(inv => {
@@ -247,6 +244,7 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
             );
             const isAllowed = isAllowedInTier && !isDisallowedForQuality;
             const label = inv === 'root' ? 'Root' : inv;
+            const isSelected = slotState.inversion === inv;
 
             return (
               <button
@@ -255,14 +253,14 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
                 disabled={disabled || isFixedInversion || !isAllowed || isDropVoicing}
                 onClick={() => onSelectInversion(inv)}
                 className={`
-                  h-10 rounded-xl font-mono text-xs font-bold border active:scale-95 transition-all
+                  h-10 rounded-xl font-serif text-xs font-bold border active:scale-95 transition-all cursor-pointer
                   ${isThisFixed || isDropVoicing
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                    ? 'bg-[#f5ede1] text-[#8c531b] border-[#d4bda8]'
                     : isAllowed
-                      ? (slotState.inversion === inv
-                          ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold'
-                          : 'bg-slate-800/90 text-emerald-400 border-slate-700 hover:bg-slate-750')
-                      : 'bg-slate-900/40 text-slate-600 border-slate-800/40 opacity-40 cursor-not-allowed'}
+                      ? (isSelected
+                          ? 'bg-[#f5ede1] text-[#8c531b] border-[1.5px] border-[#d4bda8] shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]'
+                          : 'bg-[#fcfbfa] text-[#38332d] border-[#ddd6c8] hover:bg-[#e4ddcf] shadow-[0_1px_2px_rgba(0,0,0,0.02),0_1px_0_#d5ccba]')
+                      : 'bg-[#eee9df]/40 text-[#c8bfaa] border-[#ddd6c8]/40 opacity-40 cursor-not-allowed'}
                 `}
               >
                 {label}
@@ -275,6 +273,7 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
         <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
           {displayQualities.map(q => {
             const isAllowedInTier = !tierConfig || tierConfig.qualities.includes(q);
+            const isSelected = slotState.quality === q;
 
             return (
               <button
@@ -283,12 +282,12 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
                 disabled={disabled}
                 onClick={() => onSelectQuality(q)}
                 className={`
-                  h-10 rounded-xl font-mono text-xs font-semibold border transition-all active:scale-95
-                  ${slotState.quality === q
-                    ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-bold'
+                  h-10 rounded-xl font-serif text-xs font-semibold border transition-all active:scale-95 cursor-pointer
+                  ${isSelected
+                    ? 'bg-[#f5ede1] text-[#8c531b] border-[1.5px] border-[#d4bda8] shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] font-bold'
                     : isAllowedInTier
-                      ? 'bg-slate-800/90 text-slate-200 border-slate-700 hover:bg-slate-750'
-                      : 'bg-slate-900/60 text-slate-400 border-slate-800 hover:bg-slate-850'}
+                      ? 'bg-[#fcfbfa] text-[#38332d] border-[#ddd6c8] hover:bg-[#e4ddcf] shadow-[0_1px_2px_rgba(0,0,0,0.02),0_1px_0_#d5ccba]'
+                      : 'bg-[#fcfbfa]/60 text-[#948b7e] border-[#ddd6c8] hover:bg-[#e4ddcf]'}
                 `}
               >
                 {CHORD_FORMULAS[q].shortName}
@@ -302,7 +301,7 @@ export const SlotBufferInput: React.FC<SlotBufferInputProps> = ({
           type="button"
           disabled={disabled}
           onClick={onClear}
-          className="w-full mt-1 py-2 flex items-center justify-center gap-1.5 text-xs font-medium text-slate-400 hover:text-slate-200 active:scale-95"
+          className="w-full mt-1 py-1.5 flex items-center justify-center gap-1.5 text-xs font-serif font-medium text-[#948b7e] hover:text-[#38332d] active:scale-95 cursor-pointer"
         >
           <Delete className="w-3.5 h-3.5" /> Clear / Backspace
         </button>
