@@ -25,10 +25,10 @@ export const THEME_COLORS = {
   accentTint: '#f5ede1',
   accentBorder: '#d4bda8',
 
-  // State colors
-  success: '#2d5736',
-  successTint: '#eef5ef',
-  successBorder: '#bcd4bf',
+  // State colors (Botanical Olive & Laurel)
+  success: '#485c3b',
+  successTint: '#edf2ea',
+  successBorder: '#c2d3ba',
 
   error: '#9c382e',
   errorTint: '#fbeeed',
