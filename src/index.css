@@ -15,13 +15,12 @@
     --text-dim: #8a8275;
     --accent: #8c531b;
     --accent-tint: #f5ede1;
-    --accent-border: #d4bda8;
-    --success: #485c3b;
-    --success-tint: #edf2ea;
-    --success-border: #c2d3ba;
-    --error: #9c382e;
-    --error-tint: #fbeeed;
-    --error-border: #e2bdb8;
+    --success: #84532b;
+    --success-tint: #f5ede1;
+    --success-border: #d4bda8;
+    --error: #524b42;
+    --error-tint: #eee9df;
+    --error-border: #c8bfaa;
     --backdrop: rgba(43, 38, 32, 0.45);
   }
 

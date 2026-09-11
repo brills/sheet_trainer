@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Feedback Style Showcase — Sheet Trainer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f4ee;
+      --card: #fcfbfa;
+      --panel: #eee9df;
+      --border: #ddd6c8;
+      --text: #38332d;
+      --muted: #6b6358;
+      --accent: #84532b;
+      --accent-tint: #f5ede1;
+      --accent-border: #d4bda8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      padding: 24px 16px;
+      line-height: 1.5;
+    }
+    .container { max-width: 960px; margin: 0 auto; }
+    h1 { font-family: 'EB Garamond', serif; font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+    p.sub { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 20px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .option-title { font-family: 'EB Garamond', serif; font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .option-desc { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+    
+    .demo-frame {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .row { display: flex; align-items: center; justify-content: space-between; }
+    
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-family: 'EB Garamond', serif;
+      font-weight: 700;
+      font-size: 13px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .pill-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      padding-left: 6px;
+      margin-left: 4px;
+      border-left: 1px solid currentColor;
+      opacity: 0.85;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-family: 'EB Garamond', serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid;
+      width: 100%;
+    }
+    
+    .diff-preview {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .diff-box {
+      border: 1px solid;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+    .diff-title {
+      font-size: 10px;
+      font-family: 'EB Garamond', serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .diff-chord {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* Option 1: Amber & Charcoal (No Green/Red) */
+    .opt1-succ-pill { background: #f5ede1; color: #84532b; border: 1px solid #d4bda8; }
+    .opt1-err-pill { background: #eee9df; color: #524b42; border: 1px solid #c8bfaa; }
+    .opt1-succ-btn { background: #f5ede1; color: #84532b; border-color: #d4bda8; }
+    .opt1-diff-user { background: #eee9df; border-color: #c8bfaa; color: #524b42; }
+    .opt1-diff-target { background: #f5ede1; border-color: #d4bda8; color: #84532b; }
+
+    /* Option 2: Bold Forest Emerald & Crimson Wine */
+    .opt2-succ-pill { background: #e8f3ea; color: #1e5927; border: 1px solid #a3d2ab; }
+    .opt2-err-pill { background: #fbeeed; color: #9c2b23; border: 1px solid #e5b3af; }
+    .opt2-succ-btn { background: #e8f3ea; color: #1e5927; border-color: #a3d2ab; }
+    .opt2-diff-user { background: #fbeeed; border-color: #e5b3af; color: #9c2b23; }
+    .opt2-diff-target { background: #e8f3ea; border-color: #a3d2ab; color: #1e5927; }
+
+    /* Option 3: Royal Ink Blue & Warm Terracotta */
+    .opt3-succ-pill { background: #ebf2fb; color: #1e4b85; border: 1px solid #b6cde8; }
+    .opt3-err-pill { background: #fbf0eb; color: #9a431c; border: 1px solid #eac1af; }
+    .opt3-succ-btn { background: #ebf2fb; color: #1e4b85; border-color: #b6cde8; }
+    .opt3-diff-user { background: #fbf0eb; border-color: #eac1af; color: #9a431c; }
+    .opt3-diff-target { background: #ebf2fb; border-color: #b6cde8; color: #1e4b85; }
+
+    /* Option 4: Pure Monochrome & Amber Star */
+    .opt4-succ-pill { background: #38332d; color: #faf8f5; border: 1px solid #25211d; }
+    .opt4-err-pill { background: #e4ddcf; color: #38332d; border: 1px solid #c8bfaa; }
+    .opt4-succ-btn { background: #38332d; color: #faf8f5; border-color: #25211d; }
+    .opt4-diff-user { background: #e4ddcf; border-color: #c8bfaa; color: #6b6358; }
+    .opt4-diff-target { background: #38332d; border-color: #25211d; color: #faf8f5; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Feedback Color Paradigms — Sheet Trainer</h1>
+    <p class="sub">Do we need green and red? Compare 4 feedback systems below designed for clarity on warm linen.</p>
+
+    <div class="grid">
+      <!-- OPTION 1: AMBER HARMONY -->
+      <div class="card" style="border: 2px solid var(--accent);">
+        <div class="option-title">1. Amber & Charcoal Harmony (Zero Green/Red)</div>
+        <div class="option-desc">Uses the warm Amber brand accent for success and neutral warm charcoal for errors. 100% cohesive with the linen palette without traffic-light colors.</div>
+        
+        <div class="demo-frame">
+          <div class="row">
+            <span style="font-size: 12px; font-weight: 600;">Correct State:</span>
+            <div class="pill opt1-succ-pill">
+              <span>✓ Correct!</span>
+              <span class="pill-time">0.42s</span>
+            </div>
+          </div>
+          <div class="row">
+            <span style="font-size: 12px; font-weight: 600;">Incorrect State:</span>
+            <div class="pill opt1-err-pill">
+              <span>✕ Review Diff</span>
+            </div>
+          </div>
+          <div class="diff-preview">
+            <div class="diff-box opt1-diff-user">
+              <div class="diff-title">Your Guess</div>
+              <div class="diff-chord">C min (1st Inv)</div>
+            </div>
+            <div class="diff-box opt1-diff-target">
+              <div class="diff-title">Correct Pattern</div>
+              <div class="diff-chord">C Maj (1st Inv)</div>
+            </div>
+          </div>
+          <button class="btn opt1-succ-btn">Next Question (Space / Enter) ➔</button>
+        </div>
+      </div>
+
+      <!-- OPTION 2: BOLD FOREST EMERALD & CRIMSON -->
+      <div class="card">
+        <div class="option-title">2. Deep Forest Emerald & Crimson Wine (High-Contrast)</div>
+        <div class="option-desc">Keeps traditional semantic green/red, but with rich, saturated conservatory jewel tones that stand out immediately against linen.</div>
+        
+        <div class="demo-frame">
+          <div class="row">
+            <span style="font-size: 12px; font-weight: 600;">Correct State:</span>
+            <div class="pill opt2-succ-pill">
+              <span>✓ Correct!</span>
+              <span class="pill-time">0.42s</span>
+            </div>
+          </div>
+          <div class="row">
+            <span style="font-size: 12px; font-weight: 600;">Incorrect State:</span>
+            <div class="pill opt2-err-pill">
+              <span>✕ Incorrect</span>
+            </div>
+          </div>
+          <div class="diff-preview">
+            <div class="diff-box opt2-diff-user">
+              <div class="diff-title">Your Guess</div>
+              <div class="diff-chord">C min (1st Inv)</div>
+            </div>
+            <div class="diff-box opt2-diff-target">
+              <div class="diff-title">Correct Pattern</div>
+              <div class="diff-chord">C Maj (1st Inv)</div>
+            </div>
+          </div>
+          <button class="btn opt2-succ-btn">Next Question (Space / Enter) ➔</button>
+        </div>
+      </div>
+
+      <!-- OPTION 3: ROYAL INK BLUE & TERRACOTTA -->
+      <div class="card">
+        <div class="option-title">3. Royal Ink Blue & Warm Terracotta</div>
+        <div class="option-desc">Scholarly blue affirmation for success, warm rustic terracotta for mistakes. Distinct, calm, and non-jarring.</div>
+        
+        <div class="demo-frame">
+          <div class="row">
+            <span style="font-size: 12px; font-weight: 600;">Correct State:</span>
+            <div class="pill opt3-succ-pill">
+              <span>✓ Correct!</span>
+              <span class="pill-time">0.42s</span>
+            </div>
+          </div>
+          <div class="row">
+            <span style="font-size: 12px; font-weight: 600;">Incorrect State:</span>
+            <div class="pill opt3-err-pill">
+              <span>✕ Incorrect</span>
+            </div>
+          </div>
+          <div class="diff-preview">
+            <div class="diff-box opt3-diff-user">
+              <div class="diff-title">Your Guess</div>
+              <div class="diff-chord">C min (1st Inv)</div>
+            </div>
+            <div class="diff-box opt3-diff-target">
+              <div class="diff-title">Correct Pattern</div>
+              <div class="diff-chord">C Maj (1st Inv)</div>
+            </div>
+          </div>
+          <button class="btn opt3-succ-btn">Next Question (Space / Enter) ➔</button>
+        </div>
+      </div>
+
+      <!-- OPTION 4: OBSIDIAN MONOCHROME & AMBER STAR -->
+      <div class="card">
+        <div class="option-title">4. Obsidian Monochrome & Golden Star</div>
+        <div class="option-desc">Deep charcoal/black pills with high typographic contrast. Color is reserved purely for streak and mastery stars.</div>
+        
+        <div class="demo-frame">
+          <div class="row">
+            <span style="font-size: 12px; font-weight: 600;">Correct State:</span>
+            <div class="pill opt4-succ-pill">
+              <span>✓ Correct!</span>
+              <span class="pill-time">0.42s</span>
+            </div>
+          </div>
+          <div class="row">
+            <span style="font-size: 12px; font-weight: 600;">Incorrect State:</span>
+            <div class="pill opt4-err-pill">
+              <span>✕ Incorrect</span>
+            </div>
+          </div>
+          <div class="diff-preview">
+            <div class="diff-box opt4-diff-user">
+              <div class="diff-title">Your Guess</div>
+              <div class="diff-chord">C min (1st Inv)</div>
+            </div>
+            <div class="diff-box opt4-diff-target">
+              <div class="diff-title">Correct Pattern</div>
+              <div class="diff-chord">C Maj (1st Inv)</div>
+            </div>
+          </div>
+          <button class="btn opt4-succ-btn">Next Question (Space / Enter) ➔</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

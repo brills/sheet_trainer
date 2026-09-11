@@ -25,14 +25,14 @@ export const THEME_COLORS = {
   accentTint: '#f5ede1',
   accentBorder: '#d4bda8',
 
-  // State colors (Botanical Olive & Laurel)
-  success: '#485c3b',
-  successTint: '#edf2ea',
-  successBorder: '#c2d3ba',
+  // State colors (Amber Affirmation & Warm Charcoal Neutral)
+  success: '#84532b',
+  successTint: '#f5ede1',
+  successBorder: '#d4bda8',
 
-  error: '#9c382e',
-  errorTint: '#fbeeed',
-  errorBorder: '#e2bdb8',
+  error: '#524b42',
+  errorTint: '#eee9df',
+  errorBorder: '#c8bfaa',
 
   // Stave & Notation
   staveLine: '#635b50',
