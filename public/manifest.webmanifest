@@ -2,13 +2,14 @@
   "name": "Sheet Trainer",
   "short_name": "SheetTrainer",
   "description": "Fast Sight-Reading Pattern Chunking & Reflex Trainer",
-  "start_url": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f7f4ee",
   "theme_color": "#84532b",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "favicon.svg",
       "sizes": "192x192 512x512",
       "type": "image/svg+xml"
     }
